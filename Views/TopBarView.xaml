@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="car_storage_odometer.Views.TopBarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:car_storage_odometer.Views"
+             mc:Ignorable="d" 
+             Height="60">
+    <Border VerticalAlignment="Center" HorizontalAlignment="Center" Height="60" Background="#1A1D23" CornerRadius="20, 20, 0, 0" Padding="30,0">
+
+        <StackPanel Orientation="Horizontal">
+            <Button Content="Dashboard" Margin="10,0" Width="120" Height="40"
+                    Background="#23272E" Foreground="White" FontWeight="SemiBold"
+                    Command="{Binding NavigateCommand}" CommandParameter="DashboardView"/>
+
+            <Button Content="Logs users" Margin="10,0" Width="140" Height="40"
+                    Background="#23272E" Foreground="White" FontWeight="SemiBold"
+                    Command="{Binding NavigateCommand}" CommandParameter="LogsUsersView"/>
+
+            <Button Content="Logs device" Margin="10,0" Width="140" Height="40"
+                    Background="#23272E" Foreground="White" FontWeight="SemiBold"
+                    Command="{Binding NavigateCommand}" CommandParameter="LogsDeviceView"/>
+
+            <Button Content="History of repair" Margin="10,0" Width="140" Height="40"
+                    Background="#23272E" Foreground="White" FontWeight="SemiBold"
+                    Command="{Binding NavigateCommand}" CommandParameter="HistoryOfRepairView"/>
+
+            <Button Content="Storage" Margin="10,0" Width="120" Height="40"
+                    Background="#23272E" Foreground="White" FontWeight="SemiBold"
+                    Command="{Binding NavigateCommand}" CommandParameter="StorageView"/>
+
+            <Button Content="Devices" Margin="10,0" Width="120" Height="40"
+                    Background="#23272E" Foreground="White" FontWeight="SemiBold"
+                    Command="{Binding NavigateCommand}" CommandParameter="DevicesView"/>
+
+            <Button Content="Account" Margin="10,0" Width="120" Height="40"
+                    Background="#23272E" Foreground="White" FontWeight="SemiBold"
+                    Command="{Binding NavigateCommand}" CommandParameter="AccountView"/>
+        </StackPanel>
+    </Border>
+</UserControl>
