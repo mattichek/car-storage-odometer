@@ -75,6 +75,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Modules\SideBarModule.cs" />
     <Compile Include="ViewModels\AccountViewModel.cs" />
     <Compile Include="ViewModels\DashboardViewModel.cs" />
     <Compile Include="ViewModels\DevicesViewModel.cs" />
@@ -83,8 +84,8 @@
     <Compile Include="ViewModels\LogsDeviceViewModel.cs" />
     <Compile Include="ViewModels\LogsUsersViewModel.cs" />
     <Compile Include="ViewModels\MainPageViewModel.cs" />
+    <Compile Include="ViewModels\SideBarViewModel.cs" />
     <Compile Include="ViewModels\StorageViewModel.cs" />
-    <Compile Include="ViewModels\TopBarViewModel.cs" />
     <Compile Include="Views\AccountView.xaml.cs">
       <DependentUpon>AccountView.xaml</DependentUpon>
     </Compile>
@@ -109,11 +110,11 @@
     <Compile Include="Views\MainPageView.xaml.cs">
       <DependentUpon>MainPageView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\SideBarView.xaml.cs">
+      <DependentUpon>SideBarView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\StorageView.xaml.cs">
       <DependentUpon>StorageView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\TopBarView.xaml.cs">
-      <DependentUpon>TopBarView.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -143,7 +144,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Page Include="Views\AccountView.xaml">
       <SubType>Designer</SubType>
@@ -177,11 +177,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\StorageView.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="Views\SideBarView.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\TopBarView.xaml">
+    <Page Include="Views\StorageView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

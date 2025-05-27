@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace car_storage_odometer.Views
 {
     /// <summary>
-    /// Interaction logic for TopBarView.xaml
+    /// Interaction logic for SideBarView.xaml
     /// </summary>
-    public partial class TopBarView : UserControl
+    public partial class SideBarView : UserControl
     {
-        public TopBarView()
+        public SideBarView()
         {
             InitializeComponent();
         }

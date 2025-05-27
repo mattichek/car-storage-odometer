@@ -1,0 +1,83 @@
+﻿<UserControl x:Class="car_storage_odometer.Views.SideBarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:car_storage_odometer.Views"
+             mc:Ignorable="d" 
+             Height="Auto">
+
+    <UserControl.Resources>
+        <Style x:Key="SideBarItemStyle" TargetType="Button">
+            <Setter Property="Background" Value="#2D2D30"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="Margin" Value="5,5,5,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#4A4A50"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#6A6A70"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#1E1E1E">
+        <StackPanel VerticalAlignment="Top" Margin="10,15,10,0" >
+            <Button Content="Dashboard" Style="{StaticResource SideBarItemStyle}"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="DashboardView"/>
+
+            <Button Content="Logs Users" Style="{StaticResource SideBarItemStyle}"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="LogsUsersView"/>
+
+            <Button Content="Logs Device" Style="{StaticResource SideBarItemStyle}"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="LogsDeviceView"/>
+
+            <Button Content="History of Repair" Style="{StaticResource SideBarItemStyle}"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="HostoryOfRepairView"/>
+
+            <Button Content="Storage" Style="{StaticResource SideBarItemStyle}"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="StorageView"/>
+
+            <Button Content="Devices" Style="{StaticResource SideBarItemStyle}"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="DevicesView"/>
+
+        </StackPanel>
+        <StackPanel VerticalAlignment="Bottom" Margin="10,0,10,15">
+            <Button Content="Account" Style="{StaticResource SideBarItemStyle}"
+                Command="{Binding NavigateCommand}"
+                CommandParameter="AccountView"/>
+            <Button Content="Logout" Style="{StaticResource SideBarItemStyle}"
+                Command="{Binding NavigateCommand}"
+                CommandParameter="AccountView"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

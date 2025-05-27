@@ -5,24 +5,33 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:car_storage_odometer.Views"
         mc:Ignorable="d"
-        Title="MainPageView" Height="800" Width="1200"
+        Title="MainPageView" Height="1000" Width="1600"
         xmlns:prism="http://prismlibrary.com/">
     <Grid Background="#23272E">
-        <Border Height="750" Width="1150" Background="#2C2F36" CornerRadius="10"
-                HorizontalAlignment="Center" VerticalAlignment="Center" Padding="30">
+        <Border Background="#2C2F36" 
+            HorizontalAlignment="Center" VerticalAlignment="Center"
+             Width="1450" Height="850">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="50"/>
+                <DropShadowEffect BlurRadius="50" ShadowDepth="0"/>
             </Border.Effect>
-            <DockPanel LastChildFill="True">
-                <ContentControl prism:RegionManager.RegionName="TopBarRegion" DockPanel.Dock="Top"/>
-                <ContentControl prism:RegionManager.RegionName="DashboardRegion" DockPanel.Dock="Bottom" Visibility="Hidden"/>
-                <ContentControl prism:RegionManager.RegionName="LogsUsersRegion" DockPanel.Dock="Bottom"/>
-                <ContentControl prism:RegionManager.RegionName="LogsDeviceRegion" DockPanel.Dock="Bottom"/>
-                <ContentControl prism:RegionManager.RegionName="HostoryOfRepairRegion" DockPanel.Dock="Bottom"/>
-                <ContentControl prism:RegionManager.RegionName="StorageRegion" DockPanel.Dock="Bottom"/>
-                <ContentControl prism:RegionManager.RegionName="DevicesRegion" DockPanel.Dock="Bottom"/>
-                <ContentControl prism:RegionManager.RegionName="AccountRegion" DockPanel.Dock="Bottom"/>
-            </DockPanel>
+
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <ContentControl prism:RegionManager.RegionName="SideBarRegion"
+                            Grid.Column="0"
+                            VerticalAlignment="Stretch"
+                            HorizontalAlignment="Stretch"/>
+
+                <ContentControl prism:RegionManager.RegionName="MainContentRegion"
+                            Grid.Column="1"
+                            VerticalAlignment="Stretch"
+                            HorizontalAlignment="Stretch"/>
+
+            </Grid>
         </Border>
     </Grid>
 </Window>
