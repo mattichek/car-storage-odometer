@@ -4,14 +4,158 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:car_storage_odometer.Views"
+             xmlns:helpers="clr-namespace:car_storage_odometer.Helpers"
+             xmlns:converters="clr-namespace:car_storage_odometer.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid >
-        <Border Background="#363A40" CornerRadius="0, 0, 20, 20"></Border>
-        <TextBlock Text="Welcome to the AccountView!"
-                   Foreground="White"
-                   FontSize="30"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"/>
+             Width="Auto" Height="Auto">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/car-storage-odometer;component/Styles/DarkThemeStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <converters:InvertBooleanConverter x:Key="InvertBooleanConverter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource SecondaryBackgroundBrush}" CornerRadius="5" Padding="16" Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Moje Konto" Style="{StaticResource TitleTextBlockStyle}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1"
+                Background="{StaticResource SecondaryBackgroundBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="5"
+                Padding="20">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Dane Użytkownika" Style="{StaticResource SubTitleTextBlockStyle}" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <Separator Background="{StaticResource BorderBrush}" Height="1" Margin="0,0,0,15"/>
+
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="ID Użytkownika:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding EditedUser.UserId}" IsReadOnly="True" Style="{StaticResource ReadOnlyTextBoxStyle}" Margin="0,0,0,10"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Imię:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding EditedUser.FirstName}" IsReadOnly="{Binding IsEditing, Converter={StaticResource InvertBooleanConverter}}" Style="{StaticResource InputTextBoxStyle}" Margin="0,0,0,10"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Nazwisko:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding EditedUser.LastName}" IsReadOnly="{Binding IsEditing, Converter={StaticResource InvertBooleanConverter}}" Style="{StaticResource InputTextBoxStyle}" Margin="0,0,0,10"/>
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Email:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding EditedUser.Email}" IsReadOnly="{Binding IsEditing, Converter={StaticResource InvertBooleanConverter}}" Style="{StaticResource InputTextBoxStyle}" Margin="0,0,0,10"/>
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Data Rejestracji:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding EditedUser.RegistrationDate, StringFormat='{}{0:yyyy-MM-dd}'}" IsReadOnly="True" Style="{StaticResource ReadOnlyTextBoxStyle}" Margin="0,0,0,10"/>
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Rola:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding EditedUser.Role}" IsReadOnly="True" Style="{StaticResource ReadOnlyTextBoxStyle}" Margin="0,0,0,10"/>
+
+                    <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <Button Content="Edytuj"
+                                Command="{Binding EditAccountCommand}"
+                                Style="{StaticResource {x:Type Button}}"
+                                Margin="0,0,10,0"/>
+
+                        <Button Content="Zapisz"
+                                Command="{Binding SaveAccountCommand}"
+                                Style="{StaticResource {x:Type Button}}"
+                                Margin="0,0,10,0"/>
+
+                        <Button Content="Anuluj"
+                                Command="{Binding CancelEditCommand}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Border Background="#6C757D"
+                                            BorderBrush="#6C757D"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            CornerRadius="3">
+                                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                          Margin="{TemplateBinding Padding}"
+                                                          Content="{TemplateBinding Content}"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#5a6268"/>
+                                            <Setter Property="BorderBrush" Value="#5a6268"/>
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter Property="Background" Value="#5a6268"/>
+                                            <Setter Property="BorderBrush" Value="#5a6268"/>
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Background" Value="{StaticResource DisabledBackgroundBrush}"/>
+                                            <Setter Property="Foreground" Value="{StaticResource DisabledForegroundBrush}"/>
+                                            <Setter Property="BorderBrush" Value="{StaticResource DisabledBorderBrush}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="Zmień Hasło" Style="{StaticResource SubTitleTextBlockStyle}" FontWeight="SemiBold" Margin="0,20,0,10"/>
+                <Separator Background="{StaticResource BorderBrush}" Height="1" Margin="0,0,0,15"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Stare Hasło:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Stare Hasło:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <PasswordBox Grid.Row="0" Grid.Column="1" Style="{StaticResource InputPasswordBoxStyle}" Margin="0,0,0,10"
+                         helpers:PasswordBoxHelper.BoundPassword="{Binding OldPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         helpers:PasswordBoxHelper.Attach="True"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Nowe Hasło:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <PasswordBox Grid.Row="1" Grid.Column="1" Style="{StaticResource InputPasswordBoxStyle}" Margin="0,0,0,10"
+                         helpers:PasswordBoxHelper.BoundPassword="{Binding NewPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         helpers:PasswordBoxHelper.Attach="True"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Potwierdź Nowe Hasło:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <PasswordBox Grid.Row="2" Grid.Column="1" Style="{StaticResource InputPasswordBoxStyle}" Margin="0,0,0,10"
+                         helpers:PasswordBoxHelper.BoundPassword="{Binding ConfirmNewPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         helpers:PasswordBoxHelper.Attach="True"/>
+                    <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <Button Content="Zmień Hasło"
+                        Command="{Binding ChangePasswordCommand}"
+                        Style="{StaticResource {x:Type Button}}"
+                        Margin="0,0,10,0"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

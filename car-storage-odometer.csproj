@@ -75,6 +75,17 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Converters\InvertBooleanConverter.cs" />
+    <Compile Include="Converters\PercentageToWidthConverter.cs" />
+    <Compile Include="Helpers\PasswordBoxHelper.cs" />
+    <Compile Include="Models\DeviceLogModel.cs" />
+    <Compile Include="Models\DeviceTypeModel.cs" />
+    <Compile Include="Models\RepairHistoryModel.cs" />
+    <Compile Include="Models\SerialNumberModel.cs" />
+    <Compile Include="Models\StatusModel.cs" />
+    <Compile Include="Models\StoredDeviceModel.cs" />
+    <Compile Include="Models\UserLogModel.cs" />
+    <Compile Include="Models\UserModel.cs" />
     <Compile Include="Modules\SideBarModule.cs" />
     <Compile Include="ViewModels\AccountViewModel.cs" />
     <Compile Include="ViewModels\DashboardViewModel.cs" />
@@ -145,6 +156,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Styles\DarkThemeStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\AccountView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -186,5 +201,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
