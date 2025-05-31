@@ -85,11 +85,13 @@
     <Compile Include="Models\RepairHistoryModel.cs" />
     <Compile Include="Models\SerialNumberModel.cs" />
     <Compile Include="Models\StatusModel.cs" />
-    <Compile Include="Models\StoredDeviceModel.cs" />
+    <Compile Include="Models\StorageDeviceModel.cs" />
     <Compile Include="Models\UserLogModel.cs" />
     <Compile Include="Models\UserModel.cs" />
     <Compile Include="Models\WarehouseStatusModel.cs" />
     <Compile Include="Modules\SideBarModule.cs" />
+    <Compile Include="Services\DeviceLogFilterService.cs" />
+    <Compile Include="Services\UserLogFilterService.cs" />
     <Compile Include="ViewModels\AccountViewModel.cs" />
     <Compile Include="ViewModels\DashboardViewModel.cs" />
     <Compile Include="ViewModels\DevicesViewModel.cs" />

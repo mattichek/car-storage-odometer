@@ -1,119 +1,131 @@
-﻿using car_storage_odometer.Models;
+﻿using Prism.Commands;
+using Prism.Mvvm;
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Windows.Data;
-using Prism.Mvvm; // Potrzebne dla BindableBase
-using Prism.Commands; // Potrzebne dla DelegateCommand
+using System.Linq;
+using car_storage_odometer.Models;
+using car_storage_odometer.Services; // Dodaj przestrzeń nazw dla UserLogFilterService
 
 namespace car_storage_odometer.ViewModels
 {
     public class LogsUsersViewModel : BindableBase
     {
-        private ObservableCollection<UserLogModel> _userLogs;
-        public ObservableCollection<UserLogModel> UserLogs
+        private ObservableCollection<UserLogModel> _allUserLogs;
+        private ObservableCollection<UserLogModel> _latestUserLogs;
+        public ObservableCollection<UserLogModel> LatestUserLogs
         {
-            get { return _userLogs; }
-            set
-            {
-                // Używamy SetProperty z BindableBase
-                SetProperty(ref _userLogs, value);
-
-                // Kiedy bazowa kolekcja (UserLogs) się zmienia, musimy zaktualizować CollectionView
-                // ICollectionView nie ma właściwości 'Source'. Zamiast tego, uzyskujemy nową widok.
-                if (_userLogs != null) // Sprawdzamy, czy nowa kolekcja nie jest null
-                {
-                    UserLogsView = CollectionViewSource.GetDefaultView(_userLogs);
-                    // Ponownie zastosuj sortowanie po zmianie kolekcji
-                    ApplySort();
-                }
-                else
-                {
-                    UserLogsView = null; // Jeśli kolekcja jest null, wyczyść widok
-                }
-            }
+            get => _latestUserLogs;
+            set => SetProperty(ref _latestUserLogs, value);
         }
 
-        public ICollectionView UserLogsView { get; private set; }
-
-        private string _selectedSortProperty;
-        public string SelectedSortProperty
+        private DateTime? _filterDateFrom;
+        public DateTime? FilterDateFrom
         {
-            get { return _selectedSortProperty; }
-            set
-            {
-                SetProperty(ref _selectedSortProperty, value); // Używamy SetProperty
-                ApplySort();
-            }
+            get => _filterDateFrom;
+            set => SetProperty(ref _filterDateFrom, value);
         }
 
-        private ListSortDirection _sortDirection = ListSortDirection.Descending; // Domyślnie malejąco dla daty
-        public ListSortDirection SortDirection
+        private DateTime? _filterDateTo;
+        public DateTime? FilterDateTo
         {
-            get { return _sortDirection; }
-            set
-            {
-                SetProperty(ref _sortDirection, value); // Używamy SetProperty
-                ApplySort();
-            }
+            get => _filterDateTo;
+            set => SetProperty(ref _filterDateTo, value);
         }
 
-        public DelegateCommand ToggleSortDirectionCommand { get; }
-
-        public LogsUsersViewModel()
+        private UserLogModel _selectedUserFilter;
+        public UserLogModel SelectedUserFilter
         {
-            // Inicjalizujemy UserLogs pustą kolekcją, co automatycznie ustawi UserLogsView
-            UserLogs = new ObservableCollection<UserLogModel>();
+            get => _selectedUserFilter;
+            set => SetProperty(ref _selectedUserFilter, value);
+        }
 
-            LoadDummyData(); // Ładowanie przykładowych danych (spowoduje ponowne wywołanie settera UserLogs)
-            ToggleSortDirectionCommand = new DelegateCommand(ToggleSortDirection);
+        private ObservableCollection<UserLogModel> _availableUsers;
+        public ObservableCollection<UserLogModel> AvailableUsers
+        {
+            get => _availableUsers;
+            set => SetProperty(ref _availableUsers, value);
+        }
 
-            // Domyślne sortowanie zostanie zastosowane przez setter UserLogs po LoadDummyData()
-            // Możemy jednak ustawić tutaj domyślne wartości, które będą użyte w ApplySort()
-            SelectedSortProperty = nameof(UserLogModel.EventDate);
-            SortDirection = ListSortDirection.Descending;
-            ApplySort(); // Ponowne wywołanie, aby upewnić się, że sortowanie jest aktywne po załadowaniu danych.
+        private string _selectedActionFilter;
+        public string SelectedActionFilter
+        {
+            get => _selectedActionFilter;
+            set => SetProperty(ref _selectedActionFilter, value);
+        }
+
+        private ObservableCollection<string> _availableActions;
+        public ObservableCollection<string> AvailableActions
+        {
+            get => _availableActions;
+            set => SetProperty(ref _availableActions, value);
+        }
+
+        public DelegateCommand FilterLogsCommand { get; private set; }
+        public DelegateCommand ResetFiltersCommand { get; private set; }
+
+        // Instancja klasy pomocniczej
+        private readonly UserLogFilterService _filterService;
+
+        public LogsUsersViewModel(UserLogFilterService filterService)
+        {
+            // Inicjalizacja serwisu filtrującego
+            _filterService = filterService;
+
+            LoadDummyData();
+            InitializeFilterOptions();
+
+            // Użyj serwisu do początkowego załadowania logów
+            LatestUserLogs = _filterService.ResetFilters(_allUserLogs);
+
+            FilterLogsCommand = new DelegateCommand(ApplyFilter);
+            ResetFiltersCommand = new DelegateCommand(ResetFilters);
         }
 
         private void LoadDummyData()
         {
-            // Tworzymy nową kolekcję i przypisujemy ją do UserLogs.
-            // Setter UserLogs zajmie się zaktualizowaniem UserLogsView.
-            ObservableCollection<UserLogModel> dummyData = new ObservableCollection<UserLogModel>();
-            dummyData.Add(new UserLogModel { UserLogId = 1, UserId = 1, UserName = "admin", Action = "Login", EventDate = DateTime.Now.AddHours(-2) });
-            dummyData.Add(new UserLogModel { UserLogId = 2, UserId = 2, UserName = "user1", Action = "ViewCars", EventDate = DateTime.Now.AddHours(-1) });
-            dummyData.Add(new UserLogModel { UserLogId = 3, UserId = 1, UserName = "admin", Action = "AddCar", EventDate = DateTime.Now.AddMinutes(-30) });
-            dummyData.Add(new UserLogModel { UserLogId = 4, UserId = 3, UserName = "user2", Action = "Logout", EventDate = DateTime.Now.AddMinutes(-10) });
-            dummyData.Add(new UserLogModel { UserLogId = 5, UserId = 1, UserName = "admin", Action = "EditCar", EventDate = DateTime.Now.AddMinutes(-5) });
-            dummyData.Add(new UserLogModel { UserLogId = 6, UserId = 4, UserName = "guest", Action = "Search", EventDate = DateTime.Now.AddHours(-3) });
-            dummyData.Add(new UserLogModel { UserLogId = 7, UserId = 2, UserName = "user1", Action = "UpdateProfile", EventDate = DateTime.Now.AddMinutes(-45) });
-            dummyData.Add(new UserLogModel { UserLogId = 8, UserId = 1, UserName = "admin", Action = "DeleteCar", EventDate = DateTime.Now.AddMinutes(-20) });
-
-            UserLogs = dummyData; // To wywoła setter UserLogs i zaktualizuje UserLogsView
-        }
-
-        private void ApplySort()
-        {
-            if (UserLogsView != null && !string.IsNullOrEmpty(SelectedSortProperty))
+            _allUserLogs = new ObservableCollection<UserLogModel>
             {
-                UserLogsView.SortDescriptions.Clear();
-                UserLogsView.SortDescriptions.Add(new SortDescription(SelectedSortProperty, SortDirection));
-                UserLogsView.Refresh();
-            }
+                new UserLogModel { UserLogId = 1, UserId = 1, UserName = "Jan Kowalski", Action = "Zalogował się", EventDate = new DateTime(2025, 05, 31, 08, 55, 0) },
+                new UserLogModel { UserLogId = 2, UserId = 2, UserName = "Anna Nowak", Action = "Dodała licznik 'Licznik-001'", EventDate = new DateTime(2025, 05, 31, 07, 55, 0) },
+                new UserLogModel { UserLogId = 3, UserId = 3, UserName = "Piotr Zieliński", Action = "Wylogował się", EventDate = new DateTime(2025, 05, 31, 06, 55, 0) },
+                new UserLogModel { UserLogId = 4, UserId = 1, UserName = "Jan Kowalski", Action = "Usunął moduł 'Moduł-ABC'", EventDate = new DateTime(2025, 05, 31, 05, 55, 0) },
+                new UserLogModel { UserLogId = 5, UserId = 2, UserName = "Anna Nowak", Action = "Zalogowała się", EventDate = new DateTime(2025, 05, 31, 04, 55, 0) },
+                new UserLogModel { UserLogId = 6, UserId = 4, UserName = "Alicja Nowak", Action = "Zalogowała się", EventDate = new DateTime(2025, 05, 30, 09, 00, 0) },
+                new UserLogModel { UserLogId = 7, UserId = 1, UserName = "Jan Kowalski", Action = "Zmienił licznik 'Licznik-002'", EventDate = new DateTime(2025, 05, 30, 10, 15, 0) },
+                new UserLogModel { UserLogId = 8, UserId = 3, UserName = "Piotr Zieliński", Action = "Dodał moduł 'Moduł-XYZ'", EventDate = new DateTime(2025, 05, 29, 11, 30, 0) }
+            };
         }
 
-        private void ToggleSortDirection()
+        private void InitializeFilterOptions()
         {
-            SortDirection = (SortDirection == ListSortDirection.Ascending) ? ListSortDirection.Descending : ListSortDirection.Ascending;
+            AvailableUsers = new ObservableCollection<UserLogModel>(_allUserLogs
+                                                                     .GroupBy(log => log.UserName)
+                                                                     .Select(g => new UserLogModel { UserName = g.Key })
+                                                                     .OrderBy(u => u.UserName));
+            AvailableActions = new ObservableCollection<string>(_allUserLogs.Select(log => log.Action).Distinct().OrderBy(a => a));
         }
 
-        public string[] SortProperties { get; } = new string[]
+        // Teraz metoda ApplyFilter tylko wywołuje serwis
+        private void ApplyFilter()
         {
-            nameof(UserLogModel.UserLogId),
-            nameof(UserLogModel.UserId),
-            nameof(UserLogModel.UserName),
-            nameof(UserLogModel.Action),
-            nameof(UserLogModel.EventDate)
-        };
+            LatestUserLogs = _filterService.ApplyFilter(
+                _allUserLogs,
+                FilterDateFrom,
+                FilterDateTo,
+                SelectedUserFilter,
+                SelectedActionFilter
+            );
+        }
+
+        // Teraz metoda ResetFilters tylko wywołuje serwis i resetuje właściwości ViewModelu
+        private void ResetFilters()
+        {
+            FilterDateFrom = null;
+            FilterDateTo = null;
+            SelectedUserFilter = null;
+            SelectedActionFilter = null;
+
+            LatestUserLogs = _filterService.ResetFilters(_allUserLogs);
+        }
     }
 }

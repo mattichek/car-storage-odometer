@@ -1,18 +1,20 @@
 ﻿<UserControl x:Class="car_storage_odometer.Views.LogsDeviceView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:car_storage_odometer.Views"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:prism="http://prismlibrary.com/"
+             xmlns:converters="clr-namespace:car_storage_odometer.Converters"
              prism:ViewModelLocator.AutoWireViewModel="True"
-             Width="1282.96666666667" Height="850">
+             mc:Ignorable="d"
+             Width="Auto" Height="Auto">
 
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/car-storage-odometer;component/Styles/DarkThemeStyles.xaml"/>
+                <ResourceDictionary Source="/car-storage-odometer;component/Styles/DashboardStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <converters:InvertBooleanConverter x:Key="InvertBooleanConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -22,39 +24,44 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0"
+        <Border Grid.Row="0" Background="{StaticResource SecondaryBackgroundBrush}" CornerRadius="5" Padding="16" Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Logi urządzeń" Style="{StaticResource TitleTextBlockStyle}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1"
                 Background="{StaticResource SecondaryBackgroundBrush}"
                 BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="1"
                 CornerRadius="5"
-                Margin="0,0,0,20"
-                Padding="16">
-            <StackPanel Orientation="Vertical">
-                <TextBlock Text="Filtrowanie logów urządzeń" Style="{StaticResource SubTitleTextBlockStyle}" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                <Separator Background="{StaticResource BorderBrush}" Height="1" Margin="0,0,0,15"/>
+                Padding="20">
 
-                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+            <StackPanel>
+                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,10">
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
                         <TextBlock Text="Data od:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <DatePicker SelectedDate="{Binding FilterDateFrom}"
-                                    Width="120">
+                        <DatePicker SelectedDate="{Binding FilterDateFrom}" Width="120">
                             <DatePicker.Template>
                                 <ControlTemplate TargetType="{x:Type DatePicker}">
                                     <Grid x:Name="PART_Root">
                                         <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="3*"/>
                                             <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <DatePickerTextBox x:Name="PART_TextBox"
-                                                 Grid.Column="0"
-                                                 Background="Transparent"
-                                                 Foreground="{StaticResource PrimaryForegroundBrush}"
-                                                 BorderBrush="Transparent"
-                                                 BorderThickness="0"
-                                                 Padding="5"
-                                                 CaretBrush="{StaticResource AccentBrush}"
-                                                 VerticalContentAlignment="Center"
-                                                 HorizontalContentAlignment="Left"/>
+                                                           Grid.Column="0"
+                                                           Background="Transparent"
+                                                           Foreground="{StaticResource PrimaryForegroundBrush}"
+                                                           BorderBrush="Transparent"
+                                                           BorderThickness="0"
+                                                           Padding="5"
+                                                           CaretBrush="{StaticResource AccentBrush}"
+                                                           VerticalContentAlignment="Center"
+                                                           HorizontalContentAlignment="Left"/>
                                         <Button x:Name="PART_Button"
                                                 Grid.Column="1"
                                                 Style="{StaticResource {x:Type Button}}"
@@ -137,25 +144,24 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
                         <TextBlock Text="Data do:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <DatePicker SelectedDate="{Binding FilterDateTo}"
-                                    Width="120">
+                        <DatePicker SelectedDate="{Binding FilterDateTo}" Width="120">
                             <DatePicker.Template>
                                 <ControlTemplate TargetType="{x:Type DatePicker}">
                                     <Grid x:Name="PART_Root">
                                         <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="3*"/>
                                             <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <DatePickerTextBox x:Name="PART_TextBox"
-                                                 Grid.Column="0"
-                                                 Background="Transparent"
-                                                 Foreground="{StaticResource PrimaryForegroundBrush}"
-                                                 BorderBrush="Transparent"
-                                                 BorderThickness="0"
-                                                 Padding="5"
-                                                 CaretBrush="{StaticResource AccentBrush}"
-                                                 VerticalContentAlignment="Center"
-                                                 HorizontalContentAlignment="Left"/>
+                                                           Grid.Column="0"
+                                                           Background="Transparent"
+                                                           Foreground="{StaticResource PrimaryForegroundBrush}"
+                                                           BorderBrush="Transparent"
+                                                           BorderThickness="0"
+                                                           Padding="5"
+                                                           CaretBrush="{StaticResource AccentBrush}"
+                                                           VerticalContentAlignment="Center"
+                                                           HorizontalContentAlignment="Left"/>
                                         <Button x:Name="PART_Button"
                                                 Grid.Column="1"
                                                 Style="{StaticResource {x:Type Button}}"
@@ -238,17 +244,18 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
                         <TextBlock Text="Numer ser.:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <ComboBox ItemsSource="{Binding AvailableDeviceSerials}"
-                                  SelectedItem="{Binding SelectedDeviceSerialFilter}"
-                                  Width="150">
+                        <ComboBox ItemsSource="{Binding AvailableSerialNumbers}"
+                                  SelectedItem="{Binding SelectedSerialNumberFilter}"
+                                  Width="150"
+                                  Style="{StaticResource {x:Type ComboBox}}">
                             <ComboBox.ItemContainerStyle>
                                 <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
                             </ComboBox.ItemContainerStyle>
                             <ComboBox.Template>
                                 <ControlTemplate TargetType="ComboBox">
                                     <Grid>
-                                        <ToggleButton Grid.Column="2" 
-                                                      Focusable="false" 
+                                        <ToggleButton Grid.Column="1"
+                                                      Focusable="false"
                                                       IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                                       Background="{TemplateBinding Background}"
                                                       BorderBrush="{TemplateBinding BorderBrush}"
@@ -260,15 +267,15 @@
                                                             <ColumnDefinition />
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
-                                                        <Border x:Name="border" Grid.ColumnSpan="2" 
-                                                                Background="{TemplateBinding Background}" 
-                                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                        <Border x:Name="border" Grid.ColumnSpan="2"
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
                                                                 BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" />
-                                                        <Path x:Name="arrow" Grid.Column="1" 
-                                                              Fill="{StaticResource PrimaryForegroundBrush}" 
-                                                              HorizontalAlignment="Center" 
-                                                              VerticalAlignment="Center" 
-                                                              Data="M 0 0 L 4 4 L 8 0 Z" 
+                                                        <Path x:Name="arrow" Grid.Column="1"
+                                                              Fill="{StaticResource PrimaryForegroundBrush}"
+                                                              HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"
+                                                              Data="M 0 0 L 4 4 L 8 0 Z"
                                                               Margin="0,0,5,0" />
                                                     </Grid>
                                                     <ControlTemplate.Triggers>
@@ -279,23 +286,24 @@
                                                 </ControlTemplate>
                                             </ToggleButton.Template>
                                         </ToggleButton>
-                                        <ContentPresenter ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
-                                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
-                                                          Content="{TemplateBinding SelectionBoxItem}" 
-                                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}" 
-                                                          HorizontalAlignment="Left" 
-                                                          VerticalAlignment="Center" 
+                                        <ContentPresenter Grid.Column="0"
+                                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                          Content="{TemplateBinding SelectionBoxItem}"
+                                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                                          HorizontalAlignment="Left"
+                                                          VerticalAlignment="Center"
                                                           Margin="{TemplateBinding Padding}"/>
-                                        <Popup x:Name="PART_Popup" 
-                                               AllowsTransparency="True" 
-                                               Placement="Bottom" 
-                                               IsOpen="{TemplateBinding IsDropDownOpen}" 
-                                               StaysOpen="False" 
+                                        <Popup x:Name="PART_Popup" Grid.ColumnSpan="2"
+                                               AllowsTransparency="True"
+                                               Placement="Bottom"
+                                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                                               StaysOpen="False"
                                                Focusable="False">
-                                            <Border x:Name="DropDownBorder" 
-                                                    Background="{StaticResource SecondaryBackgroundBrush}" 
-                                                    BorderBrush="{StaticResource BorderBrush}" 
-                                                    BorderThickness="1" 
+                                            <Border x:Name="DropDownBorder"
+                                                    Background="{StaticResource SecondaryBackgroundBrush}"
+                                                    BorderBrush="{StaticResource BorderBrush}"
+                                                    BorderThickness="1"
                                                     CornerRadius="3">
                                                 <ScrollViewer Margin="4,6,4,6" MaxHeight="{TemplateBinding MaxDropDownHeight}" SnapsToDevicePixels="True">
                                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
@@ -310,18 +318,18 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
                         <TextBlock Text="Z magazynu:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <ComboBox ItemsSource="{Binding AvailableFromWarehouses}"
+                        <ComboBox ItemsSource="{Binding AvailableWarehouses}"
                                   SelectedItem="{Binding SelectedFromWarehouseFilter}"
                                   Width="150"
-                                  DisplayMemberPath="WarehouseName">
+                                  Style="{StaticResource {x:Type ComboBox}}">
                             <ComboBox.ItemContainerStyle>
                                 <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
                             </ComboBox.ItemContainerStyle>
                             <ComboBox.Template>
                                 <ControlTemplate TargetType="ComboBox">
                                     <Grid>
-                                        <ToggleButton Grid.Column="2" 
-                                                      Focusable="false" 
+                                        <ToggleButton Grid.Column="1"
+                                                      Focusable="false"
                                                       IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                                       Background="{TemplateBinding Background}"
                                                       BorderBrush="{TemplateBinding BorderBrush}"
@@ -333,15 +341,15 @@
                                                             <ColumnDefinition />
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
-                                                        <Border x:Name="border" Grid.ColumnSpan="2" 
-                                                                Background="{TemplateBinding Background}" 
-                                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                        <Border x:Name="border" Grid.ColumnSpan="2"
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
                                                                 BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" />
-                                                        <Path x:Name="arrow" Grid.Column="1" 
-                                                              Fill="{StaticResource PrimaryForegroundBrush}" 
-                                                              HorizontalAlignment="Center" 
-                                                              VerticalAlignment="Center" 
-                                                              Data="M 0 0 L 4 4 L 8 0 Z" 
+                                                        <Path x:Name="arrow" Grid.Column="1"
+                                                              Fill="{StaticResource PrimaryForegroundBrush}"
+                                                              HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"
+                                                              Data="M 0 0 L 4 4 L 8 0 Z"
                                                               Margin="0,0,5,0" />
                                                     </Grid>
                                                     <ControlTemplate.Triggers>
@@ -352,23 +360,24 @@
                                                 </ControlTemplate>
                                             </ToggleButton.Template>
                                         </ToggleButton>
-                                        <ContentPresenter ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
-                                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
-                                                          Content="{TemplateBinding SelectionBoxItem}" 
-                                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}" 
-                                                          HorizontalAlignment="Left" 
-                                                          VerticalAlignment="Center" 
+                                        <ContentPresenter Grid.Column="0"
+                                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                          Content="{TemplateBinding SelectionBoxItem}"
+                                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                                          HorizontalAlignment="Left"
+                                                          VerticalAlignment="Center"
                                                           Margin="{TemplateBinding Padding}"/>
-                                        <Popup x:Name="PART_Popup" 
-                                               AllowsTransparency="True" 
-                                               Placement="Bottom" 
-                                               IsOpen="{TemplateBinding IsDropDownOpen}" 
-                                               StaysOpen="False" 
+                                        <Popup x:Name="PART_Popup" Grid.ColumnSpan="2"
+                                               AllowsTransparency="True"
+                                               Placement="Bottom"
+                                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                                               StaysOpen="False"
                                                Focusable="False">
-                                            <Border x:Name="DropDownBorder" 
-                                                    Background="{StaticResource SecondaryBackgroundBrush}" 
-                                                    BorderBrush="{StaticResource BorderBrush}" 
-                                                    BorderThickness="1" 
+                                            <Border x:Name="DropDownBorder"
+                                                    Background="{StaticResource SecondaryBackgroundBrush}"
+                                                    BorderBrush="{StaticResource BorderBrush}"
+                                                    BorderThickness="1"
                                                     CornerRadius="3">
                                                 <ScrollViewer Margin="4,6,4,6" MaxHeight="{TemplateBinding MaxDropDownHeight}" SnapsToDevicePixels="True">
                                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
@@ -383,18 +392,18 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
                         <TextBlock Text="Do magazynu:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <ComboBox ItemsSource="{Binding AvailableToWarehouses}"
+                        <ComboBox ItemsSource="{Binding AvailableWarehouses}"
                                   SelectedItem="{Binding SelectedToWarehouseFilter}"
                                   Width="150"
-                                  DisplayMemberPath="WarehouseName">
+                                  Style="{StaticResource {x:Type ComboBox}}">
                             <ComboBox.ItemContainerStyle>
                                 <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
                             </ComboBox.ItemContainerStyle>
                             <ComboBox.Template>
                                 <ControlTemplate TargetType="ComboBox">
                                     <Grid>
-                                        <ToggleButton Grid.Column="2" 
-                                                      Focusable="false" 
+                                        <ToggleButton Grid.Column="1"
+                                                      Focusable="false"
                                                       IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                                       Background="{TemplateBinding Background}"
                                                       BorderBrush="{TemplateBinding BorderBrush}"
@@ -406,15 +415,15 @@
                                                             <ColumnDefinition />
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
-                                                        <Border x:Name="border" Grid.ColumnSpan="2" 
-                                                                Background="{TemplateBinding Background}" 
-                                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                        <Border x:Name="border" Grid.ColumnSpan="2"
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
                                                                 BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" />
-                                                        <Path x:Name="arrow" Grid.Column="1" 
-                                                              Fill="{StaticResource PrimaryForegroundBrush}" 
-                                                              HorizontalAlignment="Center" 
-                                                              VerticalAlignment="Center" 
-                                                              Data="M 0 0 L 4 4 L 8 0 Z" 
+                                                        <Path x:Name="arrow" Grid.Column="1"
+                                                              Fill="{StaticResource PrimaryForegroundBrush}"
+                                                              HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"
+                                                              Data="M 0 0 L 4 4 L 8 0 Z"
                                                               Margin="0,0,5,0" />
                                                     </Grid>
                                                     <ControlTemplate.Triggers>
@@ -425,23 +434,24 @@
                                                 </ControlTemplate>
                                             </ToggleButton.Template>
                                         </ToggleButton>
-                                        <ContentPresenter ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
-                                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
-                                                          Content="{TemplateBinding SelectionBoxItem}" 
-                                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}" 
-                                                          HorizontalAlignment="Left" 
-                                                          VerticalAlignment="Center" 
+                                        <ContentPresenter Grid.Column="0"
+                                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                          Content="{TemplateBinding SelectionBoxItem}"
+                                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                                          HorizontalAlignment="Left"
+                                                          VerticalAlignment="Center"
                                                           Margin="{TemplateBinding Padding}"/>
-                                        <Popup x:Name="PART_Popup" 
-                                               AllowsTransparency="True" 
-                                               Placement="Bottom" 
-                                               IsOpen="{TemplateBinding IsDropDownOpen}" 
-                                               StaysOpen="False" 
+                                        <Popup x:Name="PART_Popup" Grid.ColumnSpan="2"
+                                               AllowsTransparency="True"
+                                               Placement="Bottom"
+                                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                                               StaysOpen="False"
                                                Focusable="False">
-                                            <Border x:Name="DropDownBorder" 
-                                                    Background="{StaticResource SecondaryBackgroundBrush}" 
-                                                    BorderBrush="{StaticResource BorderBrush}" 
-                                                    BorderThickness="1" 
+                                            <Border x:Name="DropDownBorder"
+                                                    Background="{StaticResource SecondaryBackgroundBrush}"
+                                                    BorderBrush="{StaticResource BorderBrush}"
+                                                    BorderThickness="1"
                                                     CornerRadius="3">
                                                 <ScrollViewer Margin="4,6,4,6" MaxHeight="{TemplateBinding MaxDropDownHeight}" SnapsToDevicePixels="True">
                                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
@@ -453,21 +463,23 @@
                             </ComboBox.Template>
                         </ComboBox>
                     </StackPanel>
+                </WrapPanel>
 
+                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
                         <TextBlock Text="Od użytkownika:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <ComboBox ItemsSource="{Binding AvailableFromUsers}"
+                        <ComboBox ItemsSource="{Binding AvailableUsers}"
                                   SelectedItem="{Binding SelectedFromUserFilter}"
                                   Width="150"
-                                  DisplayMemberPath="UserName">
+                                  Style="{StaticResource {x:Type ComboBox}}">
                             <ComboBox.ItemContainerStyle>
                                 <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
                             </ComboBox.ItemContainerStyle>
                             <ComboBox.Template>
                                 <ControlTemplate TargetType="ComboBox">
                                     <Grid>
-                                        <ToggleButton Grid.Column="2" 
-                                                      Focusable="false" 
+                                        <ToggleButton Grid.Column="1"
+                                                      Focusable="false"
                                                       IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                                       Background="{TemplateBinding Background}"
                                                       BorderBrush="{TemplateBinding BorderBrush}"
@@ -479,15 +491,15 @@
                                                             <ColumnDefinition />
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
-                                                        <Border x:Name="border" Grid.ColumnSpan="2" 
-                                                                Background="{TemplateBinding Background}" 
-                                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                        <Border x:Name="border" Grid.ColumnSpan="2"
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
                                                                 BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" />
-                                                        <Path x:Name="arrow" Grid.Column="1" 
-                                                              Fill="{StaticResource PrimaryForegroundBrush}" 
-                                                              HorizontalAlignment="Center" 
-                                                              VerticalAlignment="Center" 
-                                                              Data="M 0 0 L 4 4 L 8 0 Z" 
+                                                        <Path x:Name="arrow" Grid.Column="1"
+                                                              Fill="{StaticResource PrimaryForegroundBrush}"
+                                                              HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"
+                                                              Data="M 0 0 L 4 4 L 8 0 Z"
                                                               Margin="0,0,5,0" />
                                                     </Grid>
                                                     <ControlTemplate.Triggers>
@@ -498,23 +510,24 @@
                                                 </ControlTemplate>
                                             </ToggleButton.Template>
                                         </ToggleButton>
-                                        <ContentPresenter ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
-                                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
-                                                          Content="{TemplateBinding SelectionBoxItem}" 
-                                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}" 
-                                                          HorizontalAlignment="Left" 
-                                                          VerticalAlignment="Center" 
+                                        <ContentPresenter Grid.Column="0"
+                                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                          Content="{TemplateBinding SelectionBoxItem}"
+                                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                                          HorizontalAlignment="Left"
+                                                          VerticalAlignment="Center"
                                                           Margin="{TemplateBinding Padding}"/>
-                                        <Popup x:Name="PART_Popup" 
-                                               AllowsTransparency="True" 
-                                               Placement="Bottom" 
-                                               IsOpen="{TemplateBinding IsDropDownOpen}" 
-                                               StaysOpen="False" 
+                                        <Popup x:Name="PART_Popup" Grid.ColumnSpan="2"
+                                               AllowsTransparency="True"
+                                               Placement="Bottom"
+                                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                                               StaysOpen="False"
                                                Focusable="False">
-                                            <Border x:Name="DropDownBorder" 
-                                                    Background="{StaticResource SecondaryBackgroundBrush}" 
-                                                    BorderBrush="{StaticResource BorderBrush}" 
-                                                    BorderThickness="1" 
+                                            <Border x:Name="DropDownBorder"
+                                                    Background="{StaticResource SecondaryBackgroundBrush}"
+                                                    BorderBrush="{StaticResource BorderBrush}"
+                                                    BorderThickness="1"
                                                     CornerRadius="3">
                                                 <ScrollViewer Margin="4,6,4,6" MaxHeight="{TemplateBinding MaxDropDownHeight}" SnapsToDevicePixels="True">
                                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
@@ -529,18 +542,18 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
                         <TextBlock Text="Do użytkownika:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <ComboBox ItemsSource="{Binding AvailableToUsers}"
+                        <ComboBox ItemsSource="{Binding AvailableUsers}"
                                   SelectedItem="{Binding SelectedToUserFilter}"
                                   Width="150"
-                                  DisplayMemberPath="UserName">
+                                  Style="{StaticResource {x:Type ComboBox}}">
                             <ComboBox.ItemContainerStyle>
                                 <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
                             </ComboBox.ItemContainerStyle>
                             <ComboBox.Template>
                                 <ControlTemplate TargetType="ComboBox">
                                     <Grid>
-                                        <ToggleButton Grid.Column="2" 
-                                                      Focusable="false" 
+                                        <ToggleButton Grid.Column="1"
+                                                      Focusable="false"
                                                       IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                                       Background="{TemplateBinding Background}"
                                                       BorderBrush="{TemplateBinding BorderBrush}"
@@ -552,15 +565,15 @@
                                                             <ColumnDefinition />
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
-                                                        <Border x:Name="border" Grid.ColumnSpan="2" 
-                                                                Background="{TemplateBinding Background}" 
-                                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                        <Border x:Name="border" Grid.ColumnSpan="2"
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
                                                                 BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" />
-                                                        <Path x:Name="arrow" Grid.Column="1" 
-                                                              Fill="{StaticResource PrimaryForegroundBrush}" 
-                                                              HorizontalAlignment="Center" 
-                                                              VerticalAlignment="Center" 
-                                                              Data="M 0 0 L 4 4 L 8 0 Z" 
+                                                        <Path x:Name="arrow" Grid.Column="1"
+                                                              Fill="{StaticResource PrimaryForegroundBrush}"
+                                                              HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"
+                                                              Data="M 0 0 L 4 4 L 8 0 Z"
                                                               Margin="0,0,5,0" />
                                                     </Grid>
                                                     <ControlTemplate.Triggers>
@@ -571,23 +584,24 @@
                                                 </ControlTemplate>
                                             </ToggleButton.Template>
                                         </ToggleButton>
-                                        <ContentPresenter ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
-                                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
-                                                          Content="{TemplateBinding SelectionBoxItem}" 
-                                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}" 
-                                                          HorizontalAlignment="Left" 
-                                                          VerticalAlignment="Center" 
+                                        <ContentPresenter Grid.Column="0"
+                                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                          Content="{TemplateBinding SelectionBoxItem}"
+                                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                                          HorizontalAlignment="Left"
+                                                          VerticalAlignment="Center"
                                                           Margin="{TemplateBinding Padding}"/>
-                                        <Popup x:Name="PART_Popup" 
-                                               AllowsTransparency="True" 
-                                               Placement="Bottom" 
-                                               IsOpen="{TemplateBinding IsDropDownOpen}" 
-                                               StaysOpen="False" 
+                                        <Popup x:Name="PART_Popup" Grid.ColumnSpan="2"
+                                               AllowsTransparency="True"
+                                               Placement="Bottom"
+                                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                                               StaysOpen="False"
                                                Focusable="False">
-                                            <Border x:Name="DropDownBorder" 
-                                                    Background="{StaticResource SecondaryBackgroundBrush}" 
-                                                    BorderBrush="{StaticResource BorderBrush}" 
-                                                    BorderThickness="1" 
+                                            <Border x:Name="DropDownBorder"
+                                                    Background="{StaticResource SecondaryBackgroundBrush}"
+                                                    BorderBrush="{StaticResource BorderBrush}"
+                                                    BorderThickness="1"
                                                     CornerRadius="3">
                                                 <ScrollViewer Margin="4,6,4,6" MaxHeight="{TemplateBinding MaxDropDownHeight}" SnapsToDevicePixels="True">
                                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
@@ -601,12 +615,8 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <Button Content="Filtruj" 
-                                Command="{Binding FilterDeviceLogsCommand}"
-                                Style="{StaticResource {x:Type Button}}"
-                                Margin="0,0,10,0"/>
-                        <Button Content="Resetuj" 
-                                Command="{Binding ResetFiltersCommand}">
+                        <Button Content="Filtruj" Command="{Binding FilterLogsCommand}" Style="{StaticResource {x:Type Button}}" Margin="0,0,10,0"/>
+                        <Button Content="Resetuj">
                             <Button.Template>
                                 <ControlTemplate TargetType="{x:Type Button}">
                                     <Border Background="#6C757D"
@@ -633,41 +643,26 @@
                         </Button>
                     </StackPanel>
                 </WrapPanel>
-            </StackPanel>
-        </Border>
 
-        <Border Grid.Row="1"
-                Background="{StaticResource SecondaryBackgroundBrush}"
-                BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="1"
-                CornerRadius="5">
-            <StackPanel Orientation="Vertical">
-                <TextBlock Text="Ostatnie logi urządzeń" Style="{StaticResource SubTitleTextBlockStyle}" FontWeight="SemiBold" Margin="16,16,16,10"/>
-                <Separator Background="{StaticResource BorderBrush}" Height="1"/>
-                <DataGrid ItemsSource="{Binding FilteredDeviceLogs}" AutoGenerateColumns="False" IsReadOnly="True"
-                          Background="{StaticResource SecondaryBackgroundBrush}"
-                          Foreground="{StaticResource PrimaryForegroundBrush}"
-                          HeadersVisibility="Column"
-                          BorderBrush="{StaticResource BorderBrush}"
-                          BorderThickness="0,1,0,0"
-                          GridLinesVisibility="Horizontal"
-                          HorizontalGridLinesBrush="{StaticResource BorderBrush}"
-                          VerticalGridLinesBrush="{StaticResource BorderBrush}"
-                          Margin="16,0,16,16">
-                    <DataGrid.Resources>
-                        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource DataGridColumnHeaderStyle}"/>
-                        <Style TargetType="DataGridCell" BasedOn="{StaticResource DataGridCellStyle}"/>
-                        <Style TargetType="DataGridRow" BasedOn="{StaticResource DataGridRowStyle}"/>
-                    </DataGrid.Resources>
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Data zdarzenia" Binding="{Binding EventDate, StringFormat='dd.MM.yyyy HH:mm'}" Width="1.5*"/>
-                        <DataGridTextColumn Header="Numer seryjny" Binding="{Binding DeviceSerialNumber}" Width="1.5*"/>
-                        <DataGridTextColumn Header="Z magazynu" Binding="{Binding FromWarehouseName}" Width="1*"/>
-                        <DataGridTextColumn Header="Do magazynu" Binding="{Binding ToWarehouseName}" Width="1*"/>
-                        <DataGridTextColumn Header="Od użytkownika" Binding="{Binding FromUserName}" Width="1*"/>
-                        <DataGridTextColumn Header="Do użytkownika" Binding="{Binding ToUserName}" Width="1*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <Separator Background="{StaticResource BorderBrush}" Height="1" Margin="0,0,0,15"/>
+
+                <Border Background="{StaticResource SecondaryBackgroundBrush}" Padding="15" Margin="0,0,0,5">
+                    <StackPanel>
+                        <DataGrid ItemsSource="{Binding LatestDeviceLogs}"
+                                  Style="{StaticResource {x:Type DataGrid}}"
+                                  AutoGenerateColumns="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Id" Binding="{Binding LogId}" Width="Auto"/>
+                                <DataGridTextColumn Header="Data" Binding="{Binding EventDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="Auto"/>
+                                <DataGridTextColumn Header="Numer ser." Binding="{Binding SerialNumber}" Width="Auto"/>
+                                <DataGridTextColumn Header="Akcja" Binding="{Binding Event}" Width="*"/>
+                                <DataGridTextColumn Header="Z magazynu" Binding="{Binding FromWarehouseName}" Width="*"/>
+                                <DataGridTextColumn Header="Do magazynu" Binding="{Binding ToWarehouseName}" Width="*"/>
+                                <DataGridTextColumn Header="Użytkownik" Binding="{Binding FromUserName}" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </Border>
     </Grid>

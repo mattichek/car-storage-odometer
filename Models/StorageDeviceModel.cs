@@ -3,7 +3,7 @@ using System;
 
 namespace car_storage_odometer.Models
 {
-    public class StoredDeviceModel : BindableBase
+    public class StorageDeviceModel : BindableBase
     {
         private int _deviceId;
         public int DeviceId // odpowiada urzadzenie_id
@@ -77,21 +77,6 @@ namespace car_storage_odometer.Models
         }
 
         // Metoda do klonowania obiektu - ważna dla trybu edycji
-        public StoredDevice Clone()
-        {
-            return new StoredDevice
-            {
-                DeviceId = this.DeviceId,
-                TypeId = this.TypeId,
-                StatusId = this.StatusId,
-                WarehouseId = (int)this.WarehouseId,
-                UserId = (int)this.UserId,
-                SerialNumber = this.SerialNumber,
-                TypeName = this.TypeName,
-                StatusName = this.StatusName,
-                WarehouseName = this.WarehouseName,
-                AddedByUserName = this.AddedByUserName
-            };
-        }
+
     }
 }

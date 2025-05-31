@@ -8,11 +8,11 @@
              xmlns:converters="clr-namespace:car_storage_odometer.Converters"
              mc:Ignorable="d" 
              Width="Auto" Height="Auto">
-    
+
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/car-storage-odometer;component/Styles/DarkThemeStyles.xaml"/>
+                <ResourceDictionary Source="/car-storage-odometer;component/Styles/DashboardStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <converters:InvertBooleanConverter x:Key="InvertBooleanConverter"/>
         </ResourceDictionary>
@@ -39,56 +39,363 @@
                 BorderThickness="1"
                 CornerRadius="5"
                 Padding="20">
-            <StackPanel Orientation="Vertical">
-                <TextBlock Text="Dane Użytkownika" Style="{StaticResource SubTitleTextBlockStyle}" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                <Separator Background="{StaticResource BorderBrush}" Height="1" Margin="0,0,0,15"/>
 
-                <Grid Margin="0,0,0,20">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+            <StackPanel Grid.Column="1" >
+                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
+                        <TextBlock Text="Data od:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <DatePicker SelectedDate="{Binding FilterDateFrom}"
+                    Width="120">
+                            <DatePicker.Template>
+                                <ControlTemplate TargetType="{x:Type DatePicker}">
+                                    <Grid x:Name="PART_Root">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="3*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <DatePickerTextBox x:Name="PART_TextBox"
+                                 Grid.Column="0"
+                                 Background="Transparent"
+                                 Foreground="{StaticResource PrimaryForegroundBrush}"
+                                 BorderBrush="Transparent"
+                                 BorderThickness="0"
+                                 Padding="5"
+                                 CaretBrush="{StaticResource AccentBrush}"
+                                 VerticalContentAlignment="Center"
+                                 HorizontalContentAlignment="Left"/>
+                                        <Button x:Name="PART_Button"
+                                Grid.Column="1"
+                                Style="{StaticResource {x:Type Button}}"
+                                Width="30"
+                                Margin="5,0,0,0"
+                                Background="{StaticResource SecondaryBackgroundBrush}"
+                                BorderThickness="0">
+                                            <Path Data="M 0 0 L 4 4 L 8 0 Z" Stretch="Fill" Fill="{StaticResource PrimaryForegroundBrush}" Width="8" Height="4" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        </Button>
+                                        <Popup x:Name="PART_Popup"
+                               AllowsTransparency="True"
+                               Placement="Bottom"
+                               StaysOpen="False">
+                                            <Border BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    Background="{StaticResource SecondaryBackgroundBrush}">
+                                                <Calendar x:Name="PART_Calendar"
+                                          Foreground="{StaticResource PrimaryForegroundBrush}"
+                                          Background="{StaticResource SecondaryBackgroundBrush}"
+                                          BorderBrush="{StaticResource BorderBrush}"
+                                          BorderThickness="0"/>
+                                            </Border>
+                                        </Popup>
+                                    </Grid>
+                                </ControlTemplate>
+                            </DatePicker.Template>
+                            <DatePicker.Resources>
+                                <Style TargetType="{x:Type Calendar}">
+                                    <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource PrimaryForegroundBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                </Style>
+                                <Style TargetType="{x:Type CalendarDayButton}">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="{StaticResource PrimaryForegroundBrush}"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type CalendarDayButton}">
+                                                <Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource SelectedBackgroundBrush}"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                                <Style TargetType="{x:Type CalendarButton}">
+                                    <Setter Property="Background" Value="{StaticResource SurfaceBackgroundBrush}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource PrimaryForegroundBrush}"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type CalendarButton}">
+                                                <Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </DatePicker.Resources>
+                        </DatePicker>
+                    </StackPanel>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="ID Użytkownika:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
-                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding EditedUser.UserId}" IsReadOnly="True" Style="{StaticResource ReadOnlyTextBoxStyle}" Margin="0,0,0,10"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
+                        <TextBlock Text="Data do:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <DatePicker SelectedDate="{Binding FilterDateTo}"
+                    Width="120">
+                            <DatePicker.Template>
+                                <ControlTemplate TargetType="{x:Type DatePicker}">
+                                    <Grid x:Name="PART_Root">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="3*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <DatePickerTextBox x:Name="PART_TextBox"
+                                 Grid.Column="0"
+                                 Background="Transparent"
+                                 Foreground="{StaticResource PrimaryForegroundBrush}"
+                                 BorderBrush="Transparent"
+                                 BorderThickness="0"
+                                 Padding="5"
+                                 CaretBrush="{StaticResource AccentBrush}"
+                                 VerticalContentAlignment="Center"
+                                 HorizontalContentAlignment="Left"/>
+                                        <Button x:Name="PART_Button"
+                                Grid.Column="1"
+                                Style="{StaticResource {x:Type Button}}"
+                                Width="30"
+                                Margin="5,0,0,0"
+                                Background="{StaticResource SecondaryBackgroundBrush}"
+                                BorderThickness="0">
+                                            <Path Data="M 0 0 L 4 4 L 8 0 Z" Stretch="Fill" Fill="{StaticResource PrimaryForegroundBrush}" Width="8" Height="4" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                        </Button>
+                                        <Popup x:Name="PART_Popup"
+                               AllowsTransparency="True"
+                               Placement="Bottom"
+                               StaysOpen="False">
+                                            <Border BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    Background="{StaticResource SecondaryBackgroundBrush}">
+                                                <Calendar x:Name="PART_Calendar"
+                                          Foreground="{StaticResource PrimaryForegroundBrush}"
+                                          Background="{StaticResource SecondaryBackgroundBrush}"
+                                          BorderBrush="{StaticResource BorderBrush}"
+                                          BorderThickness="0"/>
+                                            </Border>
+                                        </Popup>
+                                    </Grid>
+                                </ControlTemplate>
+                            </DatePicker.Template>
+                            <DatePicker.Resources>
+                                <Style TargetType="{x:Type Calendar}">
+                                    <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource PrimaryForegroundBrush}"/>
+                                    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                </Style>
+                                <Style TargetType="{x:Type CalendarDayButton}">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="{StaticResource PrimaryForegroundBrush}"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type CalendarDayButton}">
+                                                <Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource SelectedBackgroundBrush}"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                                <Style TargetType="{x:Type CalendarButton}">
+                                    <Setter Property="Background" Value="{StaticResource SurfaceBackgroundBrush}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource PrimaryForegroundBrush}"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type CalendarButton}">
+                                                <Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </DatePicker.Resources>
+                        </DatePicker>
+                    </StackPanel>
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Imię:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding EditedUser.FirstName}" IsReadOnly="{Binding IsEditing, Converter={StaticResource InvertBooleanConverter}}" Style="{StaticResource InputTextBoxStyle}" Margin="0,0,0,10"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
+                        <TextBlock Text="Użytkownik:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <ComboBox ItemsSource="{Binding AvailableUsers}"
+                                  SelectedItem="{Binding SelectedUserFilter}"
+                                  Width="150"
+                                  DisplayMemberPath="UserName">
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
+                            </ComboBox.ItemContainerStyle>
+                            <ComboBox.Template>
+                                <ControlTemplate TargetType="ComboBox">
+                                    <Grid>
+                                        <ToggleButton Grid.Column="2" 
+                                      Focusable="false" 
+                                      IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                      Background="{TemplateBinding Background}"
+                                      BorderBrush="{TemplateBinding BorderBrush}"
+                                      BorderThickness="{TemplateBinding BorderThickness}">
+                                            <ToggleButton.Template>
+                                                <ControlTemplate>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border x:Name="border" Grid.ColumnSpan="2" 
+                                                Background="{TemplateBinding Background}" 
+                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" />
+                                                        <Path x:Name="arrow" Grid.Column="1" 
+                                              Fill="{StaticResource PrimaryForegroundBrush}" 
+                                              HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center" 
+                                              Data="M 0 0 L 4 4 L 8 0 Z" 
+                                              Margin="0,0,5,0" />
+                                                    </Grid>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="border" Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </ToggleButton.Template>
+                                        </ToggleButton>
+                                        <ContentPresenter ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
+                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
+                                          Content="{TemplateBinding SelectionBoxItem}" 
+                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}" 
+                                          HorizontalAlignment="Left" 
+                                          VerticalAlignment="Center" 
+                                          Margin="{TemplateBinding Padding}"/>
+                                        <Popup x:Name="PART_Popup" 
+                               AllowsTransparency="True" 
+                               Placement="Bottom" 
+                               IsOpen="{TemplateBinding IsDropDownOpen}" 
+                               StaysOpen="False" 
+                               Focusable="False">
+                                            <Border x:Name="DropDownBorder" 
+                                    Background="{StaticResource SecondaryBackgroundBrush}" 
+                                    BorderBrush="{StaticResource BorderBrush}" 
+                                    BorderThickness="1" 
+                                    CornerRadius="3">
+                                                <ScrollViewer Margin="4,6,4,6" MaxHeight="{TemplateBinding MaxDropDownHeight}" SnapsToDevicePixels="True">
+                                                    <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                                </ScrollViewer>
+                                            </Border>
+                                        </Popup>
+                                    </Grid>
+                                </ControlTemplate>
+                            </ComboBox.Template>
+                        </ComboBox>
+                    </StackPanel>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Nazwisko:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
-                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding EditedUser.LastName}" IsReadOnly="{Binding IsEditing, Converter={StaticResource InvertBooleanConverter}}" Style="{StaticResource InputTextBoxStyle}" Margin="0,0,0,10"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
+                        <TextBlock Text="Akcja:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <ComboBox ItemsSource="{Binding AvailableActions}"
+                  SelectedItem="{Binding SelectedActionFilter}"
+                  Width="150">
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
+                            </ComboBox.ItemContainerStyle>
+                            <ComboBox.Template>
+                                <ControlTemplate TargetType="ComboBox">
+                                    <Grid>
+                                        <ToggleButton Grid.Column="2" 
+                                      Focusable="false" 
+                                      IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                      Background="{TemplateBinding Background}"
+                                      BorderBrush="{TemplateBinding BorderBrush}"
+                                      BorderThickness="{TemplateBinding BorderThickness}">
+                                            <ToggleButton.Template>
+                                                <ControlTemplate>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border x:Name="border" Grid.ColumnSpan="2" 
+                                                Background="{TemplateBinding Background}" 
+                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" />
+                                                        <Path x:Name="arrow" Grid.Column="1" 
+                                              Fill="{StaticResource PrimaryForegroundBrush}" 
+                                              HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center" 
+                                              Data="M 0 0 L 4 4 L 8 0 Z" 
+                                              Margin="0,0,5,0" />
+                                                    </Grid>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="border" Property="Background" Value="{StaticResource HoverBackgroundBrush}" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </ToggleButton.Template>
+                                        </ToggleButton>
+                                        <ContentPresenter ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
+                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
+                                          Content="{TemplateBinding SelectionBoxItem}" 
+                                          ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}" 
+                                          HorizontalAlignment="Left" 
+                                          VerticalAlignment="Center" 
+                                          Margin="{TemplateBinding Padding}"/>
+                                        <Popup x:Name="PART_Popup" 
+                               AllowsTransparency="True" 
+                               Placement="Bottom" 
+                               IsOpen="{TemplateBinding IsDropDownOpen}" 
+                               StaysOpen="False" 
+                               Focusable="False">
+                                            <Border x:Name="DropDownBorder" 
+                                    Background="{StaticResource SecondaryBackgroundBrush}" 
+                                    BorderBrush="{StaticResource BorderBrush}" 
+                                    BorderThickness="1" 
+                                    CornerRadius="3">
+                                                <ScrollViewer Margin="4,6,4,6" MaxHeight="{TemplateBinding MaxDropDownHeight}" SnapsToDevicePixels="True">
+                                                    <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                                </ScrollViewer>
+                                            </Border>
+                                        </Popup>
+                                    </Grid>
+                                </ControlTemplate>
+                            </ComboBox.Template>
+                        </ComboBox>
+                    </StackPanel>
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Email:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
-                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding EditedUser.Email}" IsReadOnly="{Binding IsEditing, Converter={StaticResource InvertBooleanConverter}}" Style="{StaticResource InputTextBoxStyle}" Margin="0,0,0,10"/>
-
-                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Data Rejestracji:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
-                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding EditedUser.RegistrationDate, StringFormat='{}{0:yyyy-MM-dd}'}" IsReadOnly="True" Style="{StaticResource ReadOnlyTextBoxStyle}" Margin="0,0,0,10"/>
-
-                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Rola:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
-                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding EditedUser.Role}" IsReadOnly="True" Style="{StaticResource ReadOnlyTextBoxStyle}" Margin="0,0,0,10"/>
-
-                    <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                        <Button Content="Edytuj"
-                                Command="{Binding EditAccountCommand}"
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Content="Filtruj" 
+                                Command="{Binding FilterLogsCommand}"
                                 Style="{StaticResource {x:Type Button}}"
                                 Margin="0,0,10,0"/>
-
-                        <Button Content="Zapisz"
-                                Command="{Binding SaveAccountCommand}"
-                                Style="{StaticResource {x:Type Button}}"
-                                Margin="0,0,10,0"/>
-
-                        <Button Content="Anuluj"
-                                Command="{Binding CancelEditCommand}">
+                        <Button Content="Resetuj" 
+                                Command="{Binding ResetFiltersCommand}">
                             <Button.Template>
                                 <ControlTemplate TargetType="{x:Type Button}">
                                     <Border Background="#6C757D"
@@ -96,9 +403,9 @@
                                             BorderThickness="{TemplateBinding BorderThickness}"
                                             CornerRadius="3">
                                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                          Margin="{TemplateBinding Padding}"
-                                                          Content="{TemplateBinding Content}"/>
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          Margin="{TemplateBinding Padding}"
+                                          Content="{TemplateBinding Content}"/>
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
@@ -109,53 +416,30 @@
                                             <Setter Property="Background" Value="#5a6268"/>
                                             <Setter Property="BorderBrush" Value="#5a6268"/>
                                         </Trigger>
-                                        <Trigger Property="IsEnabled" Value="False">
-                                            <Setter Property="Background" Value="{StaticResource DisabledBackgroundBrush}"/>
-                                            <Setter Property="Foreground" Value="{StaticResource DisabledForegroundBrush}"/>
-                                            <Setter Property="BorderBrush" Value="{StaticResource DisabledBorderBrush}"/>
-                                        </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
                     </StackPanel>
-                </Grid>
-
-                <TextBlock Text="Zmień Hasło" Style="{StaticResource SubTitleTextBlockStyle}" FontWeight="SemiBold" Margin="0,20,0,10"/>
+                </WrapPanel>
+                
                 <Separator Background="{StaticResource BorderBrush}" Height="1" Margin="0,0,0,15"/>
-
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Stare Hasło:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Stare Hasło:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
-                    <PasswordBox Grid.Row="0" Grid.Column="1" Style="{StaticResource InputPasswordBoxStyle}" Margin="0,0,0,10"
-                         helpers:PasswordBoxHelper.BoundPassword="{Binding OldPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         helpers:PasswordBoxHelper.Attach="True"/>
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Nowe Hasło:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
-                    <PasswordBox Grid.Row="1" Grid.Column="1" Style="{StaticResource InputPasswordBoxStyle}" Margin="0,0,0,10"
-                         helpers:PasswordBoxHelper.BoundPassword="{Binding NewPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         helpers:PasswordBoxHelper.Attach="True"/>
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Potwierdź Nowe Hasło:" Style="{StaticResource BaseTextBlockStyle}" VerticalAlignment="Center" Margin="0,0,10,10"/>
-                    <PasswordBox Grid.Row="2" Grid.Column="1" Style="{StaticResource InputPasswordBoxStyle}" Margin="0,0,0,10"
-                         helpers:PasswordBoxHelper.BoundPassword="{Binding ConfirmNewPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         helpers:PasswordBoxHelper.Attach="True"/>
-                    <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                        <Button Content="Zmień Hasło"
-                        Command="{Binding ChangePasswordCommand}"
-                        Style="{StaticResource {x:Type Button}}"
-                        Margin="0,0,10,0"/>
+                <Border Background="{StaticResource SecondaryBackgroundBrush}"
+                            Padding="15"
+                            Margin="0,0,0,5">
+                    <StackPanel>
+                        <DataGrid ItemsSource="{Binding LatestUserLogs}"
+                                      Style="{StaticResource {x:Type DataGrid}}"
+                                      AutoGenerateColumns="False">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Id" Binding="{Binding UserLogId}"  Width="Auto"/>
+                                <DataGridTextColumn Header="Data" Binding="{Binding EventDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*"/>
+                                <DataGridTextColumn Header="Użytkownik" Binding="{Binding UserName}" Width="*"/>
+                                <DataGridTextColumn Header="Akcja" Binding="{Binding Action}" Width="2*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </StackPanel>
-                </Grid>
+                </Border>
             </StackPanel>
         </Border>
     </Grid>
