@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace car_storage_odometer.ViewModels
 {
-    internal class DevicesViewModel
+    public class DevicesViewModel
     {
     }
 }
