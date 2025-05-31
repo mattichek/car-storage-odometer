@@ -79,6 +79,7 @@
     <Compile Include="Converters\PercentageToWidthConverter.cs" />
     <Compile Include="Helpers\PasswordBoxHelper.cs" />
     <Compile Include="Models\DeviceLogModel.cs" />
+    <Compile Include="Models\DeviceStatusModel.cs" />
     <Compile Include="Models\DeviceTypeModel.cs" />
     <Compile Include="Models\RepairHistoryModel.cs" />
     <Compile Include="Models\SerialNumberModel.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="Models\StoredDeviceModel.cs" />
     <Compile Include="Models\UserLogModel.cs" />
     <Compile Include="Models\UserModel.cs" />
+    <Compile Include="Models\WarehouseStatusModel.cs" />
     <Compile Include="Modules\SideBarModule.cs" />
     <Compile Include="ViewModels\AccountViewModel.cs" />
     <Compile Include="ViewModels\DashboardViewModel.cs" />
@@ -157,6 +159,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Styles\DarkThemeStyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Styles\DashboardStyles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

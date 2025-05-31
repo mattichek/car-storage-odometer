@@ -46,5 +46,19 @@ namespace car_storage_odometer.Models
             get => _userId;
             set => SetProperty(ref _userId, value);
         }
+
+        private string _userName;
+        public string UserName
+        {
+            get => _userName;
+            set => SetProperty(ref _userName, value);
+        }
+
+        private string _deviceName;
+        public string DeviceName
+        {
+            get => _deviceName;
+            set => SetProperty(ref _deviceName, value);
+        }
     }
 }

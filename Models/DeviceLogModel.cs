@@ -88,10 +88,27 @@ namespace car_storage_odometer.Models
         }
 
         private string _toUserName;
+
         public string ToUserName // Nazwa użytkownika docelowego
         {
             get => _toUserName;
             set => SetProperty(ref _toUserName, value);
         }
+
+        private string _deviceName;
+        public string DeviceName // Nazwa urządznia
+        {
+            get => _deviceName;
+            set => SetProperty(ref _deviceName, value);
+        }
+
+        private string _event;
+        public string Event // Nazwa co działo się z urządzeniem
+        {
+            get => _event;
+            set => SetProperty(ref _event, value);
+        }
+
+
     }
 }

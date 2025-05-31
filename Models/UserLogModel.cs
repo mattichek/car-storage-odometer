@@ -34,6 +34,7 @@ namespace car_storage_odometer.Models
         }
 
         // Opcjonalnie: właściwość pomocnicza, jeśli potrzebujesz nazwy użytkownika w logu
+        internal int LogId;
         private string _userName;
         public string UserName
         {
