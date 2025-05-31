@@ -90,11 +90,11 @@ namespace car_storage_odometer.ViewModels
             // W prawdziwej aplikacji: zapytanie do bazy danych z ORDER BY i LIMIT
             LatestUserLogs.Clear();
             // Przykładowe dane, pamiętaj, aby to były faktyczne dane z bazy, jeśli dostępne
-            LatestUserLogs.Add(new UserLogModel { LogId = 5, UserId = 1, UserName = "Jan Kowalski", Action = "Zalogował się", EventDate = new DateTime(2025, 5, 31, 8, 55, 0) });
-            LatestUserLogs.Add(new UserLogModel { LogId = 4, UserId = 2, UserName = "Anna Nowak", Action = "Dodała licznik 'Licznik-001'", EventDate = new DateTime(2025, 5, 31, 7, 55, 0) });
-            LatestUserLogs.Add(new UserLogModel { LogId = 3, UserId = 3, UserName = "Piotr Zieliński", Action = "Wylogował się", EventDate = new DateTime(2025, 5, 31, 6, 55, 0) });
-            LatestUserLogs.Add(new UserLogModel { LogId = 2, UserId = 1, UserName = "Jan Kowalski", Action = "Usunął moduł 'Moduł-ABC'", EventDate = new DateTime(2025, 5, 31, 5, 55, 0) });
-            LatestUserLogs.Add(new UserLogModel { LogId = 1, UserId = 2, UserName = "Anna Nowak", Action = "Zalogowała się", EventDate = new DateTime(2025, 5, 31, 4, 55, 0) });
+            LatestUserLogs.Add(new UserLogModel { UserLogId = 5, UserId = 1, UserName = "Jan Kowalski", Action = "Zalogował się", EventDate = new DateTime(2025, 5, 31, 8, 55, 0) });
+            LatestUserLogs.Add(new UserLogModel { UserLogId = 4, UserId = 2, UserName = "Anna Nowak", Action = "Dodała licznik 'Licznik-001'", EventDate = new DateTime(2025, 5, 31, 7, 55, 0) });
+            LatestUserLogs.Add(new UserLogModel { UserLogId = 3, UserId = 3, UserName = "Piotr Zieliński", Action = "Wylogował się", EventDate = new DateTime(2025, 5, 31, 6, 55, 0) });
+            LatestUserLogs.Add(new UserLogModel { UserLogId = 2, UserId = 1, UserName = "Jan Kowalski", Action = "Usunął moduł 'Moduł-ABC'", EventDate = new DateTime(2025, 5, 31, 5, 55, 0) });
+            LatestUserLogs.Add(new UserLogModel { UserLogId = 1, UserId = 2, UserName = "Anna Nowak", Action = "Zalogowała się", EventDate = new DateTime(2025, 5, 31, 4, 55, 0) });
             // Sortowanie po dacie (najnowsze na górze) i wzięcie 5 ostatnich
             LatestUserLogs = new ObservableCollection<UserLogModel>(LatestUserLogs.OrderByDescending(l => l.EventDate).Take(5));
 
