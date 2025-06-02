@@ -1,9 +1,10 @@
-﻿<UserControl x:Class="car_storage_odometer.Views.StorageView"
+﻿<UserControl x:Class="car_storage_odometer.Views.HistoryOfRepairView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:car_storage_odometer.Views"
+             xmlns:helpers="clr-namespace:car_storage_odometer.Helpers"
              xmlns:converters="clr-namespace:car_storage_odometer.Converters"
              mc:Ignorable="d" 
              Width="Auto" Height="Auto">
@@ -24,7 +25,7 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Background="{StaticResource SecondaryBackgroundBrush}" CornerRadius="5" Padding="16" Margin="0,0,0,20">
-            <TextBlock Text="Stan Magazynowy" Style="{StaticResource TitleTextBlockStyle}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <TextBlock Text="Historia Zmian" Style="{StaticResource TitleTextBlockStyle}" FontWeight="SemiBold" VerticalAlignment="Center"/>
         </Border>
 
         <Border Grid.Row="1"
@@ -37,7 +38,7 @@
             <StackPanel>
                 <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,15">
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
-                        <TextBlock Text="Data dodania od:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <TextBlock Text="Data od:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
                         <DatePicker SelectedDate="{Binding FilterDateFrom}" Width="120">
                             <DatePicker.Resources>
                                 <Style TargetType="{x:Type Calendar}" BasedOn="{StaticResource {x:Type Calendar}}"/>
@@ -48,7 +49,7 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
-                        <TextBlock Text="Data dodania do:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <TextBlock Text="Data do:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
                         <DatePicker SelectedDate="{Binding FilterDateTo}" Width="120">
                             <DatePicker.Resources>
                                 <Style TargetType="{x:Type Calendar}" BasedOn="{StaticResource {x:Type Calendar}}"/>
@@ -59,9 +60,9 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
-                        <TextBlock Text="Nr seryjny:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <ComboBox ItemsSource="{Binding AvailableSerialNumbers}" 
-                                  SelectedItem="{Binding SelectedSerialNumberFilter}" 
+                        <TextBlock Text="Użytkownik:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <ComboBox ItemsSource="{Binding AvailableUsers}"
+                                  SelectedItem="{Binding SelectedUserFilter}"
                                   Width="150">
                             <ComboBox.ItemContainerStyle>
                                 <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
@@ -72,7 +73,7 @@
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
                         <TextBlock Text="Typ urządzenia:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
                         <ComboBox ItemsSource="{Binding AvailableDeviceTypes}" 
-                                  SelectedItem="{Binding SelectedDeviceTypeFilter}" 
+                                  SelectedItem="{Binding SelectedDeviceTypeFilter}"
                                   Width="150">
                             <ComboBox.ItemContainerStyle>
                                 <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
@@ -81,9 +82,9 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
-                        <TextBlock Text="Status:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <ComboBox ItemsSource="{Binding AvailableStatuses}" 
-                                  SelectedItem="{Binding SelectedStatusFilter}" 
+                        <TextBlock Text="Akcja:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <ComboBox ItemsSource="{Binding AvailableActions}"
+                                  SelectedItem="{Binding SelectedActionFilter}"
                                   Width="120">
                             <ComboBox.ItemContainerStyle>
                                 <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
@@ -91,33 +92,11 @@
                         </ComboBox>
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
-                        <TextBlock Text="Magazyn:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <ComboBox ItemsSource="{Binding AvailableWarehouses}" 
-                                  SelectedItem="{Binding SelectedWarehouseFilter}" 
-                                  Width="150">
-                            <ComboBox.ItemContainerStyle>
-                                <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
-                            </ComboBox.ItemContainerStyle>
-                        </ComboBox>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
-                        <TextBlock Text="Dodane przez:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <ComboBox ItemsSource="{Binding AvailableAddedByUsers}" 
-                                  SelectedItem="{Binding SelectedAddedByUserFilter}" 
-                                  Width="150">
-                            <ComboBox.ItemContainerStyle>
-                                <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
-                            </ComboBox.ItemContainerStyle>
-                        </ComboBox>
-                    </StackPanel>
-
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <Button Content="Filtruj" 
+                        <Button Content="Filtruj"
                                 Command="{Binding FilterCommand}"
                                 Style="{StaticResource {x:Type Button}}" Margin="0,0,10,0"/>
-                        <Button Content="Resetuj" 
+                        <Button Content="Resetuj"
                                 Command="{Binding ResetFiltersCommand}">
                             <Button.Template>
                                 <ControlTemplate TargetType="{x:Type Button}">
@@ -142,25 +121,22 @@
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
-
                         </Button>
                     </StackPanel>
                 </WrapPanel>
 
                 <Separator Background="{StaticResource BorderBrush}" Height="1" Margin="0,0,0,15"/>
 
-                <DataGrid ItemsSource="{Binding LatestWarehouseItems}"
+                <DataGrid ItemsSource="{Binding LatestRepairHistory}"
                           Style="{StaticResource {x:Type DataGrid}}"
                           AutoGenerateColumns="False"
                           CanUserSortColumns="True">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID" Binding="{Binding DeviceId}" Width="Auto" SortMemberPath="Id"/>
-                        <DataGridTextColumn Header="Data Dodania" Binding="{Binding DateAdded, StringFormat='{}{0:dd.MM.yyyy}'}" Width="*" SortMemberPath="DateAdded"/>
-                        <DataGridTextColumn Header="Nr Seryjny" Binding="{Binding SerialNumber}" Width="*" SortMemberPath="SerialNumber"/>
-                        <DataGridTextColumn Header="Typ" Binding="{Binding TypeName}" Width="*" SortMemberPath="DeviceType"/>
-                        <DataGridTextColumn Header="Status" Binding="{Binding StatusName}" Width="*" SortMemberPath="Status"/>
-                        <DataGridTextColumn Header="Magazyn" Binding="{Binding WarehouseName}" Width="*" SortMemberPath="WarehouseName"/>
-                        <DataGridTextColumn Header="Dodane przez" Binding="{Binding AddedByUserName}" Width="*" SortMemberPath="AddedByUserName"/>
+                        <DataGridTextColumn Header="ID" Binding="{Binding RepairId}" Width="Auto" SortMemberPath="Id"/>
+                        <DataGridTextColumn Header="Data" Binding="{Binding StartDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*" SortMemberPath="Date"/>
+                        <DataGridTextColumn Header="Użytkownik" Binding="{Binding UserName}" Width="*" SortMemberPath="UserName"/>
+                        <DataGridTextColumn Header="Typ Urządzenia" Binding="{Binding DeviceName}" Width="*" SortMemberPath="DeviceTypeName"/>
+                        <DataGridTextColumn Header="Akcja" Binding="{Binding Description}" Width="*" SortMemberPath="ActionDescription"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>

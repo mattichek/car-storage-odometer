@@ -32,7 +32,7 @@ namespace car_storage_odometer
             regionManager.RegisterViewWithRegion("DashboardRegion", typeof(DashboardView));
             regionManager.RegisterViewWithRegion("LogsUsersRegion", typeof(LogsUsersView));
             regionManager.RegisterViewWithRegion("LogsDeviceRegion", typeof(LogsDeviceView));
-            regionManager.RegisterViewWithRegion("HostoryOfRepairRegion", typeof(HostoryOfRepairView));
+            regionManager.RegisterViewWithRegion("HistoryOfRepairRegion", typeof(HistoryOfRepairView));
             regionManager.RegisterViewWithRegion("StorageRegion", typeof(StorageView));
             regionManager.RegisterViewWithRegion("DevicesRegion", typeof(DevicesView));
             regionManager.RegisterViewWithRegion("AccountRegion", typeof(AccountView));

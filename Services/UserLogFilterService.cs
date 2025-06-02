@@ -7,7 +7,6 @@ namespace car_storage_odometer.Services
 {
     public class UserLogFilterService
     {
-        // Ta metoda będzie filtrować logi na podstawie podanych kryteriów
         public ObservableCollection<UserLogModel> ApplyFilter(
             ObservableCollection<UserLogModel> allLogs,
             DateTime? filterDateFrom,
@@ -29,12 +28,10 @@ namespace car_storage_odometer.Services
             if (!string.IsNullOrEmpty(selectedActionFilter))
                 filteredLogs = filteredLogs.Where(log => log.Action == selectedActionFilter);
 
-            // Zwracamy posortowaną kolekcję
             return new ObservableCollection<UserLogModel>(filteredLogs.OrderByDescending(log => log.EventDate));
         }
 
-        // Ta metoda będzie resetować filtry i zwracać wszystkie logi
-        public ObservableCollection<UserLogModel> ResetFilters(ObservableCollection<UserLogModel> allLogs) =>
-            new ObservableCollection<UserLogModel>(allLogs.OrderByDescending(log => log.EventDate));
+        public ObservableCollection<UserLogModel> ResetFilters(ObservableCollection<UserLogModel> allLogs) 
+            => new ObservableCollection<UserLogModel>(allLogs.OrderByDescending(log => log.EventDate));
     }
 }

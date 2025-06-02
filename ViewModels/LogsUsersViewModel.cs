@@ -1,10 +1,11 @@
-﻿using Prism.Commands;
+﻿using car_storage_odometer.Models; // Zakładam, że UserLogModel będzie w Models
+using Prism.Commands;
 using Prism.Mvvm;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using car_storage_odometer.Models;
-using car_storage_odometer.Services; // Dodaj przestrzeń nazw dla UserLogFilterService
+using System.Threading.Tasks;
 
 namespace car_storage_odometer.ViewModels
 {
@@ -18,29 +19,29 @@ namespace car_storage_odometer.ViewModels
             set => SetProperty(ref _latestUserLogs, value);
         }
 
+        // Filter properties for LogsUsersView
         private DateTime? _filterDateFrom;
         public DateTime? FilterDateFrom
         {
             get => _filterDateFrom;
-            set => SetProperty(ref _filterDateFrom, value);
+            set { SetProperty(ref _filterDateFrom, value); }
         }
 
         private DateTime? _filterDateTo;
         public DateTime? FilterDateTo
         {
             get => _filterDateTo;
-            set => SetProperty(ref _filterDateTo, value);
+            set { SetProperty(ref _filterDateTo, value); }
         }
 
-        private UserLogModel _selectedUserFilter;
-        public UserLogModel SelectedUserFilter
+        private string _selectedUserFilter;
+        public string SelectedUserFilter
         {
             get => _selectedUserFilter;
-            set => SetProperty(ref _selectedUserFilter, value);
+            set { SetProperty(ref _selectedUserFilter, value); }
         }
-
-        private ObservableCollection<UserLogModel> _availableUsers;
-        public ObservableCollection<UserLogModel> AvailableUsers
+        private ObservableCollection<string> _availableUsers;
+        public ObservableCollection<string> AvailableUsers
         {
             get => _availableUsers;
             set => SetProperty(ref _availableUsers, value);
@@ -50,9 +51,8 @@ namespace car_storage_odometer.ViewModels
         public string SelectedActionFilter
         {
             get => _selectedActionFilter;
-            set => SetProperty(ref _selectedActionFilter, value);
+            set { SetProperty(ref _selectedActionFilter, value); }
         }
-
         private ObservableCollection<string> _availableActions;
         public ObservableCollection<string> AvailableActions
         {
@@ -60,72 +60,74 @@ namespace car_storage_odometer.ViewModels
             set => SetProperty(ref _availableActions, value);
         }
 
-        public DelegateCommand FilterLogsCommand { get; private set; }
+        // Commands
+        public DelegateCommand FilterCommand { get; private set; }
         public DelegateCommand ResetFiltersCommand { get; private set; }
 
-        // Instancja klasy pomocniczej
-        private readonly UserLogFilterService _filterService;
-
-        public LogsUsersViewModel(UserLogFilterService filterService)
+        public LogsUsersViewModel()
         {
-            // Inicjalizacja serwisu filtrującego
-            _filterService = filterService;
+            LoadDummyData(); // Load initial data
+            InitializeFilterOptions(); // Populate filter dropdowns
 
-            LoadDummyData();
-            InitializeFilterOptions();
+            // Initially, display all user logs, sorted by date
+            LatestUserLogs = new ObservableCollection<UserLogModel>(_allUserLogs.OrderByDescending(log => log.EventDate));
 
-            // Użyj serwisu do początkowego załadowania logów
-            LatestUserLogs = _filterService.ResetFilters(_allUserLogs);
-
-            FilterLogsCommand = new DelegateCommand(ApplyFilter);
-            ResetFiltersCommand = new DelegateCommand(ResetFilters);
+            FilterCommand = new DelegateCommand(ApplyFilters);
+            ResetFiltersCommand = new DelegateCommand(ResetAllFilters);
         }
 
         private void LoadDummyData()
         {
+            // Sample data for user logs
             _allUserLogs = new ObservableCollection<UserLogModel>
             {
-                new UserLogModel { UserLogId = 1, UserId = 1, UserName = "Jan Kowalski", Action = "Zalogował się", EventDate = new DateTime(2025, 05, 31, 08, 55, 0) },
-                new UserLogModel { UserLogId = 2, UserId = 2, UserName = "Anna Nowak", Action = "Dodała licznik 'Licznik-001'", EventDate = new DateTime(2025, 05, 31, 07, 55, 0) },
-                new UserLogModel { UserLogId = 3, UserId = 3, UserName = "Piotr Zieliński", Action = "Wylogował się", EventDate = new DateTime(2025, 05, 31, 06, 55, 0) },
-                new UserLogModel { UserLogId = 4, UserId = 1, UserName = "Jan Kowalski", Action = "Usunął moduł 'Moduł-ABC'", EventDate = new DateTime(2025, 05, 31, 05, 55, 0) },
-                new UserLogModel { UserLogId = 5, UserId = 2, UserName = "Anna Nowak", Action = "Zalogowała się", EventDate = new DateTime(2025, 05, 31, 04, 55, 0) },
-                new UserLogModel { UserLogId = 6, UserId = 4, UserName = "Alicja Nowak", Action = "Zalogowała się", EventDate = new DateTime(2025, 05, 30, 09, 00, 0) },
-                new UserLogModel { UserLogId = 7, UserId = 1, UserName = "Jan Kowalski", Action = "Zmienił licznik 'Licznik-002'", EventDate = new DateTime(2025, 05, 30, 10, 15, 0) },
-                new UserLogModel { UserLogId = 8, UserId = 3, UserName = "Piotr Zieliński", Action = "Dodał moduł 'Moduł-XYZ'", EventDate = new DateTime(2025, 05, 29, 11, 30, 0) }
+                new UserLogModel { UserLogId = 1, EventDate = new DateTime(2024, 5, 20, 9, 0, 0), UserName = "Admin", Action = "Logowanie" },
+                new UserLogModel { UserLogId = 2, EventDate = new DateTime(2024, 5, 20, 9, 5, 0), UserName = "Jan Kowalski", Action = "Dodanie urządzenia" },
+                new UserLogModel { UserLogId = 3, EventDate = new DateTime(2024, 5, 21, 10, 30, 0), UserName = "Admin", Action = "Zmiana uprawnień" },
+                new UserLogModel { UserLogId = 4, EventDate = new DateTime(2024, 5, 21, 11, 0, 0), UserName = "Anna Nowak", Action = "Wydanie urządzenia" },
+                new UserLogModel { UserLogId = 5, EventDate = new DateTime(2024, 5, 22, 14, 15, 0), UserName = "Jan Kowalski", Action = "Wylogowanie" },
+                new UserLogModel { UserLogId = 6, EventDate = new DateTime(2024, 5, 22, 14, 20, 0), UserName = "Admin", Action = "Logowanie" }
             };
         }
 
         private void InitializeFilterOptions()
         {
-            AvailableUsers = new ObservableCollection<UserLogModel>(_allUserLogs
-                                                                     .GroupBy(log => log.UserName)
-                                                                     .Select(g => new UserLogModel { UserName = g.Key })
-                                                                     .OrderBy(u => u.UserName));
-            AvailableActions = new ObservableCollection<string>(_allUserLogs.Select(log => log.Action).Distinct().OrderBy(a => a));
+            AvailableUsers = new ObservableCollection<string>(
+                new[] { "Wszyscy" }.Concat(_allUserLogs.Select(log => log.UserName).Where(u => u != null).Distinct().OrderBy(u => u)));
+            SelectedUserFilter = "Wszyscy";
+
+            AvailableActions = new ObservableCollection<string>(
+                new[] { "Wszystkie" }.Concat(_allUserLogs.Select(log => log.Action).Where(a => a != null).Distinct().OrderBy(a => a)));
+            SelectedActionFilter = "Wszystkie";
         }
 
-        // Teraz metoda ApplyFilter tylko wywołuje serwis
-        private void ApplyFilter()
+        private void ApplyFilters()
         {
-            LatestUserLogs = _filterService.ApplyFilter(
-                _allUserLogs,
-                FilterDateFrom,
-                FilterDateTo,
-                SelectedUserFilter,
-                SelectedActionFilter
-            );
+            IEnumerable<UserLogModel> filteredData = _allUserLogs;
+
+            if (FilterDateFrom.HasValue)
+                filteredData = filteredData.Where(log => log.EventDate.Date >= FilterDateFrom.Value.Date);
+
+            if (FilterDateTo.HasValue)
+                filteredData = filteredData.Where(log => log.EventDate.Date <= FilterDateTo.Value.Date);
+
+            if (SelectedUserFilter != null && SelectedUserFilter != "Wszyscy")
+                filteredData = filteredData.Where(log => log.UserName == SelectedUserFilter);
+
+            if (SelectedActionFilter != null && SelectedActionFilter != "Wszystkie")
+                filteredData = filteredData.Where(log => log.Action == SelectedActionFilter);
+
+            LatestUserLogs = new ObservableCollection<UserLogModel>(filteredData.OrderByDescending(log => log.EventDate));
         }
 
-        // Teraz metoda ResetFilters tylko wywołuje serwis i resetuje właściwości ViewModelu
-        private void ResetFilters()
+        private void ResetAllFilters()
         {
             FilterDateFrom = null;
             FilterDateTo = null;
-            SelectedUserFilter = null;
-            SelectedActionFilter = null;
+            SelectedUserFilter = "Wszyscy";
+            SelectedActionFilter = "Wszystkie";
 
-            LatestUserLogs = _filterService.ResetFilters(_allUserLogs);
+            LatestUserLogs = new ObservableCollection<UserLogModel>(_allUserLogs.OrderByDescending(log => log.EventDate));
         }
     }
 }

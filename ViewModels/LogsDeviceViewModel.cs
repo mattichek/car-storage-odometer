@@ -1,8 +1,8 @@
-﻿using car_storage_odometer.Models;
-using car_storage_odometer.Services;
+﻿using car_storage_odometer.Models; // Zakładam, że LogsDeviceModel będzie w Models
 using Prism.Commands;
 using Prism.Mvvm;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,27 +19,26 @@ namespace car_storage_odometer.ViewModels
             set => SetProperty(ref _latestDeviceLogs, value);
         }
 
-        // Filtry daty
+        // Filter properties for LogsDeviceView
         private DateTime? _filterDateFrom;
         public DateTime? FilterDateFrom
         {
             get => _filterDateFrom;
-            set => SetProperty(ref _filterDateFrom, value);
+            set { SetProperty(ref _filterDateFrom, value); }
         }
 
         private DateTime? _filterDateTo;
         public DateTime? FilterDateTo
         {
             get => _filterDateTo;
-            set => SetProperty(ref _filterDateTo, value);
+            set { SetProperty(ref _filterDateTo, value); }
         }
 
-        // Filtry tekstowe (ComboBox)
         private string _selectedSerialNumberFilter;
         public string SelectedSerialNumberFilter
         {
             get => _selectedSerialNumberFilter;
-            set => SetProperty(ref _selectedSerialNumberFilter, value);
+            set { SetProperty(ref _selectedSerialNumberFilter, value); }
         }
         private ObservableCollection<string> _availableSerialNumbers;
         public ObservableCollection<string> AvailableSerialNumbers
@@ -48,31 +47,50 @@ namespace car_storage_odometer.ViewModels
             set => SetProperty(ref _availableSerialNumbers, value);
         }
 
+        private string _selectedEventFilter;
+        public string SelectedEventFilter
+        {
+            get => _selectedEventFilter;
+            set { SetProperty(ref _selectedEventFilter, value); }
+        }
+        private ObservableCollection<string> _availableEvents;
+        public ObservableCollection<string> AvailableEvents
+        {
+            get => _availableEvents;
+            set => SetProperty(ref _availableEvents, value);
+        }
+
         private string _selectedFromWarehouseFilter;
         public string SelectedFromWarehouseFilter
         {
             get => _selectedFromWarehouseFilter;
-            set => SetProperty(ref _selectedFromWarehouseFilter, value);
+            set { SetProperty(ref _selectedFromWarehouseFilter, value); }
         }
-        private ObservableCollection<string> _availableWarehouses;
-        public ObservableCollection<string> AvailableWarehouses
+        private ObservableCollection<string> _availableFromWarehouses;
+        public ObservableCollection<string> AvailableFromWarehouses
         {
-            get => _availableWarehouses;
-            set => SetProperty(ref _availableWarehouses, value);
+            get => _availableFromWarehouses;
+            set => SetProperty(ref _availableFromWarehouses, value);
         }
 
         private string _selectedToWarehouseFilter;
         public string SelectedToWarehouseFilter
         {
             get => _selectedToWarehouseFilter;
-            set => SetProperty(ref _selectedToWarehouseFilter, value);
+            set { SetProperty(ref _selectedToWarehouseFilter, value); }
+        }
+        private ObservableCollection<string> _availableToWarehouses;
+        public ObservableCollection<string> AvailableToWarehouses
+        {
+            get => _availableToWarehouses;
+            set => SetProperty(ref _availableToWarehouses, value);
         }
 
-        private string _selectedFromUserFilter;
-        public string SelectedFromUserFilter
+        private string _selectedUserFilter;
+        public string SelectedUserFilter
         {
-            get => _selectedFromUserFilter;
-            set => SetProperty(ref _selectedFromUserFilter, value);
+            get => _selectedUserFilter;
+            set { SetProperty(ref _selectedUserFilter, value); }
         }
         private ObservableCollection<string> _availableUsers;
         public ObservableCollection<string> AvailableUsers
@@ -81,91 +99,97 @@ namespace car_storage_odometer.ViewModels
             set => SetProperty(ref _availableUsers, value);
         }
 
-        private string _selectedToUserFilter;
-        public string SelectedToUserFilter
-        {
-            get => _selectedToUserFilter;
-            set => SetProperty(ref _selectedToUserFilter, value);
-        }
-
-        // Komendy
-        public DelegateCommand FilterLogsCommand { get; private set; }
+        // Commands
+        public DelegateCommand FilterCommand { get; private set; }
         public DelegateCommand ResetFiltersCommand { get; private set; }
-
-        private readonly DeviceLogFilterService _filterService;
 
         public LogsDeviceViewModel()
         {
-            _filterService = new DeviceLogFilterService();
+            LoadDummyData(); // Load initial data
+            InitializeFilterOptions(); // Populate filter dropdowns
 
-            LoadDummyData();
-            InitializeFilterOptions();
+            // Initially, display all device logs, sorted by date
+            LatestDeviceLogs = new ObservableCollection<DeviceLogModel>(_allDeviceLogs.OrderByDescending(log => log.EventDate));
 
-            LatestDeviceLogs = _filterService.ResetFilters(_allDeviceLogs);
-
-            FilterLogsCommand = new DelegateCommand(ApplyFilter);
-            ResetFiltersCommand = new DelegateCommand(ResetFilters);
+            FilterCommand = new DelegateCommand(ApplyFilters);
+            ResetFiltersCommand = new DelegateCommand(ResetAllFilters);
         }
 
         private void LoadDummyData()
         {
+            // Sample data for device logs
             _allDeviceLogs = new ObservableCollection<DeviceLogModel>
             {
-                new DeviceLogModel { LogId = 1, SerialNumber = "SN-001", Event = "Przyjęcie na magazyn", FromWarehouseName = "Dostawca", ToWarehouseName = "Magazyn A", FromUserName = "Jan Kowalski", EventDate = new DateTime(2025, 05, 31, 10, 0, 0) },
-                new DeviceLogModel { LogId = 2, SerialNumber = "SN-002", Event = "Wydanie z magazynu", FromWarehouseName = "Magazyn A", ToWarehouseName = "Klient X", FromUserName = "Anna Nowak", EventDate = new DateTime(2025, 05, 31, 11, 30, 0) },
-                new DeviceLogModel { LogId = 3, SerialNumber = "SN-001", Event = "Przeniesienie między magazynami", FromWarehouseName = "Magazyn A", ToWarehouseName = "Magazyn B", FromUserName = "Piotr Zieliński", EventDate = new DateTime(2025, 05, 30, 09, 0, 0) },
-                new DeviceLogModel { LogId = 4, SerialNumber = "SN-003", Event = "Przyjęcie na magazyn", FromWarehouseName = "Dostawca", ToWarehouseName = "Magazyn B", FromUserName = "Jan Kowalski", EventDate = new DateTime(2025, 05, 29, 14, 0, 0) },
-                new DeviceLogModel { LogId = 5, SerialNumber = "SN-002", Event = "Zwrot", FromWarehouseName = "Klient X", ToWarehouseName = "Magazyn A", FromUserName = "Anna Nowak", EventDate = new DateTime(2025, 05, 28, 16, 0, 0) }
+                new DeviceLogModel { LogId = 1, EventDate = new DateTime(2024, 5, 20, 10, 0, 0), SerialNumber = "SN001", Event = "Przyjęcie", FromWarehouseName = "Dostawca", ToWarehouseName = "Magazyn Główny", FromUserName = "Admin" },
+                new DeviceLogModel { LogId = 2, EventDate = new DateTime(2024, 5, 21, 11, 30, 0), SerialNumber = "SN002", Event = "Wydanie", FromWarehouseName = "Magazyn Główny", ToWarehouseName = "Serwis", FromUserName = "Jan Kowalski" },
+                new DeviceLogModel { LogId = 3, EventDate = new DateTime(2024, 5, 22, 14, 0, 0), SerialNumber = "SN001", Event = "Przesunięcie", FromWarehouseName = "Magazyn Główny", ToWarehouseName = "Magazyn Awaryjny", FromUserName = "Admin" },
+                new DeviceLogModel { LogId = 4, EventDate = new DateTime(2024, 5, 23, 9, 15, 0), SerialNumber = "SN003", Event = "Przyjęcie", FromWarehouseName = "Dostawca", ToWarehouseName = "Magazyn Główny", FromUserName = "Anna Nowak" },
+                new DeviceLogModel { LogId = 5, EventDate = new DateTime(2024, 5, 24, 16, 45, 0), SerialNumber = "SN002", Event = "Zwrot", FromWarehouseName = "Serwis", ToWarehouseName = "Magazyn Główny", FromUserName = "Piotr Zieliński" }
             };
         }
 
         private void InitializeFilterOptions()
         {
-            // Dodaj "Wszystkie" / "Wszyscy" jako pierwszą opcję
             AvailableSerialNumbers = new ObservableCollection<string>(
-                new[] { "Wszystkie" }.Concat(_allDeviceLogs.Select(log => log.SerialNumber).Distinct().OrderBy(s => s)));
+                new[] { "Wszystkie" }.Concat(_allDeviceLogs.Select(log => log.SerialNumber).Where(s => s != null).Distinct().OrderBy(s => s)));
+            SelectedSerialNumberFilter = "Wszystkie";
 
-            AvailableWarehouses = new ObservableCollection<string>(
-                new[] { "Wszystkie" }.Concat(_allDeviceLogs.Select(log => log.FromWarehouseName).Distinct().OrderBy(w => w))
-                                     .Concat(_allDeviceLogs.Select(log => log.ToWarehouseName).Distinct().OrderBy(w => w))
-                                     .Distinct()); // Upewnij się, że są unikalne
+            AvailableEvents = new ObservableCollection<string>(
+                new[] { "Wszystkie" }.Concat(_allDeviceLogs.Select(log => log.Event).Where(e => e != null).Distinct().OrderBy(e => e)));
+            SelectedEventFilter = "Wszystkie";
+
+            AvailableFromWarehouses = new ObservableCollection<string>(
+                new[] { "Wszystkie" }.Concat(_allDeviceLogs.Select(log => log.FromWarehouseName).Where(w => w != null).Distinct().OrderBy(w => w)));
+            SelectedFromWarehouseFilter = "Wszystkie";
+
+            AvailableToWarehouses = new ObservableCollection<string>(
+                new[] { "Wszystkie" }.Concat(_allDeviceLogs.Select(log => log.ToWarehouseName).Where(w => w != null).Distinct().OrderBy(w => w)));
+            SelectedToWarehouseFilter = "Wszystkie";
 
             AvailableUsers = new ObservableCollection<string>(
-                new[] { "Wszyscy" }.Concat(_allDeviceLogs.Select(log => log.FromUserName).Distinct().OrderBy(u => u)));
-
-            // Domyślne wartości dla filtrów
-            SelectedSerialNumberFilter = "Wszystkie";
-            SelectedFromWarehouseFilter = "Wszystkie";
-            SelectedToWarehouseFilter = "Wszystkie";
-            SelectedFromUserFilter = "Wszyscy";
-            SelectedToUserFilter = "Wszyscy";
+                new[] { "Wszyscy" }.Concat(_allDeviceLogs.Select(log => log.FromUserName).Where(u => u != null).Distinct().OrderBy(u => u)));
+            SelectedUserFilter = "Wszyscy";
         }
 
-        private void ApplyFilter()
+        private void ApplyFilters()
         {
-            LatestDeviceLogs = _filterService.ApplyFilter(
-                _allDeviceLogs,
-                FilterDateFrom,
-                FilterDateTo,
-                SelectedSerialNumberFilter,
-                SelectedFromWarehouseFilter,
-                SelectedToWarehouseFilter,
-                SelectedFromUserFilter,
-                SelectedToUserFilter
-            );
+            IEnumerable<DeviceLogModel> filteredData = _allDeviceLogs;
+
+            if (FilterDateFrom.HasValue)
+                filteredData = filteredData.Where(log => log.EventDate.Date >= FilterDateFrom.Value.Date);
+
+            if (FilterDateTo.HasValue)
+                filteredData = filteredData.Where(log => log.EventDate.Date <= FilterDateTo.Value.Date);
+
+            if (SelectedSerialNumberFilter != null && SelectedSerialNumberFilter != "Wszystkie")
+                filteredData = filteredData.Where(log => log.SerialNumber == SelectedSerialNumberFilter);
+
+            if (SelectedEventFilter != null && SelectedEventFilter != "Wszystkie")
+                filteredData = filteredData.Where(log => log.Event == SelectedEventFilter);
+
+            if (SelectedFromWarehouseFilter != null && SelectedFromWarehouseFilter != "Wszystkie")
+                filteredData = filteredData.Where(log => log.FromWarehouseName == SelectedFromWarehouseFilter);
+
+            if (SelectedToWarehouseFilter != null && SelectedToWarehouseFilter != "Wszystkie")
+                filteredData = filteredData.Where(log => log.ToWarehouseName == SelectedToWarehouseFilter);
+
+            if (SelectedUserFilter != null && SelectedUserFilter != "Wszyscy")
+                filteredData = filteredData.Where(log => log.FromUserName == SelectedUserFilter);
+
+            LatestDeviceLogs = new ObservableCollection<DeviceLogModel>(filteredData.OrderByDescending(log => log.EventDate));
         }
 
-        private void ResetFilters()
+        private void ResetAllFilters()
         {
             FilterDateFrom = null;
             FilterDateTo = null;
             SelectedSerialNumberFilter = "Wszystkie";
+            SelectedEventFilter = "Wszystkie";
             SelectedFromWarehouseFilter = "Wszystkie";
             SelectedToWarehouseFilter = "Wszystkie";
-            SelectedFromUserFilter = "Wszyscy";
-            SelectedToUserFilter = "Wszyscy";
+            SelectedUserFilter = "Wszyscy";
 
-            LatestDeviceLogs = _filterService.ResetFilters(_allDeviceLogs);
+            LatestDeviceLogs = new ObservableCollection<DeviceLogModel>(_allDeviceLogs.OrderByDescending(log => log.EventDate));
         }
     }
 }

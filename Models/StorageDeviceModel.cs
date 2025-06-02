@@ -70,13 +70,19 @@ namespace car_storage_odometer.Models
         }
 
         private string _addedByUserName;
+
         public string AddedByUserName // Nazwa użytkownika (z tabeli uzytkownicy, kto przypisany/dodał)
         {
             get => _addedByUserName;
             set => SetProperty(ref _addedByUserName, value);
         }
 
-        // Metoda do klonowania obiektu - ważna dla trybu edycji
+        private DateTime _dateAdded;
+        public DateTime DateAdded
+        {
+            get => _dateAdded;
+            set => SetProperty(ref _dateAdded, value);
+        }
 
     }
 }

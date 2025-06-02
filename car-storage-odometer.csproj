@@ -80,6 +80,7 @@
     <Compile Include="Converters\SortDirectionToArrowConverter .cs" />
     <Compile Include="Helpers\PasswordBoxHelper.cs" />
     <Compile Include="Models\DeviceLogModel.cs" />
+    <Compile Include="Models\DeviceModel.cs" />
     <Compile Include="Models\DeviceStatusModel.cs" />
     <Compile Include="Models\DeviceTypeModel.cs" />
     <Compile Include="Models\RepairHistoryModel.cs" />
@@ -95,7 +96,7 @@
     <Compile Include="ViewModels\AccountViewModel.cs" />
     <Compile Include="ViewModels\DashboardViewModel.cs" />
     <Compile Include="ViewModels\DevicesViewModel.cs" />
-    <Compile Include="ViewModels\HostoryOfRepairViewModel.cs" />
+    <Compile Include="ViewModels\HistoryOfRepairViewModel.cs" />
     <Compile Include="ViewModels\LoginPageViewModel.cs" />
     <Compile Include="ViewModels\LogsDeviceViewModel.cs" />
     <Compile Include="ViewModels\LogsUsersViewModel.cs" />
@@ -111,8 +112,8 @@
     <Compile Include="Views\DevicesView.xaml.cs">
       <DependentUpon>DevicesView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\HostoryOfRepairView.xaml.cs">
-      <DependentUpon>HostoryOfRepairView.xaml</DependentUpon>
+    <Compile Include="Views\HistoryOfRepairView.xaml.cs">
+      <DependentUpon>HistoryOfRepairView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\LoginPageView.xaml.cs">
       <DependentUpon>LoginPageView.xaml</DependentUpon>
@@ -181,7 +182,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\HostoryOfRepairView.xaml">
+    <Page Include="Views\HistoryOfRepairView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

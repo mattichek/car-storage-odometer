@@ -18,9 +18,9 @@ namespace car_storage_odometer.Views
     /// <summary>
     /// Interaction logic for HostoryOfRepairView.xaml
     /// </summary>
-    public partial class HostoryOfRepairView : UserControl
+    public partial class HistoryOfRepairView : UserControl
     {
-        public HostoryOfRepairView()
+        public HistoryOfRepairView()
         {
             InitializeComponent();
         }

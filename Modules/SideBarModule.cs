@@ -23,7 +23,7 @@ namespace car_storage_odometer.Modules
         {
             containerRegistry.RegisterForNavigation<DashboardView>();
             containerRegistry.RegisterForNavigation<DevicesView>();
-            containerRegistry.RegisterForNavigation<HostoryOfRepairView>();
+            containerRegistry.RegisterForNavigation<HistoryOfRepairView>();
             containerRegistry.RegisterForNavigation<LogsDeviceView>();
             containerRegistry.RegisterForNavigation<LogsUsersView>();
             containerRegistry.RegisterForNavigation<StorageView>();

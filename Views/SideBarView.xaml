@@ -60,7 +60,7 @@
 
             <Button Content="History of Repair" Style="{StaticResource SideBarItemStyle}"
                     Command="{Binding NavigateCommand}"
-                    CommandParameter="HostoryOfRepairView"/>
+                    CommandParameter="HistoryOfRepairView"/>
 
             <Button Content="Storage" Style="{StaticResource SideBarItemStyle}"
                     Command="{Binding NavigateCommand}"
