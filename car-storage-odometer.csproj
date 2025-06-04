@@ -96,6 +96,7 @@
     <Compile Include="Converters\PercentageToWidthConverter.cs" />
     <Compile Include="Converters\SortDirectionToArrowConverter .cs" />
     <Compile Include="Helpers\PasswordBoxHelper.cs" />
+    <Compile Include="Helpers\SqliteDataAccess.cs" />
     <Compile Include="Models\DeviceLogModel.cs" />
     <Compile Include="Models\DeviceModel.cs" />
     <Compile Include="Models\DeviceStatusModel.cs" />
@@ -165,6 +166,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Content Include="OdometerWarehouse.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

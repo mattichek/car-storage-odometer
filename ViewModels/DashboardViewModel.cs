@@ -3,7 +3,8 @@ using System.Collections.ObjectModel;
 using car_storage_odometer.Models; // Upewnij się, że ta przestrzeń nazw jest poprawna dla Twoich modeli
 using System;
 using System.Linq; // Do użycia Linq do sortowania i pobierania ostatnich elementów
-using Prism.Commands; // Jeśli będziesz potrzebował komend
+using Prism.Commands;
+using car_storage_odometer.Helpers; 
 
 namespace car_storage_odometer.ViewModels
 {
@@ -62,8 +63,8 @@ namespace car_storage_odometer.ViewModels
 
             // W prawdziwej aplikacji: pobierz dane z serwisu/repozytorium
             // Na razie symulacja danych
+            var x = SqliteDataAccess.LoadX();
             LoadDashboardData();
-
             // RefreshDataCommand = new DelegateCommand(LoadDashboardData);
         }
 
@@ -73,9 +74,7 @@ namespace car_storage_odometer.ViewModels
             // Symulacja danych stanów magazynowych
             // W prawdziwej aplikacji: zapytanie do bazy danych z agregacją
             WarehouseStatuses.Clear();
-            WarehouseStatuses.Add(new WarehouseStatusModel { WarehouseName = "Magazyn Główny", Quantity = 150 });
-            WarehouseStatuses.Add(new WarehouseStatusModel { WarehouseName = "Magazyn Awaryjny", Quantity = 30 });
-            WarehouseStatuses.Add(new WarehouseStatusModel { WarehouseName = "Magazyn Serwisowy", Quantity = 20 });
+            WarehouseStatuses = SqliteDataAccess.LoadX();
 
             // Symulacja danych statusów urządzeń
             // W prawdziwej aplikacji: zapytanie do bazy danych z agregacją

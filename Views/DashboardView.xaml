@@ -54,8 +54,8 @@
                                   Style="{StaticResource {x:Type DataGrid}}"
                                   AutoGenerateColumns="False">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Magazyn" Binding="{Binding WarehouseName}" Width="1*"/>
-                                <DataGridTextColumn Header="Ilość Urządzeń" Binding="{Binding Quantity}" Width="1*"/>
+                                <DataGridTextColumn Header="Magazyn" Binding="{Binding Name}" Width="1*"/>
+                                <DataGridTextColumn Header="Ilość Urządzeń" Binding="{Binding Capacity}" Width="1*"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>

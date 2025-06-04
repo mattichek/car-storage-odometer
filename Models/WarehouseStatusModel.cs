@@ -8,7 +8,9 @@ namespace car_storage_odometer.Models
 {
     public class WarehouseStatusModel
     {
-        public string WarehouseName { get; set; }
-        public int Quantity { get; set; }
+        public int WarehouseId { get; set; }
+        public string Name { get; set; }
+        public int Capacity { get; set; }
+
     }
 }
