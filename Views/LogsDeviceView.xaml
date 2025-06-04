@@ -155,8 +155,9 @@
                           CanUserSortColumns="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Id" Binding="{Binding LogId}" Width="Auto" SortMemberPath="LogId"/>
-                        <DataGridTextColumn Header="Data" Binding="{Binding EventDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*" SortMemberPath="EventDate"/>
                         <DataGridTextColumn Header="Numer ser." Binding="{Binding SerialNumber}" Width="*" SortMemberPath="SerialNumber"/>
+                        <DataGridTextColumn Header="Rodzaj urządzenia" Binding="{Binding DeviceName}" Width="*" SortMemberPath="DeviceName"/>
+                        <DataGridTextColumn Header="Data" Binding="{Binding EventDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*" SortMemberPath="EventDate"/>
                         <DataGridTextColumn Header="Akcja" Binding="{Binding Event}" Width="*" SortMemberPath="Event"/>
                         <DataGridTextColumn Header="Z magazynu" Binding="{Binding FromWarehouseName}" Width="*" SortMemberPath="FromWarehouseName"/>
                         <DataGridTextColumn Header="Do magazynu" Binding="{Binding ToWarehouseName}" Width="*" SortMemberPath="ToWarehouseName"/>

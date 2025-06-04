@@ -71,7 +71,7 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
-                        <TextBlock Text="Typ urządzenia:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <TextBlock Text="Urządzenie:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
                         <ComboBox ItemsSource="{Binding AvailableDeviceTypes}" 
                                   SelectedItem="{Binding SelectedDeviceTypeFilter}"
                                   Width="150">
@@ -82,7 +82,7 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
-                        <TextBlock Text="Akcja:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <TextBlock Text="Opis naprawy:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
                         <ComboBox ItemsSource="{Binding AvailableActions}"
                                   SelectedItem="{Binding SelectedActionFilter}"
                                   Width="120">
@@ -133,10 +133,11 @@
                           CanUserSortColumns="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="ID" Binding="{Binding RepairId}" Width="Auto" SortMemberPath="Id"/>
-                        <DataGridTextColumn Header="Data" Binding="{Binding StartDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*" SortMemberPath="Date"/>
+                        <DataGridTextColumn Header="Urządzenie" Binding="{Binding DeviceName}" Width="*" SortMemberPath="DeviceTypeName"/>
+                        <DataGridTextColumn Header="Opis" Binding="{Binding Description}" Width="*" SortMemberPath="ActionDescription"/>
+                        <DataGridTextColumn Header="Data Start" Binding="{Binding StartDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*" SortMemberPath="Date"/>
+                        <DataGridTextColumn Header="Data Koniec" Binding="{Binding EndDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*" SortMemberPath="Date"/>
                         <DataGridTextColumn Header="Użytkownik" Binding="{Binding UserName}" Width="*" SortMemberPath="UserName"/>
-                        <DataGridTextColumn Header="Typ Urządzenia" Binding="{Binding DeviceName}" Width="*" SortMemberPath="DeviceTypeName"/>
-                        <DataGridTextColumn Header="Akcja" Binding="{Binding Description}" Width="*" SortMemberPath="ActionDescription"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>

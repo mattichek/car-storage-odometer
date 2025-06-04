@@ -3,7 +3,7 @@ using System;
 
 namespace car_storage_odometer.Models
 {
-    public class StorageDeviceModel : BindableBase
+    public class StorageDeviceModel : BindableBase // do wyjebania
     {
         private int _deviceId;
         public int DeviceId // odpowiada urzadzenie_id

@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:car_storage_odometer.Views"
         mc:Ignorable="d"
-        Title="MainPageView" Height="1000" Width="1600"
+        Title="MainPageView" WindowState="Maximized"
         xmlns:prism="http://prismlibrary.com/">
     <Grid Background="#23272E">
         <Border Background="#2C2F36" 
             HorizontalAlignment="Center" VerticalAlignment="Center"
-             Width="1450" Height="850">
+             Width="1650" Height="950">
             <Border.Effect>
                 <DropShadowEffect BlurRadius="50" ShadowDepth="0"/>
             </Border.Effect>

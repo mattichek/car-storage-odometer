@@ -22,11 +22,11 @@ namespace car_storage_odometer.Modules
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterForNavigation<DashboardView>();
-            containerRegistry.RegisterForNavigation<DevicesView>();
-            containerRegistry.RegisterForNavigation<HistoryOfRepairView>();
-            containerRegistry.RegisterForNavigation<LogsDeviceView>();
             containerRegistry.RegisterForNavigation<LogsUsersView>();
-            containerRegistry.RegisterForNavigation<StorageView>();
+            containerRegistry.RegisterForNavigation<LogsDeviceView>();
+            containerRegistry.RegisterForNavigation<HistoryOfRepairView>();
+            containerRegistry.RegisterForNavigation<DevicesView>();
+            //containerRegistry.RegisterForNavigation<StorageView>();
 
             containerRegistry.RegisterForNavigation<AccountView>();
         }

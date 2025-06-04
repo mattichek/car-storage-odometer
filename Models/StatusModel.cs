@@ -2,7 +2,7 @@
 
 namespace car_storage_odometer.Models
 {
-    public class StatusModel : BindableBase
+    public class StatusModel : BindableBase // do wyjebania
     {
         private int _statusId;
         public int StatusId // odpowiada status_id

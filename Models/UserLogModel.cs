@@ -19,6 +19,13 @@ namespace car_storage_odometer.Models
             set => SetProperty(ref _userId, value);
         }
 
+        private string _userName;
+        public string UserName
+        {
+            get => _userName;
+            set => SetProperty(ref _userName, value);
+        }
+
         private string _action;
         public string Action // odpowiada akcja
         {
@@ -33,12 +40,11 @@ namespace car_storage_odometer.Models
             set => SetProperty(ref _eventDate, value);
         }
 
-        // Opcjonalnie: właściwość pomocnicza, jeśli potrzebujesz nazwy użytkownika w logu
-        private string _userName;
-        public string UserName
+        private string _serialNumber;
+        public string SerialNumber // Numer seryjny urządzenia
         {
-            get => _userName;
-            set => SetProperty(ref _userName, value);
+            get => _serialNumber;
+            set => SetProperty(ref _serialNumber, value);
         }
     }
 }

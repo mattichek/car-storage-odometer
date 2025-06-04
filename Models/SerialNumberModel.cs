@@ -3,7 +3,7 @@ using System;
 
 namespace car_storage_odometer.Models
 {
-    public class SerialNumberModel : BindableBase
+    public class SerialNumberModel : BindableBase // do wyjebania
     {
         private int _serialNumberId;
         public int SerialNumberId // odpowiada numer_id

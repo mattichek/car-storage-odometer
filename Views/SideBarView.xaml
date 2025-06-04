@@ -62,9 +62,9 @@
                     Command="{Binding NavigateCommand}"
                     CommandParameter="HistoryOfRepairView"/>
 
-            <Button Content="Storage" Style="{StaticResource SideBarItemStyle}"
+            <!--<Button Content="Storage" Style="{StaticResource SideBarItemStyle}"
                     Command="{Binding NavigateCommand}"
-                    CommandParameter="StorageView"/>
+                    CommandParameter="StorageView"/>-->
 
             <Button Content="Devices" Style="{StaticResource SideBarItemStyle}"
                     Command="{Binding NavigateCommand}"

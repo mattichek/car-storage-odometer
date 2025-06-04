@@ -93,9 +93,14 @@
                                   Style="{StaticResource {x:Type DataGrid}}"
                                   AutoGenerateColumns="False">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Data" Binding="{Binding EventDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*"/>
-                                <DataGridTextColumn Header="Użytkownik" Binding="{Binding UserName}" Width="*"/>
-                                <DataGridTextColumn Header="Akcja" Binding="{Binding Action}" Width="2*"/>
+                                <DataGridTextColumn Header="Id" Binding="{Binding LogId}" Width="Auto" SortMemberPath="LogId"/>
+                                <DataGridTextColumn Header="Numer ser." Binding="{Binding SerialNumber}" Width="*" SortMemberPath="SerialNumber"/>
+                                <DataGridTextColumn Header="Rodzaj urządzenia" Binding="{Binding DeviceName}" Width="*" SortMemberPath="DeviceName"/>
+                                <DataGridTextColumn Header="Data" Binding="{Binding EventDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*" SortMemberPath="EventDate"/>
+                                <DataGridTextColumn Header="Akcja" Binding="{Binding Event}" Width="*" SortMemberPath="Event"/>
+                                <DataGridTextColumn Header="Z magazynu" Binding="{Binding FromWarehouseName}" Width="*" SortMemberPath="FromWarehouseName"/>
+                                <DataGridTextColumn Header="Do magazynu" Binding="{Binding ToWarehouseName}" Width="*" SortMemberPath="ToWarehouseName"/>
+                                <DataGridTextColumn Header="Użytkownik" Binding="{Binding FromUserName}" Width="*" SortMemberPath="FromUserName"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
@@ -113,9 +118,10 @@
                                   Style="{StaticResource {x:Type DataGrid}}"
                                   AutoGenerateColumns="false">
                             <DataGrid.Columns>
+                                <DataGridTextColumn Header="Id" Binding="{Binding UserLogId}" Width="Auto"/>
+                                <DataGridTextColumn Header="Użytkownik" Binding="{Binding UserName}" Width="*"/>
+                                <DataGridTextColumn Header="Akcja" Binding="{Binding Action}" Width="2*"/>
                                 <DataGridTextColumn Header="Data" Binding="{Binding EventDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*"/>
-                                <DataGridTextColumn Header="Urządzenie" Binding="{Binding DeviceName}" Width="*"/>
-                                <DataGridTextColumn Header="Zdarzenie" Binding="{Binding Event}" Width="*"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>
@@ -132,10 +138,12 @@
                                   Style="{StaticResource {x:Type DataGrid}}"
                                   AutoGenerateColumns="false">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Data" Binding="{Binding StartDate, StringFormat='{}{0:dd.MM.yyyy}'}" Width="*"/>
-                                <DataGridTextColumn Header="Element" Binding="{Binding DeviceName}" Width="*"/>
+                                <DataGridTextColumn Header="ID" Binding="{Binding RepairId}" Width="Auto"/>
+                                <DataGridTextColumn Header="Urządzenie" Binding="{Binding DeviceName}" Width="*"/>
                                 <DataGridTextColumn Header="Opis" Binding="{Binding Description}" Width="*"/>
-                                <DataGridTextColumn Header="Wykonawca" Binding="{Binding UserName}" Width="*"/>
+                                <DataGridTextColumn Header="Data Start" Binding="{Binding StartDate, StringFormat='{}{0:dd.MM.yyyy}'}" Width="*"/>
+                                <DataGridTextColumn Header="Data Koniec" Binding="{Binding EndDate, StringFormat='{}{0:dd.MM.yyyy}'}" Width="*"/>
+                                <DataGridTextColumn Header="Użytkownik" Binding="{Binding UserName}" Width="*"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>

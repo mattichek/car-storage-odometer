@@ -23,6 +23,20 @@ namespace car_storage_odometer.Models
             set => SetProperty(ref _deviceId, value);
         }
 
+        private string _serialNumber;
+        public string SerialNumber // Numer seryjny urządzenia
+        {
+            get => _serialNumber;
+            set => SetProperty(ref _serialNumber, value);
+        }
+
+        private string _deviceName;
+        public string DeviceName // Nazwa urządznia
+        {
+            get => _deviceName;
+            set => SetProperty(ref _deviceName, value);
+        }
+
         private DateTime _eventDate;
         public DateTime EventDate // odpowiada data_zdarzenia
         {
@@ -37,40 +51,18 @@ namespace car_storage_odometer.Models
             set => SetProperty(ref _fromWarehouseId, value);
         }
 
-        private int _toWarehouseId;
-        public int ToWarehouseId // odpowiada to_magazyn_id (Foreign Key)
-        {
-            get => _toWarehouseId;
-            set => SetProperty(ref _toWarehouseId, value);
-        }
-
-        private int _fromUserId;
-        public int FromUserId // odpowiada from_user_id (Foreign Key)
-        {
-            get => _fromUserId;
-            set => SetProperty(ref _fromUserId, value);
-        }
-
-        private int _toUserId;
-        public int ToUserId // odpowiada to_user_id (Foreign Key)
-        {
-            get => _toUserId;
-            set => SetProperty(ref _toUserId, value);
-        }
-
-        // --- Właściwości pomocnicze do wyświetlania w DataGrid ---
-        private string _serialNumber;
-        public string SerialNumber // Numer seryjny urządzenia
-        {
-            get => _serialNumber;
-            set => SetProperty(ref _serialNumber, value);
-        }
-
         private string _fromWarehouseName;
         public string FromWarehouseName // Nazwa magazynu źródłowego
         {
             get => _fromWarehouseName;
             set => SetProperty(ref _fromWarehouseName, value);
+        }
+
+        private int _toWarehouseId;
+        public int ToWarehouseId // odpowiada to_magazyn_id (Foreign Key)
+        {
+            get => _toWarehouseId;
+            set => SetProperty(ref _toWarehouseId, value);
         }
 
         private string _toWarehouseName;
@@ -80,6 +72,13 @@ namespace car_storage_odometer.Models
             set => SetProperty(ref _toWarehouseName, value);
         }
 
+        private int _fromUserId;
+        public int FromUserId // odpowiada from_user_id (Foreign Key)
+        {
+            get => _fromUserId;
+            set => SetProperty(ref _fromUserId, value);
+        }
+
         private string _fromUserName;
         public string FromUserName // Nazwa użytkownika źródłowego
         {
@@ -87,19 +86,18 @@ namespace car_storage_odometer.Models
             set => SetProperty(ref _fromUserName, value);
         }
 
-        private string _toUserName;
+        private int _toUserId;
+        public int ToUserId // odpowiada to_user_id (Foreign Key)
+        {
+            get => _toUserId;
+            set => SetProperty(ref _toUserId, value);
+        }
 
+        private string _toUserName;
         public string ToUserName // Nazwa użytkownika docelowego
         {
             get => _toUserName;
             set => SetProperty(ref _toUserName, value);
-        }
-
-        private string _deviceName;
-        public string DeviceName // Nazwa urządznia
-        {
-            get => _deviceName;
-            set => SetProperty(ref _deviceName, value);
         }
 
         private string _event;
@@ -108,7 +106,5 @@ namespace car_storage_odometer.Models
             get => _event;
             set => SetProperty(ref _event, value);
         }
-
-
     }
 }

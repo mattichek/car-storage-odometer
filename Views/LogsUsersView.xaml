@@ -122,9 +122,9 @@
                           CanUserSortColumns="True">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Id" Binding="{Binding UserLogId}" Width="Auto" SortMemberPath="UserLogId"/>
-                        <DataGridTextColumn Header="Data" Binding="{Binding EventDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*" SortMemberPath="EventDate"/>
                         <DataGridTextColumn Header="Użytkownik" Binding="{Binding UserName}" Width="*" SortMemberPath="UserName"/>
                         <DataGridTextColumn Header="Akcja" Binding="{Binding Action}" Width="2*" SortMemberPath="Action"/>
+                        <DataGridTextColumn Header="Data" Binding="{Binding EventDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*" SortMemberPath="EventDate"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>
