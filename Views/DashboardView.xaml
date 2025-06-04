@@ -118,10 +118,14 @@
                                   Style="{StaticResource {x:Type DataGrid}}"
                                   AutoGenerateColumns="false">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Id" Binding="{Binding UserLogId}" Width="Auto"/>
-                                <DataGridTextColumn Header="Użytkownik" Binding="{Binding UserName}" Width="*"/>
-                                <DataGridTextColumn Header="Akcja" Binding="{Binding Action}" Width="2*"/>
+                                <DataGridTextColumn Header="Id" Binding="{Binding LogId}" Width="Auto"/>
+                                <DataGridTextColumn Header="Numer ser." Binding="{Binding SerialNumber}" Width="*"/>
+                                <DataGridTextColumn Header="Rodzaj urządzenia" Binding="{Binding DeviceName}" Width="*"/>
                                 <DataGridTextColumn Header="Data" Binding="{Binding EventDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*"/>
+                                <DataGridTextColumn Header="Akcja" Binding="{Binding Event}" Width="*" SortMemberPath="Event"/>
+                                <DataGridTextColumn Header="Z magazynu" Binding="{Binding FromWarehouseName}" Width="*"/>
+                                <DataGridTextColumn Header="Do magazynu" Binding="{Binding ToWarehouseName}" Width="*"/>
+                                <DataGridTextColumn Header="Użytkownik" Binding="{Binding UserName}" Width="*"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </StackPanel>

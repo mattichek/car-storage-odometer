@@ -101,13 +101,7 @@ namespace car_storage_odometer.ViewModels
             // Symulacja ostatnich logów urządzeń (5 ostatnich)
             // Pamiętaj, DeviceLogModel powinien zawierać nazwy urządzeń itp.
             LatestDeviceLogs.Clear();
-            LatestDeviceLogs.Add(new DeviceLogModel { LogId = 5, DeviceId = 101, DeviceName = "Skaner QR-01", Event = "Błąd odczytu", EventDate = new DateTime(2025, 5, 31, 9, 25, 0) });
-            LatestDeviceLogs.Add(new DeviceLogModel { LogId = 4, DeviceId = 102, DeviceName = "Drukarka etykiet", Event = "Wydruk etykiet", EventDate = new DateTime(2025, 5, 31, 8, 25, 0) });
-            LatestDeviceLogs.Add(new DeviceLogModel { LogId = 3, DeviceId = 103, DeviceName = "Czytnik RFID", Event = "Odczyt zakończony", EventDate = new DateTime(2025, 5, 31, 7, 25, 0) });
-            LatestDeviceLogs.Add(new DeviceLogModel { LogId = 2, DeviceId = 101, DeviceName = "Skaner QR-01", Event = "Aktualizacja firmware", EventDate = new DateTime(2025, 5, 31, 6, 25, 0) });
-            LatestDeviceLogs.Add(new DeviceLogModel { LogId = 1, DeviceId = 102, DeviceName = "Drukarka etykiet", Event = "Brak papieru", EventDate = new DateTime(2025, 5, 31, 5, 25, 0) });
-            LatestDeviceLogs = new ObservableCollection<DeviceLogModel>(LatestDeviceLogs.OrderByDescending(l => l.EventDate).Take(5));
-
+            LatestDeviceLogs = SqliteDataAccess.LoadDevicesLogsLastFiveLogs();
 
             // Symulacja ostatnich napraw (5 ostatnich)
             // Pamiętaj, RepairHistoryModel powinien zawierać nazwy elementów itp.
