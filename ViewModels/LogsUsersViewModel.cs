@@ -81,12 +81,12 @@ namespace car_storage_odometer.ViewModels
             // Sample data for user logs
             _allUserLogs = new ObservableCollection<UserLogModel>
             {
-                new UserLogModel { UserLogId = 1, EventDate = new DateTime(2024, 5, 20, 9, 0, 0), UserName = "Admin", Action = "Logowanie" },
-                new UserLogModel { UserLogId = 2, EventDate = new DateTime(2024, 5, 20, 9, 5, 0), UserName = "Jan Kowalski", Action = "Dodanie urządzenia" },
-                new UserLogModel { UserLogId = 3, EventDate = new DateTime(2024, 5, 21, 10, 30, 0), UserName = "Admin", Action = "Zmiana uprawnień" },
-                new UserLogModel { UserLogId = 4, EventDate = new DateTime(2024, 5, 21, 11, 0, 0), UserName = "Anna Nowak", Action = "Wydanie urządzenia" },
-                new UserLogModel { UserLogId = 5, EventDate = new DateTime(2024, 5, 22, 14, 15, 0), UserName = "Jan Kowalski", Action = "Wylogowanie" },
-                new UserLogModel { UserLogId = 6, EventDate = new DateTime(2024, 5, 22, 14, 20, 0), UserName = "Admin", Action = "Logowanie" }
+                new UserLogModel { LogId = 1, EventDate = new DateTime(2024, 5, 20, 9, 0, 0), UserName = "Admin", Event = "Logowanie" },
+                new UserLogModel { LogId = 2, EventDate = new DateTime(2024, 5, 20, 9, 5, 0), UserName = "Jan Kowalski", Event = "Dodanie urządzenia" },
+                new UserLogModel { LogId = 3, EventDate = new DateTime(2024, 5, 21, 10, 30, 0), UserName = "Admin", Event = "Zmiana uprawnień" },
+                new UserLogModel { LogId = 4, EventDate = new DateTime(2024, 5, 21, 11, 0, 0), UserName = "Anna Nowak", Event = "Wydanie urządzenia" },
+                new UserLogModel { LogId = 5, EventDate = new DateTime(2024, 5, 22, 14, 15, 0), UserName = "Jan Kowalski", Event = "Wylogowanie" },
+                new UserLogModel { LogId = 6, EventDate = new DateTime(2024, 5, 22, 14, 20, 0), UserName = "Admin", Event = "Logowanie" }
             };
         }
 
@@ -97,7 +97,7 @@ namespace car_storage_odometer.ViewModels
             SelectedUserFilter = "Wszyscy";
 
             AvailableActions = new ObservableCollection<string>(
-                new[] { "Wszystkie" }.Concat(_allUserLogs.Select(log => log.Action).Where(a => a != null).Distinct().OrderBy(a => a)));
+                new[] { "Wszystkie" }.Concat(_allUserLogs.Select(log => log.Event).Where(a => a != null).Distinct().OrderBy(a => a)));
             SelectedActionFilter = "Wszystkie";
         }
 
@@ -115,7 +115,7 @@ namespace car_storage_odometer.ViewModels
                 filteredData = filteredData.Where(log => log.UserName == SelectedUserFilter);
 
             if (SelectedActionFilter != null && SelectedActionFilter != "Wszystkie")
-                filteredData = filteredData.Where(log => log.Action == SelectedActionFilter);
+                filteredData = filteredData.Where(log => log.Event == SelectedActionFilter);
 
             LatestUserLogs = new ObservableCollection<UserLogModel>(filteredData.OrderByDescending(log => log.EventDate));
         }

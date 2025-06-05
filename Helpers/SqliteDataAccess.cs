@@ -42,9 +42,32 @@ namespace car_storage_odometer.Helpers
             using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
             {
                 var output = cnn.Query<DeviceStatusModel>(
-                    @"SELECT s.Name, COUNT(d.DeviceId) AS Quantity FROM Devices d JOIN Statuses s ON d.StatusId = s.StatusId GROUP BY s.Name;",
+                    @"SELECT 
+                        s.Name,
+                    COUNT(d.DeviceId) AS Quantity
+                    FROM Devices d
+                    JOIN Statuses s ON d.StatusId = s.StatusId GROUP BY s.Name;",
                     new DynamicParameters());
                 return new ObservableCollection<DeviceStatusModel>(output);
+            }
+        }
+
+        public static ObservableCollection<UserLogModel> LoadUserLogs()
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                var output = cnn.Query<UserLogModel>(
+                        @"SELECT 
+                          l.LogId,
+                          u.FirstName || ' ' || u.LastName AS UserName,
+                          d.DeviceId, 
+                          l.Event, 
+                          l.EventDate
+                      FROM UserLogs l
+                      LEFT JOIN Users u ON l.UserId = u.UserId
+                      LEFT JOIN Devices d ON l.DeviceId = d.DeviceId;",
+                    new DynamicParameters());
+                return new ObservableCollection<UserLogModel>(output);
             }
         }
 

@@ -5,11 +5,11 @@ namespace car_storage_odometer.Models
 {
     public class UserLogModel : BindableBase
     {
-        private int _userLogId;
-        public int UserLogId // odpowiada log_id z logi_uzytkownikow
+        private int _logId;
+        public int LogId // odpowiada log_id z logi_uzytkownikow
         {
-            get => _userLogId;
-            set => SetProperty(ref _userLogId, value);
+            get => _logId;
+            set => SetProperty(ref _logId, value);
         }
 
         private int _userId;
@@ -26,11 +26,11 @@ namespace car_storage_odometer.Models
             set => SetProperty(ref _userName, value);
         }
 
-        private string _action;
-        public string Action // odpowiada akcja
+        private string _event;
+        public string Event // odpowiada akcja
         {
-            get => _action;
-            set => SetProperty(ref _action, value);
+            get => _event;
+            set => SetProperty(ref _event, value);
         }
 
         private DateTime _eventDate;
