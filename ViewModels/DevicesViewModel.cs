@@ -13,53 +13,44 @@ namespace car_storage_odometer.ViewModels
 {
     public class DevicesViewModel : INotifyPropertyChanged
     {
-        // --- Właściwości dla DataGrid i formularza edycji ---
+        private ObservableCollection<DeviceModel> _allDevices;
+
         private ObservableCollection<DeviceModel> _devices;
         public ObservableCollection<DeviceModel> Devices
         {
-            get { return _devices; }
-            set { _devices = value; OnPropertyChanged(); }
+            get => _devices;
+            set 
+            { 
+                _devices = value; 
+                OnPropertyChanged(); 
+            }
         }
 
-        // Właściwość do przechowywania aktualnie wybranego urządzenia z DataGrid
-        // KLUCZOWA ZMIANA: Aktualizuje CurrentEditDevice i stan komend
         private DeviceModel _selectedDevice;
         public DeviceModel SelectedDevice
         {
             get => _selectedDevice;
             set
             {
-                if (SetProperty(ref _selectedDevice, value)) // Używamy SetProperty dla lepszego zarządzania zmianami
+                if (SetProperty(ref _selectedDevice, value)) 
                 {
-                    // KLUCZOWA LOGIKA: Kopiowanie wybranego urządzenia do CurrentEditDevice
-                    // Aby panel edycji odzwierciedlał wybór z DataGrid.
-                    // Używamy DeepCopy, aby zmiany w formularzu nie wpływały od razu na DataGrid,
-                    // dopóki użytkownik nie kliknie "Aktualizuj".
                     CurrentEditDevice = value != null ? value.DeepCopy() : null;
-
-                    // Powiadom komendy o zmianie stanu, aby zaktualizować CanExecute
-                    // Wszystkie komendy, których stan zależy od SelectedDevice/CurrentEditDevice
                     RaiseAllCanExecuteChanged();
                 }
             }
         }
 
-        // Właściwość do bindowania na formularzu dodawania/edycji (w XAML to było CurrentEditDevice)
-        private DeviceModel _currentEditDevice; // Zmieniono nazwę na CurrentEditDevice dla czytelności z XAML
+        private DeviceModel _currentEditDevice; 
         public DeviceModel CurrentEditDevice
         {
-            get { return _currentEditDevice; }
+            get => _currentEditDevice;
             set
             {
                 if (SetProperty(ref _currentEditDevice, value))
-                {
-                    // Po zmianie CurrentEditDevice, stan komend może się zmienić.
                     RaiseAllCanExecuteChanged();
-                }
             }
         }
 
-        // --- Właściwości dla filtrów ---
         private string _filterSerialNumber;
         public string FilterSerialNumber
         {
@@ -68,7 +59,7 @@ namespace car_storage_odometer.ViewModels
             {
                 if (SetProperty(ref _filterSerialNumber, value))
                 {
-                    ApplyFilters(); // Zastosuj filtry po zmianie numeru seryjnego
+                    ApplyFilters();
                 }
             }
         }
@@ -81,7 +72,7 @@ namespace car_storage_odometer.ViewModels
             {
                 if (SetProperty(ref _filterDeviceType, value))
                 {
-                    ApplyFilters(); // Zastosuj filtry
+                    ApplyFilters();
                 }
             }
         }
@@ -94,7 +85,7 @@ namespace car_storage_odometer.ViewModels
             {
                 if (SetProperty(ref _filterWarehouse, value))
                 {
-                    ApplyFilters(); // Zastosuj filtry
+                    ApplyFilters();
                 }
             }
         }
@@ -107,42 +98,36 @@ namespace car_storage_odometer.ViewModels
             {
                 if (SetProperty(ref _filterStatus, value))
                 {
-                    ApplyFilters(); // Zastosuj filtry
+                    ApplyFilters();
                 }
             }
         }
 
 
-        // --- Kolekcje do wypełniania ComboBoxów (dla filtrów i edycji) ---
         private ObservableCollection<string> _availableDeviceTypes;
         public ObservableCollection<string> AvailableDeviceTypes
         {
-            get { return _availableDeviceTypes; }
+            get => _availableDeviceTypes;
             set { _availableDeviceTypes = value; OnPropertyChanged(); }
         }
 
         private ObservableCollection<string> _availableWarehouses;
         public ObservableCollection<string> AvailableWarehouses
         {
-            get { return _availableWarehouses; }
+            get => _availableWarehouses;
             set { _availableWarehouses = value; OnPropertyChanged(); }
         }
 
         private ObservableCollection<string> _availableStatuses;
         public ObservableCollection<string> AvailableStatuses
         {
-            get { return _availableStatuses; }
+            get => _availableStatuses;
             set { _availableStatuses = value; OnPropertyChanged(); }
         }
-
-        // Dodatkowe kolekcje dla ComboBoxów w panelu edycji (AllPossible...)
-        // Zakładam, że są to te same dane co Available..., ale XAML używa innych nazw.
-        // Jeśli dane są różne, musisz je ładować osobno.
         public ObservableCollection<string> AllPossibleDeviceTypes => AvailableDeviceTypes;
         public ObservableCollection<string> AllPossibleWarehouses => AvailableWarehouses;
         public ObservableCollection<string> AllPossibleStatuses => AvailableStatuses;
 
-        // Właściwość dla 'Przenieś do magazynu'
         private string _selectedTargetWarehouse;
         public string SelectedTargetWarehouse
         {
@@ -156,12 +141,9 @@ namespace car_storage_odometer.ViewModels
             }
         }
 
-
-
-        // --- Komendy UI ---
         public ICommand NewDeviceCommand { get; private set; }
-        public ICommand AddDeviceCommand { get; private set; } // Dodawanie nowego urządzenia do bazy (po kliknięciu "Dodaj")
-        public ICommand UpdateDeviceCommand { get; private set; } // Aktualizacja istniejącego urządzenia (po kliknięciu "Aktualizuj")
+        public ICommand AddDeviceCommand { get; private set; } 
+        public ICommand UpdateDeviceCommand { get; private set; } 
         public ICommand DeleteDeviceCommand { get; private set; }
         public ICommand ResetFiltersCommand { get; private set; }
         public ICommand MoveDeviceCommand { get; private set; }
@@ -169,19 +151,16 @@ namespace car_storage_odometer.ViewModels
         public ICommand FinishRepairCommand { get; private set; }
 
 
-        // Przykładowy ID użytkownika - dostosuj to do swojego systemu logowania
         private const int CurrentUserId = 1;
 
-        // Pełna lista urządzeń załadowana z bazy (do filtrowania)
-        private ObservableCollection<DeviceModel> _allDevices;
 
         public DevicesViewModel()
         {
-            _devices = new ObservableCollection<DeviceModel>(); // Inicjalizacja domyślna
-            _allDevices = new ObservableCollection<DeviceModel>(); // Inicjalizacja do przechowywania wszystkich danych
+            _devices = new ObservableCollection<DeviceModel>();
+            _allDevices = new ObservableCollection<DeviceModel>();
 
             InitializeCommands();
-            _ = LoadInitialDataAsync(); // Zmieniono nazwę na LoadInitialDataAsync, aby rozróżnić od ApplyFilters
+            _ = LoadInitialDataAsync();
         }
 
         private void InitializeCommands()
@@ -196,7 +175,6 @@ namespace car_storage_odometer.ViewModels
             FinishRepairCommand = new RelayCommand(async (obj) => await ExecuteFinishRepairAsync(), CanExecuteOnSelectedDevice);
         }
 
-        // Metoda pomocnicza do wywołania RaiseCanExecuteChanged dla wszystkich komend
         private void RaiseAllCanExecuteChanged()
         {
             ((RelayCommand)NewDeviceCommand)?.RaiseCanExecuteChanged();
@@ -209,19 +187,17 @@ namespace car_storage_odometer.ViewModels
             ((RelayCommand)FinishRepairCommand)?.RaiseCanExecuteChanged();
         }
 
-        // Asynchroniczna metoda do ładowania wszystkich danych początkowych
         private async Task LoadInitialDataAsync()
         {
             try
             {
-                _allDevices = await SqliteDataAccess.LoadDevicesAsync(); // Ładujemy wszystkie do _allDevices
-                Devices = new ObservableCollection<DeviceModel>(_allDevices); // Kopiujemy na start do wyświetlanej listy
+                _allDevices = await SqliteDataAccess.LoadDevicesAsync();
+                Devices = new ObservableCollection<DeviceModel>(_allDevices);
 
                 AvailableDeviceTypes = await SqliteDataAccess.LoadDeviceTypesAsync();
                 AvailableWarehouses = await SqliteDataAccess.LoadWarehousesAsync();
                 AvailableStatuses = await SqliteDataAccess.LoadStatusesAsync();
 
-                // Dodaj opcję "Wszystkie" do filtrów, jeśli to pożądane
                 if (AvailableDeviceTypes != null && !AvailableDeviceTypes.Contains("Wszystkie"))
                     AvailableDeviceTypes.Insert(0, "Wszystkie");
 
@@ -231,7 +207,6 @@ namespace car_storage_odometer.ViewModels
                 if (AvailableStatuses != null && !AvailableStatuses.Contains("Wszystkie"))
                     AvailableStatuses.Insert(0, "Wszystkie");
 
-                // Domyślnie ustaw filtry na "Wszystkie"
                 FilterDeviceType = "Wszystkie";
                 FilterWarehouse = "Wszystkie";
                 FilterStatus = "Wszystkie";
@@ -243,7 +218,6 @@ namespace car_storage_odometer.ViewModels
             }
         }
 
-        // --- Logika filtrowania ---
         private void ApplyFilters()
         {
             if (_allDevices == null) return;
@@ -263,7 +237,7 @@ namespace car_storage_odometer.ViewModels
                 filteredDevices = filteredDevices.Where(d => d.StatusName == FilterStatus);
 
             Devices = new ObservableCollection<DeviceModel>(filteredDevices);
-            SelectedDevice = null; // Wyczyść zaznaczenie po przefiltrowaniu
+            SelectedDevice = null;
         }
 
         private void ExecuteResetFilters(object parameter)
@@ -272,27 +246,23 @@ namespace car_storage_odometer.ViewModels
             FilterDeviceType = "Wszystkie";
             FilterWarehouse = "Wszystkie";
             FilterStatus = "Wszystkie";
-            // ApplyFilters() zostanie wywołane automatycznie przez settery
         }
 
-        // --- Logika dla 'Nowe urządzenie' ---
         private void ExecuteNewDevice(object parameter)
         {
-            // Przygotuj CurrentEditDevice do wprowadzenia nowego urządzenia
             CurrentEditDevice = new DeviceModel
             {
                 EventDate = DateTime.Now,
-                TypeName = AvailableDeviceTypes?.FirstOrDefault(t => t != "Wszystkie") ?? string.Empty, // Ustaw pierwszą nie-pustą/nie-wszystkie
+                TypeName = AvailableDeviceTypes?.FirstOrDefault(t => t != "Wszystkie") ?? string.Empty,
                 StatusName = AvailableStatuses?.FirstOrDefault(s => s != "Wszystkie") ?? string.Empty,
                 WarehouseName = AvailableWarehouses?.FirstOrDefault(w => w != "Wszystkie") ?? string.Empty,
                 SerialNumber = string.Empty,
                 Note = string.Empty
             };
-            SelectedDevice = null; // Upewnij się, że nic nie jest zaznaczone w DataGrid
-            RaiseAllCanExecuteChanged(); // Odśwież stan przycisków
+            SelectedDevice = null;
+            RaiseAllCanExecuteChanged();
         }
 
-        // --- Logika dla 'Dodaj urządzenie' (teraz dedykowana tylko do dodawania) ---
         private async Task ExecuteAddDeviceAsync()
         {
             if (CurrentEditDevice == null || string.IsNullOrWhiteSpace(CurrentEditDevice.SerialNumber))
@@ -300,7 +270,7 @@ namespace car_storage_odometer.ViewModels
                 MessageBox.Show("Numer seryjny jest wymagany.", "Walidacja", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            if (CurrentEditDevice.DeviceId != 0) // To nie jest nowe urządzenie, błąd logiki
+            if (CurrentEditDevice.DeviceId != 0)
             {
                 MessageBox.Show("To urządzenie już istnieje. Użyj przycisku 'Aktualizuj urządzenie'.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -312,9 +282,9 @@ namespace car_storage_odometer.ViewModels
                 await SqliteDataAccess.AddUserLogAsync(CurrentUserId, "Dodano urządznie");
                 await SqliteDataAccess.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Dodano nowe urządzenie", CurrentEditDevice.WarehouseId);
                 MessageBox.Show("Urządzenie zostało dodane pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
-                await LoadInitialDataAsync(); // Odśwież pełną listę i zastosuj filtry
-                CurrentEditDevice = null; // Wyczyść formularz
-                SelectedDevice = null; // Wyczyść zaznaczenie
+                await LoadInitialDataAsync();
+                CurrentEditDevice = null;
+                SelectedDevice = null;
             }
             catch (InvalidOperationException ex)
             {
@@ -326,17 +296,12 @@ namespace car_storage_odometer.ViewModels
             }
         }
 
-        // Czy można dodać urządzenie (gdy CurrentEditDevice jest ustawione na nowe)
-        private bool CanExecuteAddDevice(object parameter)
-        {
-            // Można dodać, jeśli jest obiekt do edycji, ma numer seryjny i jest to nowe urządzenie (DeviceId == 0)
-            return CurrentEditDevice != null && !string.IsNullOrWhiteSpace(CurrentEditDevice.SerialNumber) && CurrentEditDevice.DeviceId == 0;
-        }
+        private bool CanExecuteAddDevice(object parameter) 
+            => CurrentEditDevice != null && !string.IsNullOrWhiteSpace(CurrentEditDevice.SerialNumber) && CurrentEditDevice.DeviceId == 0;
 
-        // --- Logika dla 'Aktualizuj urządzenie' (teraz dedykowana tylko do aktualizacji) ---
         private async Task ExecuteUpdateDeviceAsync()
         {
-            if (CurrentEditDevice == null || CurrentEditDevice.DeviceId == 0) // Nie wybrano urządzenia do aktualizacji lub to nowe
+            if (CurrentEditDevice == null || CurrentEditDevice.DeviceId == 0)
             {
                 MessageBox.Show("Wybierz urządzenie do aktualizacji z listy lub użyj 'Dodaj urządzenie' dla nowego.", "Walidacja", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -353,9 +318,9 @@ namespace car_storage_odometer.ViewModels
                 await SqliteDataAccess.AddUserLogAsync(CurrentUserId, "Zaktualizowano status urządzenia");
                 await SqliteDataAccess.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Zaktualizowano status urządzenia", CurrentEditDevice.WarehouseId);
                 MessageBox.Show("Urządzenie zostało zaktualizowane pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
-                await LoadInitialDataAsync(); // Odśwież pełną listę i zastosuj filtry
-                CurrentEditDevice = null; // Wyczyść formularz
-                SelectedDevice = null; // Wyczyść zaznaczenie
+                await LoadInitialDataAsync();
+                CurrentEditDevice = null;
+                SelectedDevice = null;
             }
             catch (InvalidOperationException ex)
             {
@@ -367,17 +332,13 @@ namespace car_storage_odometer.ViewModels
             }
         }
 
-        // Czy można zaktualizować urządzenie (gdy CurrentEditDevice to istniejące urządzenie)
         private bool CanExecuteUpdateDevice(object parameter)
-        {
-            // Można aktualizować, jeśli jest obiekt do edycji, ma numer seryjny i jest to istniejące urządzenie (DeviceId > 0)
-            return CurrentEditDevice != null && !string.IsNullOrWhiteSpace(CurrentEditDevice.SerialNumber) && CurrentEditDevice.DeviceId > 0;
-        }
+            => CurrentEditDevice != null && !string.IsNullOrWhiteSpace(CurrentEditDevice.SerialNumber) && CurrentEditDevice.DeviceId > 0;
 
-        // --- Logika dla 'Usuń urządzenie' ---
         private async Task ExecuteDeleteDeviceAsync()
         {
-            if (SelectedDevice == null) return; // Powinno być zablokowane przez CanExecute
+            if (SelectedDevice == null) 
+                return;
 
             MessageBoxResult result = MessageBox.Show(
                 $"Czy na pewno chcesz usunąć urządzenie o numerze seryjnym: {SelectedDevice.SerialNumber}?",
@@ -393,9 +354,9 @@ namespace car_storage_odometer.ViewModels
                     await SqliteDataAccess.AddUserLogAsync(CurrentUserId, "Usunięto urządzenie");
                     await SqliteDataAccess.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Usunięto urządzenie", null);
                     MessageBox.Show("Urządzenie zostało usunięte pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
-                    await LoadInitialDataAsync(); // Odśwież listę urządzeń
-                    SelectedDevice = null; // Wyczyść zaznaczenie
-                    CurrentEditDevice = null; // Wyczyść formularz edycji
+                    await LoadInitialDataAsync();
+                    SelectedDevice = null;
+                    CurrentEditDevice = null;
                 }
                 catch (Exception ex)
                 {
@@ -404,13 +365,9 @@ namespace car_storage_odometer.ViewModels
             }
         }
 
-        // Czy można edytować lub usunąć (czy wybrano urządzenie z listy)
         private bool CanExecuteOnSelectedDevice(object parameter)
-        {
-            return SelectedDevice != null && SelectedDevice.DeviceId > 0;
-        }
+            => SelectedDevice != null && SelectedDevice.DeviceId > 0;
 
-        // --- Logika dla 'Przenieś do magazynu' ---
         private async Task ExecuteMoveDeviceAsync()
         {
             if (SelectedDevice == null || SelectedTargetWarehouse == null || SelectedTargetWarehouse == "Wszystkie")
@@ -421,14 +378,12 @@ namespace car_storage_odometer.ViewModels
 
             try
             {
-                // Załóżmy, że metoda w SqliteDataAccess potrafi przenieść urządzenie
-                // Będziesz potrzebował dostosować tę metodę w swoim SqliteDataAccess
                 await SqliteDataAccess.MoveDeviceToWarehouseAsync(SelectedDevice.DeviceId, SelectedTargetWarehouse);
                 await SqliteDataAccess.AddUserLogAsync(CurrentUserId, "Przeniesiono urządznie między magazynami");
                 await SqliteDataAccess.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Przeniesiono urządznie między magazynami", CurrentEditDevice.WarehouseId);
                 MessageBox.Show($"Urządzenie {SelectedDevice.SerialNumber} przeniesiono do magazynu {SelectedTargetWarehouse}.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
-                await LoadInitialDataAsync(); // Odśwież listę
-                SelectedTargetWarehouse = null; // Wyczyść wybór magazynu
+                await LoadInitialDataAsync();
+                SelectedTargetWarehouse = null;
             }
             catch (Exception ex)
             {
@@ -437,28 +392,24 @@ namespace car_storage_odometer.ViewModels
         }
 
         private bool CanExecuteMoveDevice(object parameter)
-        {
-           return SelectedDevice != null && SelectedDevice.DeviceId > 0 &&
+            => SelectedDevice != null && SelectedDevice.DeviceId > 0 &&
                    !string.IsNullOrWhiteSpace(SelectedTargetWarehouse) &&
                    SelectedTargetWarehouse != "Wszystkie" &&
                    SelectedTargetWarehouse != SelectedDevice.WarehouseName;
-        }
 
 
-        // --- Logika dla 'Zgłoś naprawę' ---
         private async Task ExecuteReportRepairAsync()
         {
             if (SelectedDevice == null) return;
 
             try
             {
-                // Zakładam, że metoda w SqliteDataAccess aktualizuje status urządzenia na "W naprawie"
                 await SqliteDataAccess.ReportDeviceForRepairAsync(SelectedDevice.DeviceId);
                 await SqliteDataAccess.AddUserLogAsync(CurrentUserId, "Zgłoszono naprawę");
                 await SqliteDataAccess.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Zgłoszono naprawę", CurrentEditDevice.WarehouseId);
                 await SqliteDataAccess.AddRepairHistoryAsync(SelectedDevice.DeviceId, "Naprawa rozpoczęta", CurrentUserId);
                 MessageBox.Show($"Urządzenie {SelectedDevice.SerialNumber} zgłoszono do naprawy.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
-                await LoadInitialDataAsync(); // Odśwież listę
+                await LoadInitialDataAsync(); 
             }
             catch (Exception ex)
             {
@@ -466,20 +417,18 @@ namespace car_storage_odometer.ViewModels
             }
         }
 
-        // --- Logika dla 'Zakończ naprawę' ---
         private async Task ExecuteFinishRepairAsync()
         {
             if (SelectedDevice == null) return;
 
             try
             {
-                // Zakładam, że metoda w SqliteDataAccess aktualizuje status urządzenia na "Dostępny" lub podobny
                 await SqliteDataAccess.ResetDeviceAfterRepairAsync(SelectedDevice.DeviceId);
                 await SqliteDataAccess.AddUserLogAsync(CurrentUserId, "Zakończono naprawę");
                 await SqliteDataAccess.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Zakończono naprawę", CurrentEditDevice.WarehouseId);
                 await SqliteDataAccess.AddRepairHistoryAsync(SelectedDevice.DeviceId, "Naprawa zakończona", CurrentUserId, DateTime.Now);
                 MessageBox.Show($"Naprawa urządzenia {SelectedDevice.SerialNumber} została zakończona.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
-                await LoadInitialDataAsync(); // Odśwież listę
+                await LoadInitialDataAsync();
             }
             catch (Exception ex)
             {
@@ -487,7 +436,6 @@ namespace car_storage_odometer.ViewModels
             }
         }
 
-        // --- Implementacja INotifyPropertyChanged ---
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -495,7 +443,6 @@ namespace car_storage_odometer.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        // Pomocnicza metoda do uproszczenia setterów właściwości
         protected bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string propertyName = null)
         {
             if (Equals(field, newValue)) return false;
