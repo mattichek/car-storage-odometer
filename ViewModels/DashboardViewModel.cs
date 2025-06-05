@@ -63,9 +63,7 @@ namespace car_storage_odometer.ViewModels
 
             // W prawdziwej aplikacji: pobierz dane z serwisu/repozytorium
             // Na razie symulacja danych
-            var x = SqliteDataAccess.LoadX();
             LoadDashboardData();
-            // RefreshDataCommand = new DelegateCommand(LoadDashboardData);
         }
 
         // --- Metody Prywatne ---
@@ -74,15 +72,16 @@ namespace car_storage_odometer.ViewModels
             // Symulacja danych stanów magazynowych
             // W prawdziwej aplikacji: zapytanie do bazy danych z agregacją
             WarehouseStatuses.Clear();
-            WarehouseStatuses = SqliteDataAccess.LoadX();
+            WarehouseStatuses = SqliteDataAccess.LoadWarehouses();
 
-            // Symulacja danych statusów urządzeń
+          
             // W prawdziwej aplikacji: zapytanie do bazy danych z agregacją
             DeviceStatuses.Clear();
-            DeviceStatuses.Add(new DeviceStatusModel { StatusName = "Dostępne", Quantity = 120 });
-            DeviceStatuses.Add(new DeviceStatusModel { StatusName = "W Użyciu", Quantity = 50 });
-            DeviceStatuses.Add(new DeviceStatusModel { StatusName = "W Naprawie", Quantity = 15 });
-            DeviceStatuses.Add(new DeviceStatusModel { StatusName = "Wyjęte", Quantity = 10 });
+            DeviceStatuses = SqliteDataAccess.LoadStatusesQuantity();
+            //DeviceStatuses.Add(new DeviceStatusModel { StatusName = "Dostępne", Quantity = 120 });
+            //DeviceStatuses.Add(new DeviceStatusModel { StatusName = "W Użyciu", Quantity = 50 });
+            //DeviceStatuses.Add(new DeviceStatusModel { StatusName = "W Naprawie", Quantity = 15 });
+            //DeviceStatuses.Add(new DeviceStatusModel { StatusName = "Wyjęte", Quantity = 10 });
 
 
             // Symulacja ostatnich logów użytkowników (5 ostatnich)

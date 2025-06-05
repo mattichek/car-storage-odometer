@@ -72,7 +72,7 @@
                                   Style="{StaticResource {x:Type DataGrid}}"
                                   AutoGenerateColumns="False">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Status" Binding="{Binding StatusName}" Width="1*"/>
+                                <DataGridTextColumn Header="Status" Binding="{Binding Name}" Width="1*"/>
                                 <DataGridTextColumn Header="Ilość" Binding="{Binding Quantity}" Width="1*"/>
                             </DataGrid.Columns>
                         </DataGrid>
