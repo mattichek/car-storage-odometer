@@ -309,6 +309,8 @@ namespace car_storage_odometer.ViewModels
             try
             {
                 await SqliteDataAccess.AddDeviceAsync(CurrentEditDevice, CurrentUserId);
+                await SqliteDataAccess.AddUserLogAsync(CurrentUserId, "Dodano urządznie");
+                await SqliteDataAccess.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Dodano nowe urządzenie", CurrentEditDevice.WarehouseId);
                 MessageBox.Show("Urządzenie zostało dodane pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
                 await LoadInitialDataAsync(); // Odśwież pełną listę i zastosuj filtry
                 CurrentEditDevice = null; // Wyczyść formularz
@@ -348,6 +350,8 @@ namespace car_storage_odometer.ViewModels
             try
             {
                 await SqliteDataAccess.UpdateDeviceAsync(CurrentEditDevice);
+                await SqliteDataAccess.AddUserLogAsync(CurrentUserId, "Zaktualizowano status urządzenia");
+                await SqliteDataAccess.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Zaktualizowano status urządzenia", CurrentEditDevice.WarehouseId);
                 MessageBox.Show("Urządzenie zostało zaktualizowane pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
                 await LoadInitialDataAsync(); // Odśwież pełną listę i zastosuj filtry
                 CurrentEditDevice = null; // Wyczyść formularz
@@ -386,6 +390,8 @@ namespace car_storage_odometer.ViewModels
                 try
                 {
                     await SqliteDataAccess.DeleteDeviceAsync(SelectedDevice.DeviceId);
+                    await SqliteDataAccess.AddUserLogAsync(CurrentUserId, "Usunięto urządzenie");
+                    await SqliteDataAccess.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Usunięto urządzenie", null);
                     MessageBox.Show("Urządzenie zostało usunięte pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
                     await LoadInitialDataAsync(); // Odśwież listę urządzeń
                     SelectedDevice = null; // Wyczyść zaznaczenie
@@ -417,7 +423,9 @@ namespace car_storage_odometer.ViewModels
             {
                 // Załóżmy, że metoda w SqliteDataAccess potrafi przenieść urządzenie
                 // Będziesz potrzebował dostosować tę metodę w swoim SqliteDataAccess
-                await SqliteDataAccess.MoveDeviceToWarehouseAsync(SelectedDevice.DeviceId, SelectedTargetWarehouse, CurrentUserId);
+                await SqliteDataAccess.MoveDeviceToWarehouseAsync(SelectedDevice.DeviceId, SelectedTargetWarehouse);
+                await SqliteDataAccess.AddUserLogAsync(CurrentUserId, "Przeniesiono urządznie między magazynami");
+                await SqliteDataAccess.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Przeniesiono urządznie między magazynami", CurrentEditDevice.WarehouseId);
                 MessageBox.Show($"Urządzenie {SelectedDevice.SerialNumber} przeniesiono do magazynu {SelectedTargetWarehouse}.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
                 await LoadInitialDataAsync(); // Odśwież listę
                 SelectedTargetWarehouse = null; // Wyczyść wybór magazynu
@@ -445,7 +453,10 @@ namespace car_storage_odometer.ViewModels
             try
             {
                 // Zakładam, że metoda w SqliteDataAccess aktualizuje status urządzenia na "W naprawie"
-                await SqliteDataAccess.UpdateDeviceStatusAsync(SelectedDevice.DeviceId, "W naprawie", CurrentUserId);
+                await SqliteDataAccess.ReportDeviceForRepairAsync(SelectedDevice.DeviceId);
+                await SqliteDataAccess.AddUserLogAsync(CurrentUserId, "Zgłoszono naprawę");
+                await SqliteDataAccess.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Zgłoszono naprawę", CurrentEditDevice.WarehouseId);
+                await SqliteDataAccess.AddRepairHistoryAsync(SelectedDevice.DeviceId, "Naprawa rozpoczęta", CurrentUserId);
                 MessageBox.Show($"Urządzenie {SelectedDevice.SerialNumber} zgłoszono do naprawy.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
                 await LoadInitialDataAsync(); // Odśwież listę
             }
@@ -463,7 +474,10 @@ namespace car_storage_odometer.ViewModels
             try
             {
                 // Zakładam, że metoda w SqliteDataAccess aktualizuje status urządzenia na "Dostępny" lub podobny
-                await SqliteDataAccess.UpdateDeviceStatusAsync(SelectedDevice.DeviceId, "Dostępny", CurrentUserId);
+                await SqliteDataAccess.ResetDeviceAfterRepairAsync(SelectedDevice.DeviceId);
+                await SqliteDataAccess.AddUserLogAsync(CurrentUserId, "Zakończono naprawę");
+                await SqliteDataAccess.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Zakończono naprawę", CurrentEditDevice.WarehouseId);
+                await SqliteDataAccess.AddRepairHistoryAsync(SelectedDevice.DeviceId, "Naprawa zakończona", CurrentUserId, DateTime.Now);
                 MessageBox.Show($"Naprawa urządzenia {SelectedDevice.SerialNumber} została zakończona.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
                 await LoadInitialDataAsync(); // Odśwież listę
             }

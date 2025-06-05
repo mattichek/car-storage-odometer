@@ -15,6 +15,10 @@ namespace car_storage_odometer.Helpers
 {
     public class SqliteDataAccess
     {
+        private static string LoadConnectionString(string id = "DataBase")
+        {
+            return ConfigurationManager.ConnectionStrings[id].ConnectionString;
+        }
 
         public static ObservableCollection<WarehouseStatusModel> LoadX()
         {
@@ -81,7 +85,6 @@ namespace car_storage_odometer.Helpers
         }
 
         // --- Metody dla DeviceModel ---
-
         public static async Task AddDeviceAsync(DeviceModel device, int userId)
         {
             using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
@@ -91,172 +94,74 @@ namespace car_storage_odometer.Helpers
                 {
                     try
                     {
-                        bool serialNumberExists = await DoesSerialNumberExistAsync(device.SerialNumber, null);
-                        if (serialNumberExists)
+                        // 1. Sprawdzenie czy numer seryjny istnieje
+                        bool serialExists = await cnn.ExecuteScalarAsync<bool>(
+                            "SELECT COUNT(1) FROM SerialNumbers WHERE SerialNumber = @SerialNumber",
+                            new { device.SerialNumber }, transaction);
+
+                        if (serialExists)
                         {
-                            throw new InvalidOperationException("Numer seryjny już istnieje.");
+                            throw new InvalidOperationException($"Numer seryjny '{device.SerialNumber}' już istnieje.");
                         }
 
-                        // Kwerenda 1: Wstaw do tabeli 'devices'
-                        // Używamy EventDate z modelu, które mapuje na kolumnę EventDate w bazie
-                        string sqlInsertDevice = @"
-                            INSERT INTO devices (TypeId, StatusId, WarehouseId, UserId, EventDate, Note) -- Usunięto EntryDate, dodano EventDate
-                            VALUES ((SELECT TypeId FROM devicetypes WHERE Name = @TypeName),
-                                    (SELECT StatusId FROM statuses WHERE Name = @StatusName),
-                                    (SELECT WarehouseId FROM warehouses WHERE Name = @WarehouseName),
-                                    @UserId,
-                                    @EventDate, @Note); -- Używamy @EventDate
-                            SELECT last_insert_rowid();";
+                        // 2. Pobierz ID typu, statusu i magazynu
+                        int typeId = await cnn.ExecuteScalarAsync<int>(
+                            "SELECT TypeId FROM DeviceTypes WHERE Name = @Name",
+                            new { Name = device.TypeName }, transaction);
 
-                        long newDeviceId = await cnn.ExecuteScalarAsync<long>(sqlInsertDevice,
-                            new
-                            {
-                                TypeName = device.TypeName,
-                                StatusName = device.StatusName,
-                                WarehouseName = device.WarehouseName,
-                                UserId = userId,
-                                EventDate = device.EventDate, // Używamy EventDate
-                                Note = device.Note
-                            }, transaction);
+                        int statusId = await cnn.ExecuteScalarAsync<int>(
+                            "SELECT StatusId FROM Statuses WHERE Name = @Name",
+                            new { Name = device.StatusName }, transaction);
 
-                        // Kwerenda 2: Wstaw do tabeli 'serialnumbers'
-                        // ReleaseDate z serialnumbers będzie mapowane na EventDate z DeviceModel
-                        string sqlInsertSerialNumber = @"
-                            INSERT INTO serialnumbers (DeviceId, SerialNumber, ReleaseDate)
-                            VALUES (@DeviceId, @SerialNumber, @ReleaseDate);";
-                        await cnn.ExecuteAsync(sqlInsertSerialNumber,
-                            new
-                            {
-                                DeviceId = newDeviceId,
-                                SerialNumber = device.SerialNumber,
-                                ReleaseDate = device.EventDate // Mapujemy EventDate na ReleaseDate
-                            }, transaction);
+                        int warehouseId = await cnn.ExecuteScalarAsync<int>(
+                            "SELECT WarehouseId FROM Warehouses WHERE Name = @Name",
+                            new { Name = device.WarehouseName }, transaction);
 
-                        transaction.Commit();
-                        device.DeviceId = (int)newDeviceId;
-                    }
-                    catch (Exception)
-                    {
-                        transaction.Rollback();
-                        throw;
-                    }
-                }
-            }
-        }
+                        // 3. Wstawienie urządzenia
+                        string insertDeviceSql = @"
+                                INSERT INTO Devices (TypeId, StatusId, WarehouseId, UserId, Note, EventDate)
+                                VALUES (@TypeId, @StatusId, @WarehouseId, @UserId, @Note, @EventDate);
+                                SELECT last_insert_rowid();";
 
-        public static async Task UpdateDeviceAsync(DeviceModel device)
-        {
-            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-            {
-                cnn.Open();
-                using (var transaction = cnn.BeginTransaction())
-                {
-                    try
-                    {
-                        bool serialNumberExists = await DoesSerialNumberExistAsync(device.SerialNumber, device.DeviceId);
-                        if (serialNumberExists)
+                        int newDeviceId = await cnn.ExecuteScalarAsync<int>(insertDeviceSql, new
                         {
-                            throw new InvalidOperationException("Numer seryjny jest już używany przez inne urządzenie.");
-                        }
+                            TypeId = typeId,
+                            StatusId = statusId,
+                            WarehouseId = warehouseId,
+                            UserId = userId,
+                            device.Note,
+                            device.EventDate
+                        }, transaction);
 
-                        // Kwerenda 1: UPDATE devices
-                        // Zakładam, że kolumny Note ORAZ EventDate są w tabeli devices
-                        string sqlUpdateDevice = @"
-                            UPDATE devices
-                            SET TypeId = (SELECT TypeId FROM devicetypes WHERE Name = @TypeName),
-                                StatusId = (SELECT StatusId FROM statuses WHERE Name = @StatusName),
-                                WarehouseId = (SELECT WarehouseId FROM warehouses WHERE Name = @WarehouseName),
-                                Note = @Note,
-                                EventDate = @EventDate -- Zmienione z EntryDate na EventDate
-                            WHERE DeviceId = @DeviceId;";
+                        // 4. Dodanie numeru seryjnego
+                        string insertSerialSql = @"
+                                INSERT INTO SerialNumbers (DeviceId, SerialNumber)
+                                VALUES (@DeviceId, @SerialNumber);";
 
-                        await cnn.ExecuteAsync(sqlUpdateDevice,
-                            new
-                            {
-                                TypeName = device.TypeName,
-                                StatusName = device.StatusName,
-                                WarehouseName = device.WarehouseName,
-                                Note = device.Note,
-                                EventDate = device.EventDate, // Używamy EventDate
-                                DeviceId = device.DeviceId
-                            }, transaction);
-
-                        // Kwerenda 2: UPDATE serialnumbers
-                        // ReleaseDate z serialnumbers będzie mapowane na EventDate z DeviceModel
-                        string sqlUpdateSerialNumber = @"
-                            UPDATE serialnumbers
-                            SET SerialNumber = @SerialNumber,
-                                ReleaseDate = @ReleaseDate -- Zmienione z EntryDate na ReleaseDate
-                            WHERE DeviceId = @DeviceId;";
-                        await cnn.ExecuteAsync(sqlUpdateSerialNumber,
-                            new
-                            {
-                                SerialNumber = device.SerialNumber,
-                                ReleaseDate = device.EventDate, // Mapujemy EventDate na ReleaseDate
-                                DeviceId = device.DeviceId
-                            }, transaction);
+                        await cnn.ExecuteAsync(insertSerialSql, new
+                        {
+                            DeviceId = newDeviceId,
+                            device.SerialNumber
+                        }, transaction);
 
                         transaction.Commit();
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         transaction.Rollback();
-                        throw;
+                        throw new Exception("Błąd przy dodawaniu urządzenia: " + ex.Message, ex);
                     }
                 }
             }
         }
 
-        public static async Task DeleteDeviceAsync(int deviceId)
-        {
-            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-            {
-                cnn.Open();
-                using (var transaction = cnn.BeginTransaction())
-                {
-                    try
-                    {
-                        await cnn.ExecuteAsync("DELETE FROM repairhistory WHERE DeviceId = @DeviceId", new { DeviceId = deviceId }, transaction);
-                        await cnn.ExecuteAsync("DELETE FROM devicelogs WHERE DeviceId = @DeviceId", new { DeviceId = deviceId }, transaction);
-                        await cnn.ExecuteAsync("DELETE FROM serialnumbers WHERE DeviceId = @DeviceId", new { DeviceId = deviceId }, transaction);
-                        await cnn.ExecuteAsync("DELETE FROM devices WHERE DeviceId = @DeviceId", new { DeviceId = deviceId }, transaction);
-
-                        transaction.Commit();
-                    }
-                    catch (Exception)
-                    {
-                        transaction.Rollback();
-                        throw;
-                    }
-                }
-            }
-        }
-
-        public static async Task<bool> DoesSerialNumberExistAsync(string serialNumber, int? excludeDeviceId = null)
-        {
-            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-            {
-                string sql = "SELECT COUNT(1) FROM serialnumbers WHERE SerialNumber = @SerialNumber COLLATE NOCASE";
-                if (excludeDeviceId.HasValue)
-                {
-                    sql += " AND DeviceId != @ExcludeDeviceId";
-                }
-
-                var parameters = new DynamicParameters();
-                parameters.Add("SerialNumber", serialNumber);
-                if (excludeDeviceId.HasValue)
-                {
-                    parameters.Add("ExcludeDeviceId", excludeDeviceId.Value);
-                }
-
-                int count = await cnn.QuerySingleOrDefaultAsync<int>(sql, parameters);
-                return count > 0;
-            }
-        }
-
-        // Metoda AddDeviceLogAsync (nie zmieniona w tej modyfikacji, bo już używała EventDate)
 
 
+
+        /// <summary>
+        ///  Pobiera z bazy TypyUrządzeń, Magazyny, Ststusy
+        /// </summary>
+        /// <returns></returns>
         public static async Task<ObservableCollection<string>> LoadDeviceTypesAsync()
         {
             using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
@@ -284,79 +189,6 @@ namespace car_storage_odometer.Helpers
             }
         }
 
-        // --- NOWE METODY DO IMPLEMENTACJI ---
-
-        // Metoda do przenoszenia urządzenia do innego magazynu
-        public static async Task MoveDeviceToWarehouseAsync(int deviceId, string newWarehouseName, int userId)
-        {
-            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-            {
-                // Sprawdź, czy magazyn docelowy istnieje i pobierz jego ID
-                int newWarehouseId = await cnn.ExecuteScalarAsync<int?>(
-                    "SELECT WarehouseId FROM Warehouses WHERE WarehouseName = @NewWarehouseName",
-                    new { NewWarehouseName = newWarehouseName }
-                ) ?? throw new InvalidOperationException($"Magazyn '{newWarehouseName}' nie istnieje.");
-
-                // Aktualizuj WarehouseId dla danego urządzenia
-                string sql = @"
-                    UPDATE Devices
-                    SET WarehouseId = @NewWarehouseId,
-                        EventDate = @CurrentDate, -- Opcjonalnie aktualizuj datę wydarzenia
-                        Note = 'Przeniesiono do nowego magazynu', -- Opcjonalnie dodaj notatkę
-                        LastModifiedByUserId = @UserId,
-                        LastModifiedDate = @CurrentDate
-                    WHERE DeviceId = @DeviceId";
-
-                await cnn.ExecuteAsync(sql, new
-                {
-                    NewWarehouseId = newWarehouseId,
-                    DeviceId = deviceId,
-                    CurrentDate = DateTime.Now,
-                    UserId = userId
-                });
-
-                // Opcjonalnie: możesz dodać wpis do tabeli historii, jeśli śledzisz ruchy urządzeń
-                // string historySql = @"INSERT INTO DeviceHistory (DeviceId, EventType, OldValue, NewValue, EventDate, UserId)
-                //                      VALUES (@DeviceId, 'Przeniesienie', @OldWarehouseId, @NewWarehouseId, @CurrentDate, @UserId)";
-                // await cnn.ExecuteAsync(historySql, new { DeviceId = deviceId, ... });
-            }
-        }
-
-        // Metoda do aktualizacji statusu urządzenia
-        public static async Task UpdateDeviceStatusAsync(int deviceId, string newStatusName, int userId)
-        {
-            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-            {
-                // Sprawdź, czy status docelowy istnieje i pobierz jego ID
-                int newStatusId = await cnn.ExecuteScalarAsync<int?>(
-                    "SELECT StatusId FROM Statuses WHERE StatusName = @NewStatusName",
-                    new { NewStatusName = newStatusName }
-                ) ?? throw new InvalidOperationException($"Status '{newStatusName}' nie istnieje.");
-
-                // Aktualizuj StatusId dla danego urządzenia
-                string sql = @"
-                    UPDATE Devices
-                    SET StatusId = @NewStatusId,
-                        EventDate = @CurrentDate, -- Opcjonalnie aktualizuj datę wydarzenia
-                        LastModifiedByUserId = @UserId,
-                        LastModifiedDate = @CurrentDate
-                    WHERE DeviceId = @DeviceId";
-
-                await cnn.ExecuteAsync(sql, new
-                {
-                    NewStatusId = newStatusId,
-                    DeviceId = deviceId,
-                    CurrentDate = DateTime.Now,
-                    UserId = userId
-                });
-
-                // Opcjonalnie: możesz dodać wpis do tabeli historii
-                // string historySql = @"INSERT INTO DeviceHistory (DeviceId, EventType, OldValue, NewValue, EventDate, UserId)
-                //                      VALUES (@DeviceId, 'Zmiana statusu', @OldStatusId, @NewStatusId, @CurrentDate, @UserId)";
-                // await cnn.ExecuteAsync(historySql, new { DeviceId = deviceId, ... });
-            }
-        }
-
         public static async Task<ObservableCollection<DeviceLogModel>> LoadDevicesLastFiveLogsAsync()
         {
             return await Task.Run(() =>
@@ -381,10 +213,308 @@ namespace car_storage_odometer.Helpers
             }
         }
 
-
-        private static string LoadConnectionString(string id = "DataBase")
+        public static async Task AddUserLogAsync(int userId, string action)
         {
-            return ConfigurationManager.ConnectionStrings[id].ConnectionString;
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                string insertSql = @"
+            INSERT INTO UserLogs (UserId, Event, EventDate)
+            VALUES (@UserId, @Event, @EventDate);";
+
+                await cnn.ExecuteAsync(insertSql, new
+                {
+                    UserId = userId,
+                    Event = action,
+                    EventDate = DateTime.Now
+                });
+            }
+        }
+
+        public static async Task AddDeviceLogAsync(int userId, int deviceId, string eventDescription, int? toWarehouseId)
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                cnn.Open();
+
+                int? fromWarehouseId = await cnn.ExecuteScalarAsync<int?>(
+                    "SELECT WarehouseId FROM Devices WHERE DeviceId = @DeviceId",
+                    new { DeviceId = deviceId });
+
+                string insertSql = @"
+                    INSERT INTO DeviceLogs (UserId, DeviceId, Event, EventDate, FromWarehouseId, ToWarehouseId)
+                    VALUES (@UserId, @DeviceId, @Event, @EventDate, @FromWarehouseId, @ToWarehouseId);";
+
+                await cnn.ExecuteAsync(insertSql, new
+                {
+                    UserId = userId,
+                    DeviceId = deviceId,
+                    Event = eventDescription,
+                    EventDate = DateTime.Now,
+                    FromWarehouseId = fromWarehouseId,
+                    ToWarehouseId = toWarehouseId
+                });
+            }
+        }
+
+        public static async Task AddRepairHistoryAsync(int deviceId, string description, int userId, DateTime? endDate = null)
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                cnn.Open();
+
+                string insertSql = @"
+            INSERT INTO RepairHistory (DeviceId, Description, StartDate, EndDate, UserId)
+            VALUES (@DeviceId, @Description, @StartDate, @EndDate, @UserId);";
+
+                await cnn.ExecuteAsync(insertSql, new
+                {
+                    DeviceId = deviceId,
+                    Description = description,
+                    StartDate = DateTime.Now,
+                    EndDate = endDate,
+                    UserId = userId
+                });
+            }
+        }
+
+        public static async Task UpdateDeviceAsync(DeviceModel device)
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                cnn.Open();
+                using (var transaction = cnn.BeginTransaction())
+                {
+                    try
+                    {
+                        // 1. Sprawdź, czy ten numer seryjny nie należy do innego urządzenia
+                        var existingDeviceId = await cnn.ExecuteScalarAsync<int?>(
+                            "SELECT DeviceId FROM SerialNumbers WHERE SerialNumber = @SerialNumber",
+                            new { device.SerialNumber }, transaction);
+
+                        if (existingDeviceId != null && existingDeviceId != device.DeviceId)
+                        {
+                            throw new InvalidOperationException($"Numer seryjny '{device.SerialNumber}' jest już przypisany do innego urządzenia.");
+                        }
+
+                        // 2. Pobierz ID typu, statusu, magazynu
+                        int typeId = await cnn.ExecuteScalarAsync<int>(
+                            "SELECT TypeId FROM DeviceTypes WHERE Name = @Name",
+                            new { Name = device.TypeName }, transaction);
+
+                        int statusId = await cnn.ExecuteScalarAsync<int>(
+                            "SELECT StatusId FROM Statuses WHERE Name = @Name",
+                            new { Name = device.StatusName }, transaction);
+
+                        int warehouseId = await cnn.ExecuteScalarAsync<int>(
+                            "SELECT WarehouseId FROM Warehouses WHERE Name = @Name",
+                            new { Name = device.WarehouseName }, transaction);
+
+                        // 3. Aktualizacja rekordu w Devices
+                        string updateDeviceSql = @"
+                    UPDATE Devices
+                    SET TypeId = @TypeId,
+                        StatusId = @StatusId,
+                        WarehouseId = @WarehouseId,
+                        Note = @Note,
+                        EventDate = @EventDate
+                    WHERE DeviceId = @DeviceId;";
+
+                        await cnn.ExecuteAsync(updateDeviceSql, new
+                        {
+                            TypeId = typeId,
+                            StatusId = statusId,
+                            WarehouseId = warehouseId,
+                            device.Note,
+                            device.EventDate,
+                            DeviceId = device.DeviceId
+                        }, transaction);
+
+                        // 4. Aktualizacja numeru seryjnego
+                        string updateSerialSql = @"
+                    UPDATE SerialNumbers
+                    SET SerialNumber = @SerialNumber
+                    WHERE DeviceId = @DeviceId;";
+
+                        await cnn.ExecuteAsync(updateSerialSql, new
+                        {
+                            SerialNumber = device.SerialNumber,
+                            DeviceId = device.DeviceId
+                        }, transaction);
+
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw new Exception("Błąd podczas aktualizacji urządzenia: " + ex.Message, ex);
+                    }
+                }
+            }
+        }
+
+        public static async Task DeleteDeviceAsync(int deviceId)
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                cnn.Open();
+                using (var transaction = cnn.BeginTransaction())
+                {
+                    try
+                    {
+                        // 1. Usuń powiązany numer seryjny
+                        string deleteSerialSql = "DELETE FROM SerialNumbers WHERE DeviceId = @DeviceId;";
+                        await cnn.ExecuteAsync(deleteSerialSql, new { DeviceId = deviceId }, transaction);
+
+                        // 2. Usuń urządzenie
+                        string deleteDeviceSql = "DELETE FROM Devices WHERE DeviceId = @DeviceId;";
+                        await cnn.ExecuteAsync(deleteDeviceSql, new { DeviceId = deviceId }, transaction);
+
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw new Exception("Błąd podczas usuwania urządzenia: " + ex.Message, ex);
+                    }
+                }
+            }
+        }
+
+
+        public static async Task MoveDeviceToWarehouseAsync(int deviceId, string newWarehouseName)
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                cnn.Open();
+                using (var transaction = cnn.BeginTransaction())
+                {
+                    try
+                    {
+                        // 1. Pobierz ID nowego magazynu
+                        int newWarehouseId = await cnn.ExecuteScalarAsync<int>(
+                            "SELECT WarehouseId FROM Warehouses WHERE Name = @Name",
+                            new { Name = newWarehouseName }, transaction);
+
+                        // 2. Zaktualizuj magazyn urządzenia
+                        string updateSql = @"
+                    UPDATE Devices
+                    SET WarehouseId = @WarehouseId
+                    WHERE DeviceId = @DeviceId;";
+
+                        await cnn.ExecuteAsync(updateSql, new
+                        {
+                            WarehouseId = newWarehouseId,
+                            DeviceId = deviceId
+                        }, transaction);
+
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw new Exception("Błąd podczas przenoszenia urządzenia do nowego magazynu: " + ex.Message, ex);
+                    }
+                }
+            }
+        }
+
+        public static async Task ResetDeviceAfterRepairAsync(int deviceId)
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                cnn.Open();
+                using (var transaction = cnn.BeginTransaction())
+                {
+                    try
+                    {
+                        // Pobierz najniższy StatusId
+                        int? defaultStatusId = await cnn.ExecuteScalarAsync<int?>(
+                            "SELECT MIN(StatusId) FROM Statuses", transaction);
+
+                        // Pobierz najniższy WarehouseId
+                        int? defaultWarehouseId = await cnn.ExecuteScalarAsync<int?>(
+                            "SELECT MIN(WarehouseId) FROM Warehouses", transaction);
+
+                        if (defaultStatusId == null || defaultWarehouseId == null)
+                        {
+                            throw new InvalidOperationException("Nie znaleziono domyślnego statusu lub magazynu.");
+                        }
+
+                        // Aktualizacja statusu i magazynu w jednej operacji
+                        string updateSql = @"
+                    UPDATE Devices
+                    SET StatusId = @StatusId,
+                        WarehouseId = @WarehouseId
+                    WHERE DeviceId = @DeviceId;";
+
+                        await cnn.ExecuteAsync(updateSql, new
+                        {
+                            StatusId = defaultStatusId.Value,
+                            WarehouseId = defaultWarehouseId.Value,
+                            DeviceId = deviceId
+                        }, transaction);
+
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw new Exception("Błąd podczas resetowania urządzenia po naprawie: " + ex.Message, ex);
+                    }
+                }
+            }
+        }
+
+        public static async Task ReportDeviceForRepairAsync(int deviceId)
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                cnn.Open();
+                using (var transaction = cnn.BeginTransaction())
+                {
+                    try
+                    {
+                        // 1. Pobierz StatusId dla statusu "W naprawie"
+                        int? repairStatusId = await cnn.ExecuteScalarAsync<int?>(
+                            "SELECT StatusId FROM Statuses WHERE Name = 'W naprawie';", transaction);
+
+                        if (repairStatusId == null)
+                        {
+                            throw new InvalidOperationException("Nie znaleziono statusu 'W naprawie'.");
+                        }
+
+                        // 2. Pobierz ostatni (największy) WarehouseId
+                        int? lastWarehouseId = await cnn.ExecuteScalarAsync<int?>(
+                            "SELECT MAX(WarehouseId) FROM Warehouses;", transaction);
+
+                        if (lastWarehouseId == null)
+                        {
+                            throw new InvalidOperationException("Nie znaleziono żadnego magazynu.");
+                        }
+
+                        // 3. Aktualizuj status i magazyn w tabeli Devices
+                        string updateSql = @"
+                    UPDATE Devices
+                    SET StatusId = @StatusId,
+                        WarehouseId = @WarehouseId
+                    WHERE DeviceId = @DeviceId;";
+
+                        await cnn.ExecuteAsync(updateSql, new
+                        {
+                            StatusId = repairStatusId.Value,
+                            WarehouseId = lastWarehouseId.Value,
+                            DeviceId = deviceId
+                        }, transaction);
+
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw new Exception("Błąd podczas zgłaszania naprawy: " + ex.Message, ex);
+                    }
+                }
+            }
         }
     }
 }
