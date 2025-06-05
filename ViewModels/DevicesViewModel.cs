@@ -1,464 +1,493 @@
-﻿// ViewModels/DevicesViewModel.cs
+﻿using car_storage_odometer.Helpers;
 using car_storage_odometer.Models;
-using Prism.Commands;
-using Prism.Mvvm;
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
-using System.Windows; // Do MessageBox.Show
-using System.Collections.Generic; // Dodaj to dla List<string>
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
 
 namespace car_storage_odometer.ViewModels
 {
-    public class DevicesViewModel : BindableBase
+    public class DevicesViewModel : INotifyPropertyChanged
     {
-        private ObservableCollection<DeviceModel> _allDevices;
-        private ObservableCollection<DeviceModel> _devicesList;
-        public ObservableCollection<DeviceModel> DevicesList
+        // --- Właściwości dla DataGrid i formularza edycji ---
+        private ObservableCollection<DeviceModel> _devices;
+        public ObservableCollection<DeviceModel> Devices
         {
-            get => _devicesList;
-            set => SetProperty(ref _devicesList, value);
+            get { return _devices; }
+            set { _devices = value; OnPropertyChanged(); }
         }
 
+        // Właściwość do przechowywania aktualnie wybranego urządzenia z DataGrid
+        // KLUCZOWA ZMIANA: Aktualizuje CurrentEditDevice i stan komend
         private DeviceModel _selectedDevice;
         public DeviceModel SelectedDevice
         {
             get => _selectedDevice;
             set
             {
-                SetProperty(ref _selectedDevice, value);
-                // When a device is selected, populate the editing fields
-                if (value != null)
+                if (SetProperty(ref _selectedDevice, value)) // Używamy SetProperty dla lepszego zarządzania zmianami
                 {
-                    // Upewnij się, że zawsze tworzysz NOWY obiekt, a nie referencję do istniejącego
-                    // aby edycja nie wpływała od razu na listę, zanim nie klikniesz "Aktualizuj"
-                    CurrentEditDevice = new DeviceModel
-                    {
-                        Id = value.Id,
-                        SerialNumber = value.SerialNumber,
-                        DeviceType = value.DeviceType,
-                        CurrentWarehouse = value.CurrentWarehouse,
-                        EntryDate = value.EntryDate,
-                        Status = value.Status,
-                        Notes = value.Notes
-                    };
-                    IsEditing = true; // Enable editing mode
+                    // KLUCZOWA LOGIKA: Kopiowanie wybranego urządzenia do CurrentEditDevice
+                    // Aby panel edycji odzwierciedlał wybór z DataGrid.
+                    // Używamy DeepCopy, aby zmiany w formularzu nie wpływały od razu na DataGrid,
+                    // dopóki użytkownik nie kliknie "Aktualizuj".
+                    CurrentEditDevice = value != null ? value.DeepCopy() : null;
+
+                    // Powiadom komendy o zmianie stanu, aby zaktualizować CanExecute
+                    // Wszystkie komendy, których stan zależy od SelectedDevice/CurrentEditDevice
+                    RaiseAllCanExecuteChanged();
                 }
-                else
-                {
-                    // Jeśli SelectedDevice jest null (np. po usunięciu lub kliknięciu "Nowe urządzenie")
-                    // Przygotuj formularz do dodawania nowego urządzenia
-                    CurrentEditDevice = new DeviceModel { EntryDate = DateTime.Now, Status = "Dostępny" }; // Clear editing fields, default values
-                    IsEditing = false;
-                }
-                // Update command CanExecute after SelectedDevice changes
-                AddDeviceCommand.RaiseCanExecuteChanged();
-                UpdateDeviceCommand.RaiseCanExecuteChanged();
-                DeleteDeviceCommand.RaiseCanExecuteChanged();
-                MoveDeviceCommand.RaiseCanExecuteChanged();
-                ReportRepairCommand.RaiseCanExecuteChanged();
-                FinishRepairCommand.RaiseCanExecuteChanged();
             }
         }
 
-        private DeviceModel _currentEditDevice;
+        // Właściwość do bindowania na formularzu dodawania/edycji (w XAML to było CurrentEditDevice)
+        private DeviceModel _currentEditDevice; // Zmieniono nazwę na CurrentEditDevice dla czytelności z XAML
         public DeviceModel CurrentEditDevice
         {
-            get => _currentEditDevice;
+            get { return _currentEditDevice; }
             set
             {
-                // Ważne: Jeśli zmieniamy cały obiekt CurrentEditDevice,
-                // musimy usunąć stare nasłuchiwanie i dodać nowe
-                if (_currentEditDevice != null)
+                if (SetProperty(ref _currentEditDevice, value))
                 {
-                    _currentEditDevice.PropertyChanged -= CurrentEditDevice_PropertyChanged;
+                    // Po zmianie CurrentEditDevice, stan komend może się zmienić.
+                    RaiseAllCanExecuteChanged();
                 }
-                SetProperty(ref _currentEditDevice, value);
-                if (_currentEditDevice != null)
-                {
-                    _currentEditDevice.PropertyChanged += CurrentEditDevice_PropertyChanged;
-                }
-                // Po zmianie obiektu CurrentEditDevice, stan komend może się zmienić
-                AddDeviceCommand.RaiseCanExecuteChanged();
-                UpdateDeviceCommand.RaiseCanExecuteChanged();
-                // Inne komendy mogą również zależeć od statusu CurrentEditDevice, np. ReportRepairCommand
-                ReportRepairCommand.RaiseCanExecuteChanged();
-                FinishRepairCommand.RaiseCanExecuteChanged();
             }
         }
 
-        // Metoda do obsługi PropertyChanged z CurrentEditDevice
-        private void CurrentEditDevice_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            // Gdy zmieni się właściwość CurrentEditDevice, odśwież stan komend
-            // które zależą od tych właściwości (np. AddDeviceCommand)
-            AddDeviceCommand.RaiseCanExecuteChanged();
-            UpdateDeviceCommand.RaiseCanExecuteChanged();
-            ReportRepairCommand.RaiseCanExecuteChanged();
-            FinishRepairCommand.RaiseCanExecuteChanged();
-        }
-
-        private bool _isEditing;
-        public bool IsEditing
-        {
-            get => _isEditing;
-            set
-            {
-                SetProperty(ref _isEditing, value);
-                // Gdy zmienia się IsEditing, stan AddDeviceCommand zmienia się
-                AddDeviceCommand.RaiseCanExecuteChanged();
-            }
-        }
-
-        // Filter properties
+        // --- Właściwości dla filtrów ---
         private string _filterSerialNumber;
         public string FilterSerialNumber
         {
             get => _filterSerialNumber;
-            set { SetProperty(ref _filterSerialNumber, value); ApplyFilters(); }
+            set
+            {
+                if (SetProperty(ref _filterSerialNumber, value))
+                {
+                    ApplyFilters(); // Zastosuj filtry po zmianie numeru seryjnego
+                }
+            }
         }
 
         private string _filterDeviceType;
         public string FilterDeviceType
         {
             get => _filterDeviceType;
-            set { SetProperty(ref _filterDeviceType, value); ApplyFilters(); }
-        }
-        private ObservableCollection<string> _availableDeviceTypes;
-        public ObservableCollection<string> AvailableDeviceTypes // Lista dla filtrów
-        {
-            get => _availableDeviceTypes;
-            set => SetProperty(ref _availableDeviceTypes, value);
+            set
+            {
+                if (SetProperty(ref _filterDeviceType, value))
+                {
+                    ApplyFilters(); // Zastosuj filtry
+                }
+            }
         }
 
         private string _filterWarehouse;
         public string FilterWarehouse
         {
             get => _filterWarehouse;
-            set { SetProperty(ref _filterWarehouse, value); ApplyFilters(); }
-        }
-        private ObservableCollection<string> _availableWarehouses;
-        public ObservableCollection<string> AvailableWarehouses // Lista dla filtrów
-        {
-            get => _availableWarehouses;
-            set => SetProperty(ref _availableWarehouses, value);
+            set
+            {
+                if (SetProperty(ref _filterWarehouse, value))
+                {
+                    ApplyFilters(); // Zastosuj filtry
+                }
+            }
         }
 
         private string _filterStatus;
         public string FilterStatus
         {
             get => _filterStatus;
-            set { SetProperty(ref _filterStatus, value); ApplyFilters(); }
+            set
+            {
+                if (SetProperty(ref _filterStatus, value))
+                {
+                    ApplyFilters(); // Zastosuj filtry
+                }
+            }
         }
+
+
+        // --- Kolekcje do wypełniania ComboBoxów (dla filtrów i edycji) ---
+        private ObservableCollection<string> _availableDeviceTypes;
+        public ObservableCollection<string> AvailableDeviceTypes
+        {
+            get { return _availableDeviceTypes; }
+            set { _availableDeviceTypes = value; OnPropertyChanged(); }
+        }
+
+        private ObservableCollection<string> _availableWarehouses;
+        public ObservableCollection<string> AvailableWarehouses
+        {
+            get { return _availableWarehouses; }
+            set { _availableWarehouses = value; OnPropertyChanged(); }
+        }
+
         private ObservableCollection<string> _availableStatuses;
         public ObservableCollection<string> AvailableStatuses
         {
-            get => _availableStatuses;
-            set => SetProperty(ref _availableStatuses, value);
+            get { return _availableStatuses; }
+            set { _availableStatuses = value; OnPropertyChanged(); }
         }
 
-        // Properties for Move Device
+        // Dodatkowe kolekcje dla ComboBoxów w panelu edycji (AllPossible...)
+        // Zakładam, że są to te same dane co Available..., ale XAML używa innych nazw.
+        // Jeśli dane są różne, musisz je ładować osobno.
+        public ObservableCollection<string> AllPossibleDeviceTypes => AvailableDeviceTypes;
+        public ObservableCollection<string> AllPossibleWarehouses => AvailableWarehouses;
+        public ObservableCollection<string> AllPossibleStatuses => AvailableStatuses;
+
+        // Właściwość dla 'Przenieś do magazynu'
         private string _selectedTargetWarehouse;
         public string SelectedTargetWarehouse
         {
             get => _selectedTargetWarehouse;
-            set { SetProperty(ref _selectedTargetWarehouse, value); MoveDeviceCommand.RaiseCanExecuteChanged(); }
+            set
+            {
+                if (SetProperty(ref _selectedTargetWarehouse, value))
+                {
+                    ((RelayCommand)MoveDeviceCommand)?.RaiseCanExecuteChanged();
+                }
+            }
         }
 
-        // NOWE: Stałe listy dla ComboBoxów w formularzu dodawania/edycji
-        public ObservableCollection<string> AllPossibleDeviceTypes { get; }
-        public ObservableCollection<string> AllPossibleWarehouses { get; }
-        public ObservableCollection<string> AllPossibleStatuses { get; }
 
-        // Commands
-        public DelegateCommand AddDeviceCommand { get; private set; }
-        public DelegateCommand UpdateDeviceCommand { get; private set; }
-        public DelegateCommand DeleteDeviceCommand { get; private set; }
-        public DelegateCommand NewDeviceCommand { get; private set; }
-        public DelegateCommand MoveDeviceCommand { get; private set; }
-        public DelegateCommand ReportRepairCommand { get; private set; }
-        public DelegateCommand FinishRepairCommand { get; private set; }
-        public DelegateCommand ResetFiltersCommand { get; private set; }
+
+        // --- Komendy UI ---
+        public ICommand NewDeviceCommand { get; private set; }
+        public ICommand AddDeviceCommand { get; private set; } // Dodawanie nowego urządzenia do bazy (po kliknięciu "Dodaj")
+        public ICommand UpdateDeviceCommand { get; private set; } // Aktualizacja istniejącego urządzenia (po kliknięciu "Aktualizuj")
+        public ICommand DeleteDeviceCommand { get; private set; }
+        public ICommand ResetFiltersCommand { get; private set; }
+        public ICommand MoveDeviceCommand { get; private set; }
+        public ICommand ReportRepairCommand { get; private set; }
+        public ICommand FinishRepairCommand { get; private set; }
+
+
+        // Przykładowy ID użytkownika - dostosuj to do swojego systemu logowania
+        private const int CurrentUserId = 1;
+
+        // Pełna lista urządzeń załadowana z bazy (do filtrowania)
+        private ObservableCollection<DeviceModel> _allDevices;
 
         public DevicesViewModel()
         {
-            // 1. ZAWSZE inicjalizuj stałe listy i komendy NA POCZĄTKU konstruktora.
-            // To zapobiega NullReferenceException, gdy UI próbuje się bindować.
-            AllPossibleDeviceTypes = new ObservableCollection<string> { "Odometer", "Tracker", "Gateway", "Sensor", "Kamera" };
-            AllPossibleWarehouses = new ObservableCollection<string> { "Magazyn Główny", "Magazyn A", "Magazyn B", "Serwis" };
-            AllPossibleStatuses = new ObservableCollection<string> { "Dostępny", "W naprawie", "Wydany", "Złomowany" };
+            _devices = new ObservableCollection<DeviceModel>(); // Inicjalizacja domyślna
+            _allDevices = new ObservableCollection<DeviceModel>(); // Inicjalizacja do przechowywania wszystkich danych
 
-            // Inicjalizacja komend musi nastąpić ZANIM cokolwiek innego spróbuje ich użyć
-            AddDeviceCommand = new DelegateCommand(AddDevice, CanAddDevice);
-            UpdateDeviceCommand = new DelegateCommand(UpdateDevice, CanUpdateOrDeleteDevice);
-            DeleteDeviceCommand = new DelegateCommand(DeleteDevice, CanUpdateOrDeleteDevice);
-            NewDeviceCommand = new DelegateCommand(NewDevice);
-            MoveDeviceCommand = new DelegateCommand(MoveDevice, CanUpdateOrDeleteDevice);
-            ReportRepairCommand = new DelegateCommand(ReportRepair, CanReportRepair);
-            FinishRepairCommand = new DelegateCommand(FinishRepair, CanFinishRepair);
-            ResetFiltersCommand = new DelegateCommand(ResetAllFilters);
-
-            // 2. Ładowanie danych i inicjalizacja stanów
-            LoadDummyData();
-            InitializeFilterOptions();
-
-            // 3. Ustawienie początkowego stanu formularza edycji/dodawania
-            // Bezpośrednie przypisanie do pola, aby uniknąć wywołania settera CurrentEditDevice
-            // przed pełną inicjalizacją, a następnie ręczne podłączenie eventu.
-            _currentEditDevice = new DeviceModel { EntryDate = DateTime.Now, Status = "Dostępny" };
-            _currentEditDevice.PropertyChanged += CurrentEditDevice_PropertyChanged;
-
-            DevicesList = new ObservableCollection<DeviceModel>(_allDevices); // Initial list
-
-            // 4. Obsługa zmian właściwości samego ViewModelu
-            PropertyChanged += (s, e) =>
-            {
-                // SelectedDevice i IsEditing mają już w swoich setterach RaiseCanExecuteChanged
-                // SelectedTargetWarehouse również ma w swoim setterze
-                // Ten blok może być uproszczony, jeśli wszystko jest obsługiwane w setterach
-                // Upewnij się, że wszystkie warunki dla CanExecute są pokryte
-            };
-
-            // Upewnij się, że formularz jest gotowy do dodawania nowego urządzenia przy starcie.
-            // Wywołanie NewDevice() inicjuje CurrentEditDevice i IsEditing oraz odświeża komendy.
-            NewDevice();
+            InitializeCommands();
+            _ = LoadInitialDataAsync(); // Zmieniono nazwę na LoadInitialDataAsync, aby rozróżnić od ApplyFilters
         }
 
-        private void LoadDummyData()
+        private void InitializeCommands()
         {
-            _allDevices = new ObservableCollection<DeviceModel>
-            {
-                new DeviceModel { Id = 1, SerialNumber = "DEV001", DeviceType = "Odometer", CurrentWarehouse = "Magazyn Główny", EntryDate = new DateTime(2023, 1, 1), Status = "Dostępny", Notes = "Nowy model" },
-                new DeviceModel { Id = 2, SerialNumber = "DEV002", DeviceType = "Tracker", CurrentWarehouse = "Serwis", EntryDate = new DateTime(2023, 2, 15), Status = "W naprawie", Notes = "Uszkodzony GPS" },
-                new DeviceModel { Id = 3, SerialNumber = "DEV003", DeviceType = "Odometer", CurrentWarehouse = "Magazyn A", EntryDate = new DateTime(2023, 3, 10), Status = "Dostępny", Notes = "" },
-                new DeviceModel { Id = 4, SerialNumber = "DEV004", DeviceType = "Gateway", CurrentWarehouse = "Magazyn B", EntryDate = new DateTime(2023, 4, 5), Status = "Dostępny", Notes = "Do testów" },
-                new DeviceModel { Id = 5, SerialNumber = "DEV005", DeviceType = "Odometer", CurrentWarehouse = "Magazyn Główny", EntryDate = new DateTime(2023, 5, 20), Status = "Dostępny", Notes = "" }
-            };
+            NewDeviceCommand = new RelayCommand(ExecuteNewDevice);
+            AddDeviceCommand = new RelayCommand(async (obj) => await ExecuteAddDeviceAsync(), CanExecuteAddDevice);
+            UpdateDeviceCommand = new RelayCommand(async (obj) => await ExecuteUpdateDeviceAsync(), CanExecuteUpdateDevice);
+            DeleteDeviceCommand = new RelayCommand(async (obj) => await ExecuteDeleteDeviceAsync(), CanExecuteOnSelectedDevice);
+            ResetFiltersCommand = new RelayCommand(ExecuteResetFilters);
+            MoveDeviceCommand = new RelayCommand(async (obj) => await ExecuteMoveDeviceAsync(), CanExecuteMoveDevice);
+            ReportRepairCommand = new RelayCommand(async (obj) => await ExecuteReportRepairAsync(), CanExecuteOnSelectedDevice);
+            FinishRepairCommand = new RelayCommand(async (obj) => await ExecuteFinishRepairAsync(), CanExecuteOnSelectedDevice);
         }
 
-        private void InitializeFilterOptions()
+        // Metoda pomocnicza do wywołania RaiseCanExecuteChanged dla wszystkich komend
+        private void RaiseAllCanExecuteChanged()
         {
-            AvailableDeviceTypes = new ObservableCollection<string>(
-                new[] { "Wszystkie" }.Concat(_allDevices.Select(d => d.DeviceType).Where(dt => dt != null).Distinct().OrderBy(dt => dt)));
-            FilterDeviceType = "Wszystkie";
-
-            AvailableWarehouses = new ObservableCollection<string>(
-                new[] { "Wszystkie" }.Concat(_allDevices.Select(d => d.CurrentWarehouse).Where(w => w != null).Distinct().OrderBy(w => w)));
-            FilterWarehouse = "Wszystkie";
-            SelectedTargetWarehouse = AllPossibleWarehouses.FirstOrDefault(); // Ustaw domyślny magazyn docelowy
-
-            AvailableStatuses = new ObservableCollection<string>(
-                new[] { "Wszystkie" }.Concat(_allDevices.Select(d => d.Status).Where(s => s != null).Distinct().OrderBy(s => s)));
-            FilterStatus = "Wszystkie";
+            ((RelayCommand)NewDeviceCommand)?.RaiseCanExecuteChanged();
+            ((RelayCommand)AddDeviceCommand)?.RaiseCanExecuteChanged();
+            ((RelayCommand)UpdateDeviceCommand)?.RaiseCanExecuteChanged();
+            ((RelayCommand)DeleteDeviceCommand)?.RaiseCanExecuteChanged();
+            ((RelayCommand)ResetFiltersCommand)?.RaiseCanExecuteChanged();
+            ((RelayCommand)MoveDeviceCommand)?.RaiseCanExecuteChanged();
+            ((RelayCommand)ReportRepairCommand)?.RaiseCanExecuteChanged();
+            ((RelayCommand)FinishRepairCommand)?.RaiseCanExecuteChanged();
         }
 
+        // Asynchroniczna metoda do ładowania wszystkich danych początkowych
+        private async Task LoadInitialDataAsync()
+        {
+            try
+            {
+                _allDevices = await SqliteDataAccess.LoadDevicesAsync(); // Ładujemy wszystkie do _allDevices
+                Devices = new ObservableCollection<DeviceModel>(_allDevices); // Kopiujemy na start do wyświetlanej listy
+
+                AvailableDeviceTypes = await SqliteDataAccess.LoadDeviceTypesAsync();
+                AvailableWarehouses = await SqliteDataAccess.LoadWarehousesAsync();
+                AvailableStatuses = await SqliteDataAccess.LoadStatusesAsync();
+
+                // Dodaj opcję "Wszystkie" do filtrów, jeśli to pożądane
+                if (AvailableDeviceTypes != null && !AvailableDeviceTypes.Contains("Wszystkie"))
+                    AvailableDeviceTypes.Insert(0, "Wszystkie");
+
+                if (AvailableWarehouses != null && !AvailableWarehouses.Contains("Wszystkie"))
+                    AvailableWarehouses.Insert(0, "Wszystkie");
+
+                if (AvailableStatuses != null && !AvailableStatuses.Contains("Wszystkie"))
+                    AvailableStatuses.Insert(0, "Wszystkie");
+
+                // Domyślnie ustaw filtry na "Wszystkie"
+                FilterDeviceType = "Wszystkie";
+                FilterWarehouse = "Wszystkie";
+                FilterStatus = "Wszystkie";
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Błąd ładowania danych: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // --- Logika filtrowania ---
         private void ApplyFilters()
         {
-            var filteredData = _allDevices.AsEnumerable();
+            if (_allDevices == null) return;
+
+            var filteredDevices = _allDevices.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(FilterSerialNumber))
-                filteredData = filteredData.Where(d => d.SerialNumber.Contains(FilterSerialNumber));
+                filteredDevices = filteredDevices.Where(d => d.SerialNumber.Contains(FilterSerialNumber));
 
-            if (FilterDeviceType != null && FilterDeviceType != "Wszystkie")
-                filteredData = filteredData.Where(d => d.DeviceType == FilterDeviceType);
+            if (FilterDeviceType != "Wszystkie" && !string.IsNullOrWhiteSpace(FilterDeviceType))
+                filteredDevices = filteredDevices.Where(d => d.TypeName == FilterDeviceType);
 
-            if (FilterWarehouse != null && FilterWarehouse != "Wszystkie")
-                filteredData = filteredData.Where(d => d.CurrentWarehouse == FilterWarehouse);
+            if (FilterWarehouse != "Wszystkie" && !string.IsNullOrWhiteSpace(FilterWarehouse))
+                filteredDevices = filteredDevices.Where(d => d.WarehouseName == FilterWarehouse);
 
-            if (FilterStatus != null && FilterStatus != "Wszystkie")
-                filteredData = filteredData.Where(d => d.Status == FilterStatus);
+            if (FilterStatus != "Wszystkie" && !string.IsNullOrWhiteSpace(FilterStatus))
+                filteredDevices = filteredDevices.Where(d => d.StatusName == FilterStatus);
 
-            DevicesList = new ObservableCollection<DeviceModel>(filteredData.OrderBy(d => d.SerialNumber));
+            Devices = new ObservableCollection<DeviceModel>(filteredDevices);
+            SelectedDevice = null; // Wyczyść zaznaczenie po przefiltrowaniu
         }
 
-        private void ResetAllFilters()
+        private void ExecuteResetFilters(object parameter)
         {
-            FilterSerialNumber = null;
+            FilterSerialNumber = string.Empty;
             FilterDeviceType = "Wszystkie";
             FilterWarehouse = "Wszystkie";
             FilterStatus = "Wszystkie";
-            ApplyFilters(); // Apply filters after reset
+            // ApplyFilters() zostanie wywołane automatycznie przez settery
         }
 
-        private void NewDevice()
+        // --- Logika dla 'Nowe urządzenie' ---
+        private void ExecuteNewDevice(object parameter)
         {
-            SelectedDevice = null; // Deselect any existing device, which triggers SelectedDevice's setter
-                                   // SelectedDevice's setter already handles setting CurrentEditDevice and IsEditing
-                                   // and calling RaiseCanExecuteChanged for relevant commands.
-        }
-
-        private bool CanAddDevice()
-        {
-            // Teraz sprawdzamy, czy wszystkie wymagane pola są wypełnione
-            return !IsEditing && CurrentEditDevice != null &&
-                   !string.IsNullOrWhiteSpace(CurrentEditDevice.SerialNumber) &&
-                   !string.IsNullOrWhiteSpace(CurrentEditDevice.DeviceType) &&
-                   !string.IsNullOrWhiteSpace(CurrentEditDevice.CurrentWarehouse) &&
-                   !string.IsNullOrWhiteSpace(CurrentEditDevice.Status);
-        }
-
-        private void AddDevice()
-        {
-            if (CanAddDevice())
+            // Przygotuj CurrentEditDevice do wprowadzenia nowego urządzenia
+            CurrentEditDevice = new DeviceModel
             {
-                // Sprawdź, czy numer seryjny już istnieje
-                if (_allDevices.Any(d => d.SerialNumber.Equals(CurrentEditDevice.SerialNumber, StringComparison.OrdinalIgnoreCase)))
+                EventDate = DateTime.Now,
+                TypeName = AvailableDeviceTypes?.FirstOrDefault(t => t != "Wszystkie") ?? string.Empty, // Ustaw pierwszą nie-pustą/nie-wszystkie
+                StatusName = AvailableStatuses?.FirstOrDefault(s => s != "Wszystkie") ?? string.Empty,
+                WarehouseName = AvailableWarehouses?.FirstOrDefault(w => w != "Wszystkie") ?? string.Empty,
+                SerialNumber = string.Empty,
+                Note = string.Empty
+            };
+            SelectedDevice = null; // Upewnij się, że nic nie jest zaznaczone w DataGrid
+            RaiseAllCanExecuteChanged(); // Odśwież stan przycisków
+        }
+
+        // --- Logika dla 'Dodaj urządzenie' (teraz dedykowana tylko do dodawania) ---
+        private async Task ExecuteAddDeviceAsync()
+        {
+            if (CurrentEditDevice == null || string.IsNullOrWhiteSpace(CurrentEditDevice.SerialNumber))
+            {
+                MessageBox.Show("Numer seryjny jest wymagany.", "Walidacja", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            if (CurrentEditDevice.DeviceId != 0) // To nie jest nowe urządzenie, błąd logiki
+            {
+                MessageBox.Show("To urządzenie już istnieje. Użyj przycisku 'Aktualizuj urządzenie'.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                await SqliteDataAccess.AddDeviceAsync(CurrentEditDevice, CurrentUserId);
+                MessageBox.Show("Urządzenie zostało dodane pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                await LoadInitialDataAsync(); // Odśwież pełną listę i zastosuj filtry
+                CurrentEditDevice = null; // Wyczyść formularz
+                SelectedDevice = null; // Wyczyść zaznaczenie
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show($"Błąd walidacji: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Wystąpił błąd podczas dodawania urządzenia: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Czy można dodać urządzenie (gdy CurrentEditDevice jest ustawione na nowe)
+        private bool CanExecuteAddDevice(object parameter)
+        {
+            // Można dodać, jeśli jest obiekt do edycji, ma numer seryjny i jest to nowe urządzenie (DeviceId == 0)
+            return CurrentEditDevice != null && !string.IsNullOrWhiteSpace(CurrentEditDevice.SerialNumber) && CurrentEditDevice.DeviceId == 0;
+        }
+
+        // --- Logika dla 'Aktualizuj urządzenie' (teraz dedykowana tylko do aktualizacji) ---
+        private async Task ExecuteUpdateDeviceAsync()
+        {
+            if (CurrentEditDevice == null || CurrentEditDevice.DeviceId == 0) // Nie wybrano urządzenia do aktualizacji lub to nowe
+            {
+                MessageBox.Show("Wybierz urządzenie do aktualizacji z listy lub użyj 'Dodaj urządzenie' dla nowego.", "Walidacja", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(CurrentEditDevice.SerialNumber))
+            {
+                MessageBox.Show("Numer seryjny jest wymagany.", "Walidacja", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                await SqliteDataAccess.UpdateDeviceAsync(CurrentEditDevice);
+                MessageBox.Show("Urządzenie zostało zaktualizowane pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                await LoadInitialDataAsync(); // Odśwież pełną listę i zastosuj filtry
+                CurrentEditDevice = null; // Wyczyść formularz
+                SelectedDevice = null; // Wyczyść zaznaczenie
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show($"Błąd walidacji: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Wystąpił błąd podczas aktualizacji urządzenia: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Czy można zaktualizować urządzenie (gdy CurrentEditDevice to istniejące urządzenie)
+        private bool CanExecuteUpdateDevice(object parameter)
+        {
+            // Można aktualizować, jeśli jest obiekt do edycji, ma numer seryjny i jest to istniejące urządzenie (DeviceId > 0)
+            return CurrentEditDevice != null && !string.IsNullOrWhiteSpace(CurrentEditDevice.SerialNumber) && CurrentEditDevice.DeviceId > 0;
+        }
+
+        // --- Logika dla 'Usuń urządzenie' ---
+        private async Task ExecuteDeleteDeviceAsync()
+        {
+            if (SelectedDevice == null) return; // Powinno być zablokowane przez CanExecute
+
+            MessageBoxResult result = MessageBox.Show(
+                $"Czy na pewno chcesz usunąć urządzenie o numerze seryjnym: {SelectedDevice.SerialNumber}?",
+                "Potwierdź usunięcie",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                try
                 {
-                    MessageBox.Show("Urządzenie o podanym numerze seryjnym już istnieje.", "Błąd dodawania", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
+                    await SqliteDataAccess.DeleteDeviceAsync(SelectedDevice.DeviceId);
+                    MessageBox.Show("Urządzenie zostało usunięte pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await LoadInitialDataAsync(); // Odśwież listę urządzeń
+                    SelectedDevice = null; // Wyczyść zaznaczenie
+                    CurrentEditDevice = null; // Wyczyść formularz edycji
                 }
-
-                // Generate a simple ID (in a real app, this would be from a database)
-                CurrentEditDevice.Id = _allDevices.Any() ? _allDevices.Max(d => d.Id) + 1 : 1;
-
-                _allDevices.Add(CurrentEditDevice);
-                ApplyFilters(); // Refresh the list
-                InitializeFilterOptions(); // Update filter options (e.g., new device type)
-                MessageBox.Show("Urządzenie zostało dodane.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
-                NewDevice(); // Prepare for next new device entry
-            }
-            else
-            {
-                MessageBox.Show("Wypełnij wszystkie wymagane pola (Numer seryjny, Typ, Magazyn, Status).", "Błąd dodawania", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-
-        private bool CanUpdateOrDeleteDevice()
-        {
-            return SelectedDevice != null;
-        }
-
-        private void UpdateDevice()
-        {
-            if (CanUpdateOrDeleteDevice())
-            {
-                // Sprawdź, czy zmieniony numer seryjny nie koliduje z innym urządzeniem
-                if (_allDevices.Any(d => d.Id != CurrentEditDevice.Id && d.SerialNumber.Equals(CurrentEditDevice.SerialNumber, StringComparison.OrdinalIgnoreCase)))
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Numer seryjny jest już używany przez inne urządzenie.", "Błąd aktualizacji", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                var existingDevice = _allDevices.FirstOrDefault(d => d.Id == CurrentEditDevice.Id);
-                if (existingDevice != null)
-                {
-                    // Używamy SetProperty dla właściwości, aby wywołać INotifyPropertyChanged
-                    existingDevice.SerialNumber = CurrentEditDevice.SerialNumber;
-                    existingDevice.DeviceType = CurrentEditDevice.DeviceType;
-                    existingDevice.CurrentWarehouse = CurrentEditDevice.CurrentWarehouse;
-                    existingDevice.EntryDate = CurrentEditDevice.EntryDate;
-                    existingDevice.Status = CurrentEditDevice.Status;
-                    existingDevice.Notes = CurrentEditDevice.Notes;
-
-                    ApplyFilters(); // Refresh the list
-                    InitializeFilterOptions(); // Update filter options if necessary
-                    MessageBox.Show("Dane urządzenia zostały zaktualizowane.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Wybierz urządzenie do aktualizacji.", "Błąd aktualizacji", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-
-        private void DeleteDevice()
-        {
-            if (CanUpdateOrDeleteDevice() && MessageBox.Show($"Czy na pewno chcesz usunąć urządzenie o numerze seryjnym: {SelectedDevice.SerialNumber}?", "Potwierdź usunięcie", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
-            {
-                _allDevices.Remove(SelectedDevice);
-                ApplyFilters(); // Refresh the list
-                InitializeFilterOptions(); // Update filter options
-                SelectedDevice = null; // Deselect
-                MessageBox.Show("Urządzenie zostało usunięte.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
-
-        private void MoveDevice()
-        {
-            if (CanUpdateOrDeleteDevice())
-            {
-                if (string.IsNullOrWhiteSpace(SelectedTargetWarehouse))
-                {
-                    MessageBox.Show("Wybierz docelowy magazyn.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                if (SelectedTargetWarehouse == SelectedDevice.CurrentWarehouse)
-                {
-                    MessageBox.Show("Urządzenie już znajduje się w wybranym magazynie docelowym.", "Informacja", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
-
-                var existingDevice = _allDevices.FirstOrDefault(d => d.Id == SelectedDevice.Id);
-                if (existingDevice != null)
-                {
-                    existingDevice.CurrentWarehouse = SelectedTargetWarehouse;
-                    existingDevice.Notes = $"{existingDevice.Notes} [Przeniesiono do {SelectedTargetWarehouse} {DateTime.Now.ToString("dd.MM.yyyy")}]";
-                    ApplyFilters();
-                    InitializeFilterOptions(); // Update available warehouses if new one is added
-                    MessageBox.Show($"Urządzenie {existingDevice.SerialNumber} przeniesiono do: {SelectedTargetWarehouse}.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Wybierz urządzenie do przeniesienia.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-
-        private bool CanReportRepair()
-        {
-            return SelectedDevice != null && SelectedDevice.Status != "W naprawie";
-        }
-
-        private void ReportRepair()
-        {
-            if (CanReportRepair())
-            {
-                var existingDevice = _allDevices.FirstOrDefault(d => d.Id == SelectedDevice.Id);
-                if (existingDevice != null)
-                {
-                    existingDevice.Status = "W naprawie";
-                    existingDevice.Notes = $"{existingDevice.Notes} [Zgłoszono do naprawy {DateTime.Now.ToString("dd.MM.yyyy")}]";
-                    ApplyFilters();
-                    MessageBox.Show($"Urządzenie {existingDevice.SerialNumber} zostało zgłoszone do naprawy.", "Zgłoszono naprawę", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"Wystąpił błąd podczas usuwania urządzenia: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-            else if (SelectedDevice?.Status == "W naprawie")
+        }
+
+        // Czy można edytować lub usunąć (czy wybrano urządzenie z listy)
+        private bool CanExecuteOnSelectedDevice(object parameter)
+        {
+            return SelectedDevice != null && SelectedDevice.DeviceId > 0;
+        }
+
+        // --- Logika dla 'Przenieś do magazynu' ---
+        private async Task ExecuteMoveDeviceAsync()
+        {
+            if (SelectedDevice == null || SelectedTargetWarehouse == null || SelectedTargetWarehouse == "Wszystkie")
             {
-                MessageBox.Show("Urządzenie jest już w statusie 'W naprawie'.", "Informacja", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Wybierz urządzenie do przeniesienia i magazyn docelowy.", "Walidacja", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
-            else
+
+            try
             {
-                MessageBox.Show("Wybierz urządzenie do zgłoszenia naprawy.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Warning);
+                // Załóżmy, że metoda w SqliteDataAccess potrafi przenieść urządzenie
+                // Będziesz potrzebował dostosować tę metodę w swoim SqliteDataAccess
+                await SqliteDataAccess.MoveDeviceToWarehouseAsync(SelectedDevice.DeviceId, SelectedTargetWarehouse, CurrentUserId);
+                MessageBox.Show($"Urządzenie {SelectedDevice.SerialNumber} przeniesiono do magazynu {SelectedTargetWarehouse}.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                await LoadInitialDataAsync(); // Odśwież listę
+                SelectedTargetWarehouse = null; // Wyczyść wybór magazynu
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Błąd podczas przenoszenia urządzenia: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private bool CanFinishRepair()
+        private bool CanExecuteMoveDevice(object parameter)
         {
-            return SelectedDevice != null && SelectedDevice.Status == "W naprawie";
+           return SelectedDevice != null && SelectedDevice.DeviceId > 0 &&
+                   !string.IsNullOrWhiteSpace(SelectedTargetWarehouse) &&
+                   SelectedTargetWarehouse != "Wszystkie" &&
+                   SelectedTargetWarehouse != SelectedDevice.WarehouseName;
         }
 
-        private void FinishRepair()
+
+        // --- Logika dla 'Zgłoś naprawę' ---
+        private async Task ExecuteReportRepairAsync()
         {
-            if (CanFinishRepair())
+            if (SelectedDevice == null) return;
+
+            try
             {
-                var existingDevice = _allDevices.FirstOrDefault(d => d.Id == SelectedDevice.Id);
-                if (existingDevice != null)
-                {
-                    existingDevice.Status = "Dostępny"; // Zmieniamy status na Dostępny
-                    existingDevice.Notes = $"{existingDevice.Notes} [Zakończono naprawę {DateTime.Now.ToString("dd.MM.yyyy")}]";
-                    ApplyFilters();
-                    MessageBox.Show($"Naprawa urządzenia {existingDevice.SerialNumber} została zakończona. Status zmieniono na 'Dostępny'.", "Naprawa zakończona", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
+                // Zakładam, że metoda w SqliteDataAccess aktualizuje status urządzenia na "W naprawie"
+                await SqliteDataAccess.UpdateDeviceStatusAsync(SelectedDevice.DeviceId, "W naprawie", CurrentUserId);
+                MessageBox.Show($"Urządzenie {SelectedDevice.SerialNumber} zgłoszono do naprawy.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                await LoadInitialDataAsync(); // Odśwież listę
             }
-            else if (SelectedDevice?.Status != "W naprawie")
+            catch (Exception ex)
             {
-                MessageBox.Show("Wybrane urządzenie nie jest w statusie 'W naprawie'.", "Informacja", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Błąd podczas zgłaszania naprawy: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            else
+        }
+
+        // --- Logika dla 'Zakończ naprawę' ---
+        private async Task ExecuteFinishRepairAsync()
+        {
+            if (SelectedDevice == null) return;
+
+            try
             {
-                MessageBox.Show("Wybierz urządzenie, aby zakończyć naprawę.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Warning);
+                // Zakładam, że metoda w SqliteDataAccess aktualizuje status urządzenia na "Dostępny" lub podobny
+                await SqliteDataAccess.UpdateDeviceStatusAsync(SelectedDevice.DeviceId, "Dostępny", CurrentUserId);
+                MessageBox.Show($"Naprawa urządzenia {SelectedDevice.SerialNumber} została zakończona.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                await LoadInitialDataAsync(); // Odśwież listę
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Błąd podczas kończenia naprawy: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // --- Implementacja INotifyPropertyChanged ---
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        // Pomocnicza metoda do uproszczenia setterów właściwości
+        protected bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string propertyName = null)
+        {
+            if (Equals(field, newValue)) return false;
+            field = newValue;
+            OnPropertyChanged(propertyName);
+            return true;
         }
     }
 }

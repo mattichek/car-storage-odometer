@@ -110,19 +110,19 @@
 
                     <Separator Background="{StaticResource BorderBrush}" Height="1" Margin="0,0,0,15"/>
 
-                    <DataGrid ItemsSource="{Binding DevicesList}"
+                    <DataGrid ItemsSource="{Binding Devices}"
                               SelectedItem="{Binding SelectedDevice}"
                               Style="{StaticResource {x:Type DataGrid}}"
                               AutoGenerateColumns="False"
                               CanUserSortColumns="True">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto" SortMemberPath="Id"/>
+                            <DataGridTextColumn Header="ID" Binding="{Binding DeviceId}" Width="Auto" SortMemberPath="Id"/>
                             <DataGridTextColumn Header="Numer seryjny" Binding="{Binding SerialNumber}" Width="*" SortMemberPath="SerialNumber"/>
-                            <DataGridTextColumn Header="Typ" Binding="{Binding DeviceType}" Width="*" SortMemberPath="DeviceType"/>
-                            <DataGridTextColumn Header="Magazyn" Binding="{Binding CurrentWarehouse}" Width="*" SortMemberPath="CurrentWarehouse"/>
-                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="*" SortMemberPath="Status"/>
-                            <DataGridTextColumn Header="Data przyjęcia" Binding="{Binding EntryDate, StringFormat='{}{0:dd.MM.yyyy}'}" Width="Auto" SortMemberPath="EntryDate"/>
-                            <DataGridTextColumn Header="Uwagi" Binding="{Binding Notes}" Width="2*" SortMemberPath="Notes"/>
+                            <DataGridTextColumn Header="Typ" Binding="{Binding TypeName}" Width="*" SortMemberPath="DeviceType"/>
+                            <DataGridTextColumn Header="Magazyn" Binding="{Binding WarehouseName}" Width="*" SortMemberPath="CurrentWarehouse"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding StatusName}" Width="*" SortMemberPath="Status"/>
+                            <DataGridTextColumn Header="Data przyjęcia" Binding="{Binding EventDate, StringFormat='{}{0:dd.MM.yyyy}'}" Width="Auto" SortMemberPath="EntryDate"/>
+                            <DataGridTextColumn Header="Uwagi" Binding="{Binding Note}" Width="2*" SortMemberPath="Notes"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </StackPanel>
@@ -155,14 +155,15 @@
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="ID:" Style="{StaticResource BaseTextBlockStyle}" Margin="0,0,10,5"/>
-                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding CurrentEditDevice.Id, Mode=OneWay}" IsReadOnly="True" Style="{StaticResource StandardTextBoxStyle}" Margin="0,0,0,5"/>
+                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding CurrentEditDevice.DeviceId, Mode=OneWay}" IsReadOnly="True" Style="{StaticResource StandardTextBoxStyle}" Margin="0,0,0,5"/>
 
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="Numer ser.:" Style="{StaticResource BaseTextBlockStyle}" Margin="0,0,10,5"/>
-                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding CurrentEditDevice.SerialNumber, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource StandardTextBoxStyle}" Margin="0,0,0,5"/>
+                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding CurrentEditDevice.SerialNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource StandardTextBoxStyle}" Margin="0,0,0,5"/>
 
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="Typ:" Style="{StaticResource BaseTextBlockStyle}" Margin="0,0,10,5"/>
                             <ComboBox Grid.Row="2" Grid.Column="1"
-                                      ItemsSource="{Binding AllPossibleDeviceTypes}" SelectedItem="{Binding CurrentEditDevice.DeviceType}"
+                                      ItemsSource="{Binding AvailableDeviceTypes}"
+                                      SelectedItem="{Binding CurrentEditDevice.TypeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Style="{StaticResource {x:Type ComboBox}}" Margin="0,0,0,5">
                                 <ComboBox.ItemContainerStyle>
                                     <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
@@ -171,7 +172,8 @@
 
                             <TextBlock Grid.Row="3" Grid.Column="0" Text="Magazyn:" Style="{StaticResource BaseTextBlockStyle}" Margin="0,0,10,5"/>
                             <ComboBox Grid.Row="3" Grid.Column="1"
-                                      ItemsSource="{Binding AllPossibleWarehouses}" SelectedItem="{Binding CurrentEditDevice.CurrentWarehouse}"
+                                      ItemsSource="{Binding AvailableWarehouses}"
+                                      SelectedItem="{Binding CurrentEditDevice.WarehouseName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Style="{StaticResource {x:Type ComboBox}}" Margin="0,0,0,5">
                                 <ComboBox.ItemContainerStyle>
                                     <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
@@ -179,11 +181,12 @@
                             </ComboBox>
 
                             <TextBlock Grid.Row="4" Grid.Column="0" Text="Data przyjęcia:" Style="{StaticResource BaseTextBlockStyle}" Margin="0,0,10,5"/>
-                            <DatePicker Grid.Row="4" Grid.Column="1" SelectedDate="{Binding CurrentEditDevice.EntryDate}" Style="{StaticResource {x:Type DatePicker}}" Margin="0,0,0,5"/>
+                            <DatePicker Grid.Row="4" Grid.Column="1" SelectedDate="{Binding CurrentEditDevice.EventDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource {x:Type DatePicker}}" Margin="0,0,0,5"/>
 
                             <TextBlock Grid.Row="5" Grid.Column="0" Text="Status:" Style="{StaticResource BaseTextBlockStyle}" Margin="0,0,10,5"/>
                             <ComboBox Grid.Row="5" Grid.Column="1"
-                                      ItemsSource="{Binding AllPossibleStatuses}" SelectedItem="{Binding CurrentEditDevice.Status}"
+                                      ItemsSource="{Binding AvailableStatuses}"
+                                      SelectedItem="{Binding CurrentEditDevice.StatusName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Style="{StaticResource {x:Type ComboBox}}" Margin="0,0,0,5">
                                 <ComboBox.ItemContainerStyle>
                                     <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
@@ -191,7 +194,9 @@
                             </ComboBox>
 
                             <TextBlock Grid.Row="6" Grid.Column="0" Text="Uwagi:" Style="{StaticResource BaseTextBlockStyle}" Margin="0,0,10,5"/>
-                            <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding CurrentEditDevice.Notes}" Style="{StaticResource StandardTextBoxStyle}" TextWrapping="Wrap" MinHeight="50" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Margin="0,0,0,5"/>
+                            <TextBox Grid.Row="6" Grid.Column="1"
+                                     Text="{Binding CurrentEditDevice.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource StandardTextBoxStyle}" TextWrapping="Wrap" MinHeight="50" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Margin="0,0,0,5"/>
                         </Grid>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,20">
@@ -206,12 +211,14 @@
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                                 <TextBlock Text="Przenieś do magazynu:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                                <ComboBox ItemsSource="{Binding AllPossibleWarehouses}" SelectedItem="{Binding SelectedTargetWarehouse}"
+                                <ComboBox ItemsSource="{Binding AvailableWarehouses}" 
+                                          SelectedItem="{Binding SelectedTargetWarehouse, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                           Width="150" Margin="0,0,10,0" Style="{StaticResource {x:Type ComboBox}}">
                                     <ComboBox.ItemContainerStyle>
                                         <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
                                     </ComboBox.ItemContainerStyle>
                                 </ComboBox>
+
                                 <Button Content="Przenieś" Command="{Binding MoveDeviceCommand}" Style="{StaticResource {x:Type Button}}"/>
                             </StackPanel>
 
