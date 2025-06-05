@@ -82,15 +82,7 @@ namespace car_storage_odometer.ViewModels
             // Symulacja ostatnich logów użytkowników (5 ostatnich)
             // W prawdziwej aplikacji: zapytanie do bazy danych z ORDER BY i LIMIT
             LatestUserLogs.Clear();
-            LatestUserLogs = SqliteDataAccess.LoadUserLogs();
-            // Przykładowe dane, pamiętaj, aby to były faktyczne dane z bazy, jeśli dostępne
-            //LatestUserLogs.Add(new UserLogModel { UserLogId = 5, UserId = 1, UserName = "Jan Kowalski", Action = "Zalogował się", EventDate = new DateTime(2025, 5, 31, 8, 55, 0) });
-            //LatestUserLogs.Add(new UserLogModel { UserLogId = 4, UserId = 2, UserName = "Anna Nowak", Action = "Dodała licznik 'Licznik-001'", EventDate = new DateTime(2025, 5, 31, 7, 55, 0) });
-            //LatestUserLogs.Add(new UserLogModel { UserLogId = 3, UserId = 3, UserName = "Piotr Zieliński", Action = "Wylogował się", EventDate = new DateTime(2025, 5, 31, 6, 55, 0) });
-            //LatestUserLogs.Add(new UserLogModel { UserLogId = 2, UserId = 1, UserName = "Jan Kowalski", Action = "Usunął moduł 'Moduł-ABC'", EventDate = new DateTime(2025, 5, 31, 5, 55, 0) });
-            //LatestUserLogs.Add(new UserLogModel { UserLogId = 1, UserId = 2, UserName = "Anna Nowak", Action = "Zalogowała się", EventDate = new DateTime(2025, 5, 31, 4, 55, 0) });
-            // Sortowanie po dacie (najnowsze na górze) i wzięcie 5 ostatnich
-            LatestUserLogs = new ObservableCollection<UserLogModel>(LatestUserLogs.OrderByDescending(l => l.EventDate).Take(5));
+            LatestUserLogs = new ObservableCollection<UserLogModel>(SqliteDataAccess.LoadUserLogs().OrderByDescending(l => l.EventDate).Take(5));
 
 
             // Symulacja ostatnich logów urządzeń (5 ostatnich)
@@ -107,12 +99,13 @@ namespace car_storage_odometer.ViewModels
             // Symulacja ostatnich napraw (5 ostatnich)
             // Pamiętaj, RepairHistoryModel powinien zawierać nazwy elementów itp.
             LatestRepairs.Clear();
-            LatestRepairs.Add(new RepairHistoryModel { RepairId = 5, DeviceId = 201, DeviceName = "Licznik-005", Description = "Wymiana baterii", StartDate = new DateTime(2025, 5, 30), UserId = 1, UserName = "Jan Kowalski" });
-            LatestRepairs.Add(new RepairHistoryModel { RepairId = 4, DeviceId = 202, DeviceName = "Licznik-002", Description = "Czyszczenie styków", StartDate = new DateTime(2025, 5, 28), UserId = 2, UserName = "Anna Nowak" });
-            LatestRepairs.Add(new RepairHistoryModel { RepairId = 3, DeviceId = 203, DeviceName = "Licznik-010", Description = "Naprawa obudowy", StartDate = new DateTime(2025, 5, 24), UserId = 1, UserName = "Jan Kowalski" });
-            LatestRepairs.Add(new RepairHistoryModel { RepairId = 2, DeviceId = 204, DeviceName = "Moduł-ABC", Description = "Kalibracja", StartDate = new DateTime(2025, 5, 21), UserId = 3, UserName = "Piotr Zieliński" });
-            LatestRepairs.Add(new RepairHistoryModel { RepairId = 1, DeviceId = 205, DeviceName = "Licznik-002", Description = "Wymiana wyświetlacza", StartDate = new DateTime(2025, 5, 17), UserId = 2, UserName = "Anna Nowak" });
-            LatestRepairs = new ObservableCollection<RepairHistoryModel>(LatestRepairs.OrderByDescending(r => r.StartDate).Take(5));
+            LatestRepairs = new ObservableCollection<RepairHistoryModel>(SqliteDataAccess.LoadRepairHistory().OrderByDescending(r => r.StartDate).Take(5));
+            //LatestRepairs.Add(new RepairHistoryModel { RepairId = 5, DeviceId = 201, DeviceName = "Licznik-005", Description = "Wymiana baterii", StartDate = new DateTime(2025, 5, 30), UserId = 1, UserName = "Jan Kowalski" });
+            //LatestRepairs.Add(new RepairHistoryModel { RepairId = 4, DeviceId = 202, DeviceName = "Licznik-002", Description = "Czyszczenie styków", StartDate = new DateTime(2025, 5, 28), UserId = 2, UserName = "Anna Nowak" });
+            //LatestRepairs.Add(new RepairHistoryModel { RepairId = 3, DeviceId = 203, DeviceName = "Licznik-010", Description = "Naprawa obudowy", StartDate = new DateTime(2025, 5, 24), UserId = 1, UserName = "Jan Kowalski" });
+            //LatestRepairs.Add(new RepairHistoryModel { RepairId = 2, DeviceId = 204, DeviceName = "Moduł-ABC", Description = "Kalibracja", StartDate = new DateTime(2025, 5, 21), UserId = 3, UserName = "Piotr Zieliński" });
+            //LatestRepairs.Add(new RepairHistoryModel { RepairId = 1, DeviceId = 205, DeviceName = "Licznik-002", Description = "Wymiana wyświetlacza", StartDate = new DateTime(2025, 5, 17), UserId = 2, UserName = "Anna Nowak" });
+            //LatestRepairs = new ObservableCollection<RepairHistoryModel>(LatestRepairs.OrderByDescending(r => r.StartDate).Take(5));
         }
     }
 }

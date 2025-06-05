@@ -25,8 +25,8 @@ namespace car_storage_odometer.Helpers
         {
             using(IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<WarehouseStatusModel>("select * from Warehouses", new DynamicParameters());
-                return new ObservableCollection<WarehouseStatusModel>(output);
+                var warehouses = cnn.Query<WarehouseStatusModel>("select * from Warehouses", new DynamicParameters());
+                return new ObservableCollection<WarehouseStatusModel>(warehouses);
             }
         }
         /// <summary>
@@ -41,17 +41,25 @@ namespace car_storage_odometer.Helpers
         {
             using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<DeviceStatusModel>(
+                var statusesQuantity = cnn.Query<DeviceStatusModel>(
                     @"SELECT 
                         s.Name,
                     COUNT(d.DeviceId) AS Quantity
                     FROM Devices d
                     JOIN Statuses s ON d.StatusId = s.StatusId GROUP BY s.Name;",
                     new DynamicParameters());
-                return new ObservableCollection<DeviceStatusModel>(output);
+                return new ObservableCollection<DeviceStatusModel>(statusesQuantity);
             }
         }
-
+        /// <summary>
+        /// Retrieves a collection of user logs from the database, including user details, device information, and event
+        /// data.
+        /// </summary>
+        /// <remarks>This method queries the database to load user log entries, combining data from
+        /// multiple tables. The returned collection includes details such as the log ID, user name, device ID, event
+        /// description, and event date.</remarks>
+        /// <returns>An <see cref="ObservableCollection{T}"/> of <see cref="UserLogModel"/> objects representing the user logs.
+        /// The collection will be empty if no logs are found.</returns>
         public static ObservableCollection<UserLogModel> LoadUserLogs()
         {
             using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
@@ -70,7 +78,34 @@ namespace car_storage_odometer.Helpers
                 return new ObservableCollection<UserLogModel>(output);
             }
         }
-
+        /// <summary>
+        /// Retrieves the repair history records from the database.
+        /// </summary>
+        /// <remarks>This method queries the database to load repair history information, including repair
+        /// details, associated device names, user information, and repair dates. The data is returned as an observable
+        /// collection of <see cref="RepairHistoryModel"/> objects.</remarks>
+        /// <returns>An <see cref="ObservableCollection{T}"/> containing <see cref="RepairHistoryModel"/> objects that represent
+        /// the repair history records. The collection will be empty if no records are found.</returns>
+        public static ObservableCollection<RepairHistoryModel> LoadRepairHistory()
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                var repairHistory = cnn.Query<RepairHistoryModel>(
+                    @"SELECT 
+                        rh.RepairId,
+                        dt.Name AS DeviceName,
+                        rh.Description,
+                        rh.StartDate,
+                        rh.EndDate,
+                        u.FirstName || ' ' || u.LastName AS UserName
+                    FROM repairhistory rh
+                    LEFT JOIN devices d ON rh.DeviceId = d.DeviceId
+                    LEFT JOIN devicetypes dt ON d.TypeId = dt.TypeId
+                    LEFT JOIN users u ON rh.UserId = u.UserId;",
+                    new DynamicParameters());
+                return new ObservableCollection<RepairHistoryModel>(repairHistory);
+            }
+        }
         private static string LoadConnectionString(string id = "DataBase")
         {
             return ConfigurationManager.ConnectionStrings[id].ConnectionString;
