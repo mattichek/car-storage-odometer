@@ -61,28 +61,38 @@ namespace car_storage_odometer.ViewModels
             LatestDeviceLogs = new ObservableCollection<DeviceLogModel>();
             LatestRepairs = new ObservableCollection<RepairHistoryModel>();
 
-            // W prawdziwej aplikacji: pobierz dane z serwisu/repozytorium
-            // Na razie symulacja danych
             LoadDashboardData();
         }
 
         // --- Metody Prywatne ---
         private void LoadDashboardData()
         {
-            // Symulacja danych stanów magazynowych
-            // W prawdziwej aplikacji: zapytanie do bazy danych z agregacją
+            // Stany magazynowe
             WarehouseStatuses.Clear();
-            WarehouseStatuses = SqliteDataAccess.LoadWarehouses();
+            WarehouseStatuses = SqliteDataAccess<WarehouseStatusModel>.LoadQuery("select * from Warehouses");
 
           
-            // W prawdziwej aplikacji: zapytanie do bazy danych z agregacją
+            // Statusy i ich ilość
             DeviceStatuses.Clear();
-            DeviceStatuses = SqliteDataAccess.LoadStatusesQuantity();
+            DeviceStatuses = SqliteDataAccess<DeviceStatusModel>.LoadQuery(
+                @"SELECT 
+                    s.Name,
+                COUNT(d.DeviceId) AS Quantity
+                FROM Devices d
+                JOIN Statuses s ON d.StatusId = s.StatusId GROUP BY s.Name;");
 
-            // Symulacja ostatnich logów użytkowników (5 ostatnich)
-            // W prawdziwej aplikacji: zapytanie do bazy danych z ORDER BY i LIMIT
+            // Ostatnie logi użytkowników (5 ostatnich)
             LatestUserLogs.Clear();
-            LatestUserLogs = new ObservableCollection<UserLogModel>(SqliteDataAccess.LoadUserLogs().OrderByDescending(l => l.EventDate).Take(5));
+            LatestUserLogs = new ObservableCollection<UserLogModel>(SqliteDataAccess<UserLogModel>.LoadQuery(
+                @"SELECT 
+                    l.LogId,
+                    u.FirstName || ' ' || u.LastName AS UserName,
+                    d.DeviceId, 
+                    l.Event, 
+                    l.EventDate
+                FROM UserLogs l
+                LEFT JOIN Users u ON l.UserId = u.UserId
+                LEFT JOIN Devices d ON l.DeviceId = d.DeviceId;").OrderByDescending(l => l.EventDate).Take(5));
 
 
             // Symulacja ostatnich logów urządzeń (5 ostatnich)
@@ -96,16 +106,21 @@ namespace car_storage_odometer.ViewModels
             LatestDeviceLogs = new ObservableCollection<DeviceLogModel>(LatestDeviceLogs.OrderByDescending(l => l.EventDate).Take(5));
 
 
-            // Symulacja ostatnich napraw (5 ostatnich)
-            // Pamiętaj, RepairHistoryModel powinien zawierać nazwy elementów itp.
+            // Ostatnie naprawy (5 ostatnich)
             LatestRepairs.Clear();
-            LatestRepairs = new ObservableCollection<RepairHistoryModel>(SqliteDataAccess.LoadRepairHistory().OrderByDescending(r => r.StartDate).Take(5));
-            //LatestRepairs.Add(new RepairHistoryModel { RepairId = 5, DeviceId = 201, DeviceName = "Licznik-005", Description = "Wymiana baterii", StartDate = new DateTime(2025, 5, 30), UserId = 1, UserName = "Jan Kowalski" });
-            //LatestRepairs.Add(new RepairHistoryModel { RepairId = 4, DeviceId = 202, DeviceName = "Licznik-002", Description = "Czyszczenie styków", StartDate = new DateTime(2025, 5, 28), UserId = 2, UserName = "Anna Nowak" });
-            //LatestRepairs.Add(new RepairHistoryModel { RepairId = 3, DeviceId = 203, DeviceName = "Licznik-010", Description = "Naprawa obudowy", StartDate = new DateTime(2025, 5, 24), UserId = 1, UserName = "Jan Kowalski" });
-            //LatestRepairs.Add(new RepairHistoryModel { RepairId = 2, DeviceId = 204, DeviceName = "Moduł-ABC", Description = "Kalibracja", StartDate = new DateTime(2025, 5, 21), UserId = 3, UserName = "Piotr Zieliński" });
-            //LatestRepairs.Add(new RepairHistoryModel { RepairId = 1, DeviceId = 205, DeviceName = "Licznik-002", Description = "Wymiana wyświetlacza", StartDate = new DateTime(2025, 5, 17), UserId = 2, UserName = "Anna Nowak" });
-            //LatestRepairs = new ObservableCollection<RepairHistoryModel>(LatestRepairs.OrderByDescending(r => r.StartDate).Take(5));
+            LatestRepairs = new ObservableCollection<RepairHistoryModel>(SqliteDataAccess<RepairHistoryModel>.LoadQuery(
+                @"SELECT 
+                    rh.RepairId,
+                    dt.Name AS DeviceName,
+                    rh.Description,
+                    rh.StartDate,
+                    rh.EndDate,
+                    u.FirstName || ' ' || u.LastName AS UserName
+                FROM repairhistory rh
+                LEFT JOIN devices d ON rh.DeviceId = d.DeviceId
+                LEFT JOIN devicetypes dt ON d.TypeId = dt.TypeId
+                LEFT JOIN users u ON rh.UserId = u.UserId;").OrderByDescending(r => r.StartDate).Take(5));
+
         }
     }
 }

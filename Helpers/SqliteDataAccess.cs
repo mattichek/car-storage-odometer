@@ -11,101 +11,32 @@ using System.Collections.ObjectModel;
 
 namespace car_storage_odometer.Helpers
 {
-    public class SqliteDataAccess
+    public class SqliteDataAccess<T>
     {
         /// <summary>
-        /// Retrieves a collection of warehouse status records from the database.
+        /// Executes the specified SQL query and returns the results as an observable collection.
         /// </summary>
-        /// <remarks>This method queries the database for all records in the "Warehouses" table and
-        /// returns them as an observable collection of <see cref="WarehouseStatusModel"/> objects. The returned
-        /// collection can be used for data binding in UI frameworks that support observable collections.</remarks>
-        /// <returns>An <see cref="ObservableCollection{T}"/> containing <see cref="WarehouseStatusModel"/> objects representing
-        /// the status of each warehouse. The collection will be empty if no records are found.</returns>
-        public static ObservableCollection<WarehouseStatusModel> LoadWarehouses()
-        {
-            using(IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-            {
-                var warehouses = cnn.Query<WarehouseStatusModel>("select * from Warehouses", new DynamicParameters());
-                return new ObservableCollection<WarehouseStatusModel>(warehouses);
-            }
-        }
-        /// <summary>
-        /// Retrieves a collection of device statuses along with the quantity of devices associated with each status.
-        /// </summary>
-        /// <remarks>This method queries the database to group devices by their status and calculates the
-        /// count of devices for each status. The result is returned as an observable collection of <see
-        /// cref="DeviceStatusModel"/> objects.</remarks>
-        /// <returns>An <see cref="ObservableCollection{T}"/> of <see cref="DeviceStatusModel"/> objects, where each object
-        /// contains the name of a status and the quantity of devices associated with that status.</returns>
-        public static ObservableCollection<DeviceStatusModel> LoadStatusesQuantity()
+        /// <remarks>This method uses a SQLite connection to execute the query and map the results. Ensure
+        /// that the connection string is properly configured before calling this method.</remarks>
+        /// <param name="query">The SQL query to execute. Must be a valid SQL statement.</param>
+        /// <returns>An <see cref="ObservableCollection{T}"/> containing the results of the query. If the query returns no
+        /// results, the collection will be empty.</returns>
+        public static ObservableCollection<T> LoadQuery(string query)
         {
             using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
             {
-                var statusesQuantity = cnn.Query<DeviceStatusModel>(
-                    @"SELECT 
-                        s.Name,
-                    COUNT(d.DeviceId) AS Quantity
-                    FROM Devices d
-                    JOIN Statuses s ON d.StatusId = s.StatusId GROUP BY s.Name;",
+                var repairHistory = cnn.Query<T>(
+                    query,
                     new DynamicParameters());
-                return new ObservableCollection<DeviceStatusModel>(statusesQuantity);
+                return new ObservableCollection<T>(repairHistory);
             }
         }
         /// <summary>
-        /// Retrieves a collection of user logs from the database, including user details, device information, and event
-        /// data.
+        /// Retrieves the connection string associated with the specified identifier from the application's
+        /// configuration file.
         /// </summary>
-        /// <remarks>This method queries the database to load user log entries, combining data from
-        /// multiple tables. The returned collection includes details such as the log ID, user name, device ID, event
-        /// description, and event date.</remarks>
-        /// <returns>An <see cref="ObservableCollection{T}"/> of <see cref="UserLogModel"/> objects representing the user logs.
-        /// The collection will be empty if no logs are found.</returns>
-        public static ObservableCollection<UserLogModel> LoadUserLogs()
-        {
-            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-            {
-                var output = cnn.Query<UserLogModel>(
-                        @"SELECT 
-                          l.LogId,
-                          u.FirstName || ' ' || u.LastName AS UserName,
-                          d.DeviceId, 
-                          l.Event, 
-                          l.EventDate
-                      FROM UserLogs l
-                      LEFT JOIN Users u ON l.UserId = u.UserId
-                      LEFT JOIN Devices d ON l.DeviceId = d.DeviceId;",
-                    new DynamicParameters());
-                return new ObservableCollection<UserLogModel>(output);
-            }
-        }
-        /// <summary>
-        /// Retrieves the repair history records from the database.
-        /// </summary>
-        /// <remarks>This method queries the database to load repair history information, including repair
-        /// details, associated device names, user information, and repair dates. The data is returned as an observable
-        /// collection of <see cref="RepairHistoryModel"/> objects.</remarks>
-        /// <returns>An <see cref="ObservableCollection{T}"/> containing <see cref="RepairHistoryModel"/> objects that represent
-        /// the repair history records. The collection will be empty if no records are found.</returns>
-        public static ObservableCollection<RepairHistoryModel> LoadRepairHistory()
-        {
-            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-            {
-                var repairHistory = cnn.Query<RepairHistoryModel>(
-                    @"SELECT 
-                        rh.RepairId,
-                        dt.Name AS DeviceName,
-                        rh.Description,
-                        rh.StartDate,
-                        rh.EndDate,
-                        u.FirstName || ' ' || u.LastName AS UserName
-                    FROM repairhistory rh
-                    LEFT JOIN devices d ON rh.DeviceId = d.DeviceId
-                    LEFT JOIN devicetypes dt ON d.TypeId = dt.TypeId
-                    LEFT JOIN users u ON rh.UserId = u.UserId;",
-                    new DynamicParameters());
-                return new ObservableCollection<RepairHistoryModel>(repairHistory);
-            }
-        }
+        /// <param name="id">The identifier of the connection string to retrieve. Defaults to "DataBase" if no value is provided.</param>
+        /// <returns>The connection string corresponding to the specified identifier.</returns>
         private static string LoadConnectionString(string id = "DataBase")
         {
             return ConfigurationManager.ConnectionStrings[id].ConnectionString;
