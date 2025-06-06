@@ -99,6 +99,7 @@
     <Compile Include="Helpers\PasswordBoxHelper.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Helpers\SqliteDataAccess.cs" />
+    <Compile Include="Helpers\SqliteDataAccessModifyingQuery.cs" />
     <Compile Include="Models\DeviceLogModel.cs" />
     <Compile Include="Models\DeviceModel.cs" />
     <Compile Include="Models\DeviceStatusModel.cs" />

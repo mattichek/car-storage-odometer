@@ -133,7 +133,7 @@ namespace car_storage_odometer.ViewModels
             IsLoading = true;
             try
             {
-                AllDeviceLogs = await SqliteDataAccess.LoadDevicesLogsAsync();
+                AllDeviceLogs = await SqliteDataAccess<DeviceLogModel>.LoadDevicesLogsAsync();
                 InitializeFilterOptions();
                 ResetAllFiltersAndApply();
                 ApplyFilters();

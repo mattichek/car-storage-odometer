@@ -4,7 +4,8 @@ using car_storage_odometer.Models; // Upewnij się, że ta przestrzeń nazw jest
 using System;
 using System.Linq; // Do użycia Linq do sortowania i pobierania ostatnich elementów
 using Prism.Commands;
-using car_storage_odometer.Helpers; 
+using car_storage_odometer.Helpers;
+using System.Threading.Tasks;
 
 namespace car_storage_odometer.ViewModels
 {
@@ -61,20 +62,20 @@ namespace car_storage_odometer.ViewModels
             LatestDeviceLogs = new ObservableCollection<DeviceLogModel>();
             LatestRepairs = new ObservableCollection<RepairHistoryModel>();
 
-            LoadDashboardData();
+            _ = LoadDashboardData();
         }
 
         // --- Metody Prywatne ---
-        private void LoadDashboardData()
+        private async Task LoadDashboardData()
         {
             // Stany magazynowe
             WarehouseStatuses.Clear();
-            WarehouseStatuses = SqliteDataAccess<WarehouseStatusModel>.LoadQuery("select * from Warehouses");
+            WarehouseStatuses = await SqliteDataAccess<WarehouseStatusModel>.LoadQuery("select * from Warehouses");
 
           
             // Statusy i ich ilość
             DeviceStatuses.Clear();
-            DeviceStatuses = SqliteDataAccess<DeviceStatusModel>.LoadQuery(
+            DeviceStatuses = await SqliteDataAccess<DeviceStatusModel>.LoadQuery(
                 @"SELECT 
                     s.Name,
                 COUNT(d.DeviceId) AS Quantity
@@ -83,7 +84,7 @@ namespace car_storage_odometer.ViewModels
 
             // Ostatnie logi użytkowników (5 ostatnich)
             LatestUserLogs.Clear();
-            LatestUserLogs = new ObservableCollection<UserLogModel>(SqliteDataAccess<UserLogModel>.LoadQuery(
+            LatestUserLogs = await SqliteDataAccess<UserLogModel>.LoadQuery(
                 @"SELECT 
                     l.LogId,
                     u.FirstName || ' ' || u.LastName AS UserName,
@@ -92,17 +93,35 @@ namespace car_storage_odometer.ViewModels
                     l.EventDate
                 FROM UserLogs l
                 LEFT JOIN Users u ON l.UserId = u.UserId
-                LEFT JOIN Devices d ON l.DeviceId = d.DeviceId;").OrderByDescending(l => l.EventDate).Take(5));
+                LEFT JOIN Devices d ON l.DeviceId = d.DeviceId
+                ORDER BY l.LogId DESC LIMIT 5;");
 
 
             // Symulacja ostatnich logów urządzeń (5 ostatnich)
             // Pamiętaj, DeviceLogModel powinien zawierać nazwy urządzeń itp.
             LatestDeviceLogs.Clear();
-            LatestDeviceLogs = SqliteDataAccess.LoadDevicesLogsLastFiveLogs();
+            LatestDeviceLogs = await SqliteDataAccess<DeviceLogModel>.LoadQuery("" +
+                @"SELECT 
+                    dl.LogId, 
+                    sn.SerialNumber, 
+                    dt.Name AS DeviceName, 
+                    dl.EventDate, 
+                    dl.Event, 
+                    w1.Name AS FromWarehouseName, 
+                    w2.Name AS ToWarehouseName, 
+                    u.FirstName || ' ' || u.LastName AS UserName 
+                FROM DeviceLogs dl 
+                JOIN Devices d ON dl.DeviceId = d.DeviceId 
+                JOIN SerialNumbers sn ON d.DeviceId = sn.DeviceId 
+                JOIN DeviceTypes dt ON d.TypeId = dt.TypeId 
+                LEFT JOIN Warehouses w1 ON dl.FromWarehouseId = w1.WarehouseId 
+                LEFT JOIN Warehouses w2 ON dl.ToWarehouseId = w2.WarehouseId 
+                JOIN Users u ON dl.UserId = u.UserId 
+                ORDER BY dl.LogId DESC LIMIT 5;");
 
             // Ostatnie naprawy (5 ostatnich)
             LatestRepairs.Clear();
-            LatestRepairs = new ObservableCollection<RepairHistoryModel>(SqliteDataAccess<RepairHistoryModel>.LoadQuery(
+            LatestRepairs = await SqliteDataAccess<RepairHistoryModel>.LoadQuery(
                 @"SELECT 
                     rh.RepairId,
                     dt.Name AS DeviceName,
@@ -113,7 +132,8 @@ namespace car_storage_odometer.ViewModels
                 FROM repairhistory rh
                 LEFT JOIN devices d ON rh.DeviceId = d.DeviceId
                 LEFT JOIN devicetypes dt ON d.TypeId = dt.TypeId
-                LEFT JOIN users u ON rh.UserId = u.UserId;").OrderByDescending(r => r.StartDate).Take(5));
+                LEFT JOIN users u ON rh.UserId = u.UserId
+                ORDER BY rh.RepairId DESC LIMIT 5;");
 
         }
     }
