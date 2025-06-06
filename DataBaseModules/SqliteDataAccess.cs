@@ -11,7 +11,7 @@ using System.Security.AccessControl;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 
-namespace car_storage_odometer.Helpers
+namespace car_storage_odometer.DataBaseModules
 {
     public class SqliteDataAccess<T>
     {
@@ -43,23 +43,5 @@ namespace car_storage_odometer.Helpers
                     return new ObservableCollection<T>(cnn.Query<T>(query, new DynamicParameters()));
             });
         }
-        
-        public static async Task<ObservableCollection<DeviceLogModel>> LoadDevicesLogsAsync()
-        {
-            return await Task.Run(() =>
-            {
-                using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-                {
-                    var output = cnn.Query<DeviceLogModel>("SELECT dl.LogId, sn.SerialNumber, dt.Name AS DeviceName, dl.EventDate, dl.Event, w1.Name AS FromWarehouseName, w2.Name AS ToWarehouseName, u.FirstName || ' ' || u.LastName AS UserName FROM DeviceLogs dl JOIN Devices d ON dl.DeviceId = d.DeviceId JOIN SerialNumbers sn ON d.DeviceId = sn.DeviceId JOIN DeviceTypes dt ON d.TypeId = dt.TypeId LEFT JOIN Warehouses w1 ON dl.FromWarehouseId = w1.WarehouseId LEFT JOIN Warehouses w2 ON dl.ToWarehouseId = w2.WarehouseId JOIN Users u ON dl.UserId = u.UserId;"
-                        , new DynamicParameters());
-                    return new ObservableCollection<DeviceLogModel>(output);
-                }
-            });
-        }
-
-       
-
-
-
     }
 }

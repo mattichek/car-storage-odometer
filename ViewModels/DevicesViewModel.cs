@@ -1,4 +1,5 @@
-﻿using car_storage_odometer.Helpers;
+﻿using car_storage_odometer.DataBaseModules;
+using car_storage_odometer.Helpers;
 using car_storage_odometer.Models;
 using Prism.Commands;
 using Prism.Regions;
@@ -152,14 +153,11 @@ namespace car_storage_odometer.ViewModels
         public ICommand ReportRepairCommand { get; private set; }
         public ICommand FinishRepairCommand { get; private set; }
 
-        public DelegateCommand LoadInitialDataAsyncCommand { get; }
 
         private const int CurrentUserId = 1;
 
         public DevicesViewModel()
         {
-            LoadInitialDataAsyncCommand = new DelegateCommand(async () => await LoadInitialDataAsync());
-
             NewDeviceCommand = new RelayCommand(ExecuteNewDevice);
             AddDeviceCommand = new RelayCommand(async (obj) => await ExecuteAddDeviceAsync(), CanExecuteAddDevice);
             UpdateDeviceCommand = new RelayCommand(async (obj) => await ExecuteUpdateDeviceAsync(), CanExecuteUpdateDevice);
@@ -171,6 +169,8 @@ namespace car_storage_odometer.ViewModels
 
             _devices = new ObservableCollection<DeviceModel>();
             _allDevices = new ObservableCollection<DeviceModel>();
+
+            _ = LoadInitialDataAsync();
         }
 
         private void RaiseAllCanExecuteChanged()
@@ -447,22 +447,6 @@ namespace car_storage_odometer.ViewModels
             field = newValue;
             OnPropertyChanged(propertyName);
             return true;
-        }
-
-        public void OnNavigatedTo(NavigationContext navigationContext)
-        {
-            LoadInitialDataAsyncCommand.Execute();
-        }
-
-        public bool IsNavigationTarget(NavigationContext navigationContext)
-        {
-            return true;
-        }
-
-        public void OnNavigatedFrom(NavigationContext navigationContext)
-        {
-            _allDevices.Clear();
-            _devices.Clear();
         }
     }
 }

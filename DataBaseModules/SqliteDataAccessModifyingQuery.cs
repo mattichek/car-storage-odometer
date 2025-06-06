@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace car_storage_odometer.Helpers
+namespace car_storage_odometer.DataBaseModules
 {
     public class SqliteDataAccessModifyingQuery
     {

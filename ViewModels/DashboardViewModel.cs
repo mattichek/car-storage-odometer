@@ -1,4 +1,4 @@
-﻿using car_storage_odometer.Helpers;
+﻿using car_storage_odometer.DataBaseModules;
 using car_storage_odometer.Models;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -47,17 +47,16 @@ namespace car_storage_odometer.ViewModels
             set => SetProperty(ref _latestRepairs, value);
         }
 
-        public DelegateCommand LoadDashboardDataCommand { get; }
 
         public DashboardViewModel()
         {
-            LoadDashboardDataCommand = new DelegateCommand(async () => await LoadDashboardData());
-
             WarehouseStatuses = new ObservableCollection<WarehouseStatusModel>();
             DeviceStatuses = new ObservableCollection<DeviceStatusModel>();
             LatestUserLogs = new ObservableCollection<UserLogModel>();
             LatestDeviceLogs = new ObservableCollection<DeviceLogModel>();
             LatestRepairs = new ObservableCollection<RepairHistoryModel>();
+
+            _ = LoadDashboardData();
         }
 
         private async Task LoadDashboardData()
@@ -122,11 +121,6 @@ namespace car_storage_odometer.ViewModels
                 LEFT JOIN devicetypes dt ON d.TypeId = dt.TypeId
                 LEFT JOIN users u ON rh.UserId = u.UserId
                 ORDER BY rh.RepairId DESC LIMIT 5;");
-        }
-
-        public void OnNavigatedTo(NavigationContext navigationContext)
-        {
-            LoadDashboardDataCommand.Execute();
         }
     }
 }
