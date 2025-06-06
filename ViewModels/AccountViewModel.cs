@@ -70,7 +70,6 @@ namespace car_storage_odometer.ViewModels
         // --- Konstruktor ---
         public AccountViewModel()
         {
-            // Inicjalizacja komend
             EditAccountCommand = new DelegateCommand(ExecuteEditAccount, CanExecuteEditAccount);
             SaveAccountCommand = new DelegateCommand(ExecuteSaveAccount, CanSaveAccount);
             CancelEditCommand = new DelegateCommand(ExecuteCancelEdit);

@@ -1,17 +1,16 @@
-﻿using Prism.Mvvm;
-using System.Collections.ObjectModel;
-using car_storage_odometer.Models; // Upewnij się, że ta przestrzeń nazw jest poprawna dla Twoich modeli
-using System;
-using System.Linq; // Do użycia Linq do sortowania i pobierania ostatnich elementów
+﻿using car_storage_odometer.Helpers;
+using car_storage_odometer.Models;
 using Prism.Commands;
-using car_storage_odometer.Helpers;
+using Prism.Mvvm;
+using Prism.Regions;
+using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace car_storage_odometer.ViewModels
 {
     public class DashboardViewModel : BindableBase
     {
-        // --- Właściwości do wiązania z XAML ---
 
         private ObservableCollection<WarehouseStatusModel> _warehouseStatuses;
         public ObservableCollection<WarehouseStatusModel> WarehouseStatuses
@@ -48,32 +47,25 @@ namespace car_storage_odometer.ViewModels
             set => SetProperty(ref _latestRepairs, value);
         }
 
-        // --- Komendy (opcjonalnie, jeśli będą potrzebne akcje na dashboardzie) ---
-        // public DelegateCommand RefreshDataCommand { get; private set; }
+        public DelegateCommand LoadDashboardDataCommand { get; }
 
-
-        // --- Konstruktor ---
         public DashboardViewModel()
         {
-            // Inicjalizacja kolekcji
+            LoadDashboardDataCommand = new DelegateCommand(async () => await LoadDashboardData());
+
             WarehouseStatuses = new ObservableCollection<WarehouseStatusModel>();
             DeviceStatuses = new ObservableCollection<DeviceStatusModel>();
             LatestUserLogs = new ObservableCollection<UserLogModel>();
             LatestDeviceLogs = new ObservableCollection<DeviceLogModel>();
             LatestRepairs = new ObservableCollection<RepairHistoryModel>();
-
-            _ = LoadDashboardData();
         }
 
-        // --- Metody Prywatne ---
         private async Task LoadDashboardData()
         {
-            // Stany magazynowe
             WarehouseStatuses.Clear();
             WarehouseStatuses = await SqliteDataAccess<WarehouseStatusModel>.LoadQuery("select * from Warehouses");
 
           
-            // Statusy i ich ilość
             DeviceStatuses.Clear();
             DeviceStatuses = await SqliteDataAccess<DeviceStatusModel>.LoadQuery(
                 @"SELECT 
@@ -82,7 +74,6 @@ namespace car_storage_odometer.ViewModels
                 FROM Devices d
                 JOIN Statuses s ON d.StatusId = s.StatusId GROUP BY s.Name;");
 
-            // Ostatnie logi użytkowników (5 ostatnich)
             LatestUserLogs.Clear();
             LatestUserLogs = await SqliteDataAccess<UserLogModel>.LoadQuery(
                 @"SELECT 
@@ -97,8 +88,6 @@ namespace car_storage_odometer.ViewModels
                 ORDER BY l.LogId DESC LIMIT 5;");
 
 
-            // Symulacja ostatnich logów urządzeń (5 ostatnich)
-            // Pamiętaj, DeviceLogModel powinien zawierać nazwy urządzeń itp.
             LatestDeviceLogs.Clear();
             LatestDeviceLogs = await SqliteDataAccess<DeviceLogModel>.LoadQuery("" +
                 @"SELECT 
@@ -119,7 +108,6 @@ namespace car_storage_odometer.ViewModels
                 JOIN Users u ON dl.UserId = u.UserId 
                 ORDER BY dl.LogId DESC LIMIT 5;");
 
-            // Ostatnie naprawy (5 ostatnich)
             LatestRepairs.Clear();
             LatestRepairs = await SqliteDataAccess<RepairHistoryModel>.LoadQuery(
                 @"SELECT 
@@ -134,7 +122,11 @@ namespace car_storage_odometer.ViewModels
                 LEFT JOIN devicetypes dt ON d.TypeId = dt.TypeId
                 LEFT JOIN users u ON rh.UserId = u.UserId
                 ORDER BY rh.RepairId DESC LIMIT 5;");
+        }
 
+        public void OnNavigatedTo(NavigationContext navigationContext)
+        {
+            LoadDashboardDataCommand.Execute();
         }
     }
 }
