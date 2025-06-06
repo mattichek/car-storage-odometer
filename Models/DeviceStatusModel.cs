@@ -8,7 +8,7 @@ namespace car_storage_odometer.Models
 {
     public class DeviceStatusModel
     {
-        public string StatusName { get; set; }
+        public string Name { get; set; }
         public int Quantity { get; set; }
     }
 }

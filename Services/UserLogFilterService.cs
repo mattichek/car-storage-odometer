@@ -26,7 +26,7 @@ namespace car_storage_odometer.Services
                 filteredLogs = filteredLogs.Where(log => log.UserName == selectedUserFilter.UserName);
 
             if (!string.IsNullOrEmpty(selectedActionFilter))
-                filteredLogs = filteredLogs.Where(log => log.Action == selectedActionFilter);
+                filteredLogs = filteredLogs.Where(log => log.Event == selectedActionFilter);
 
             return new ObservableCollection<UserLogModel>(filteredLogs.OrderByDescending(log => log.EventDate));
         }

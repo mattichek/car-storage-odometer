@@ -13,19 +13,24 @@ using System.Windows.Documents;
 
 namespace car_storage_odometer.Helpers
 {
-    public class SqliteDataAccess
+    public class SqliteDataAccess<T>
     {
-        private static string LoadConnectionString(string id = "DataBase")
+        /// <summary>
+        /// Executes the specified SQL query and returns the results as an observable collection.
+        /// </summary>
+        /// <remarks>This method uses a SQLite connection to execute the query and map the results. Ensure
+        /// that the connection string is properly configured before calling this method.</remarks>
+        /// <param name="query">The SQL query to execute. Must be a valid SQL statement.</param>
+        /// <returns>An <see cref="ObservableCollection{T}"/> containing the results of the query. If the query returns no
+        /// results, the collection will be empty.</returns>
+        public static ObservableCollection<T> LoadQuery(string query)
         {
-            return ConfigurationManager.ConnectionStrings[id].ConnectionString;
-        }
-
-        public static ObservableCollection<WarehouseStatusModel> LoadX()
-        {
-            using(IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
             {
-                var output = cnn.Query<WarehouseStatusModel>("select * from Warehouses", new DynamicParameters());
-                return new ObservableCollection<WarehouseStatusModel>(output);
+                var repairHistory = cnn.Query<T>(
+                    query,
+                    new DynamicParameters());
+                return new ObservableCollection<T>(repairHistory);
             }
         }
         
@@ -515,6 +520,15 @@ namespace car_storage_odometer.Helpers
                     }
                 }
             }
+        /// <summary>
+        /// Retrieves the connection string associated with the specified identifier from the application's
+        /// configuration file.
+        /// </summary>
+        /// <param name="id">The identifier of the connection string to retrieve. Defaults to "DataBase" if no value is provided.</param>
+        /// <returns>The connection string corresponding to the specified identifier.</returns>
+        private static string LoadConnectionString(string id = "DataBase")
+        {
+            return ConfigurationManager.ConnectionStrings[id].ConnectionString;
         }
     }
 }

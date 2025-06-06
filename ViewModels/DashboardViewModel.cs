@@ -61,41 +61,38 @@ namespace car_storage_odometer.ViewModels
             LatestDeviceLogs = new ObservableCollection<DeviceLogModel>();
             LatestRepairs = new ObservableCollection<RepairHistoryModel>();
 
-            // W prawdziwej aplikacji: pobierz dane z serwisu/repozytorium
-            // Na razie symulacja danych
-            var x = SqliteDataAccess.LoadX();
             LoadDashboardData();
-            // RefreshDataCommand = new DelegateCommand(LoadDashboardData);
         }
 
         // --- Metody Prywatne ---
         private void LoadDashboardData()
         {
-            // Symulacja danych stanów magazynowych
-            // W prawdziwej aplikacji: zapytanie do bazy danych z agregacją
+            // Stany magazynowe
             WarehouseStatuses.Clear();
-            WarehouseStatuses = SqliteDataAccess.LoadX();
+            WarehouseStatuses = SqliteDataAccess<WarehouseStatusModel>.LoadQuery("select * from Warehouses");
 
-            // Symulacja danych statusów urządzeń
-            // W prawdziwej aplikacji: zapytanie do bazy danych z agregacją
+          
+            // Statusy i ich ilość
             DeviceStatuses.Clear();
-            DeviceStatuses.Add(new DeviceStatusModel { StatusName = "Dostępne", Quantity = 120 });
-            DeviceStatuses.Add(new DeviceStatusModel { StatusName = "W Użyciu", Quantity = 50 });
-            DeviceStatuses.Add(new DeviceStatusModel { StatusName = "W Naprawie", Quantity = 15 });
-            DeviceStatuses.Add(new DeviceStatusModel { StatusName = "Wyjęte", Quantity = 10 });
+            DeviceStatuses = SqliteDataAccess<DeviceStatusModel>.LoadQuery(
+                @"SELECT 
+                    s.Name,
+                COUNT(d.DeviceId) AS Quantity
+                FROM Devices d
+                JOIN Statuses s ON d.StatusId = s.StatusId GROUP BY s.Name;");
 
-
-            // Symulacja ostatnich logów użytkowników (5 ostatnich)
-            // W prawdziwej aplikacji: zapytanie do bazy danych z ORDER BY i LIMIT
+            // Ostatnie logi użytkowników (5 ostatnich)
             LatestUserLogs.Clear();
-            // Przykładowe dane, pamiętaj, aby to były faktyczne dane z bazy, jeśli dostępne
-            LatestUserLogs.Add(new UserLogModel { UserLogId = 5, UserId = 1, UserName = "Jan Kowalski", Action = "Zalogował się", EventDate = new DateTime(2025, 5, 31, 8, 55, 0) });
-            LatestUserLogs.Add(new UserLogModel { UserLogId = 4, UserId = 2, UserName = "Anna Nowak", Action = "Dodała licznik 'Licznik-001'", EventDate = new DateTime(2025, 5, 31, 7, 55, 0) });
-            LatestUserLogs.Add(new UserLogModel { UserLogId = 3, UserId = 3, UserName = "Piotr Zieliński", Action = "Wylogował się", EventDate = new DateTime(2025, 5, 31, 6, 55, 0) });
-            LatestUserLogs.Add(new UserLogModel { UserLogId = 2, UserId = 1, UserName = "Jan Kowalski", Action = "Usunął moduł 'Moduł-ABC'", EventDate = new DateTime(2025, 5, 31, 5, 55, 0) });
-            LatestUserLogs.Add(new UserLogModel { UserLogId = 1, UserId = 2, UserName = "Anna Nowak", Action = "Zalogowała się", EventDate = new DateTime(2025, 5, 31, 4, 55, 0) });
-            // Sortowanie po dacie (najnowsze na górze) i wzięcie 5 ostatnich
-            LatestUserLogs = new ObservableCollection<UserLogModel>(LatestUserLogs.OrderByDescending(l => l.EventDate).Take(5));
+            LatestUserLogs = new ObservableCollection<UserLogModel>(SqliteDataAccess<UserLogModel>.LoadQuery(
+                @"SELECT 
+                    l.LogId,
+                    u.FirstName || ' ' || u.LastName AS UserName,
+                    d.DeviceId, 
+                    l.Event, 
+                    l.EventDate
+                FROM UserLogs l
+                LEFT JOIN Users u ON l.UserId = u.UserId
+                LEFT JOIN Devices d ON l.DeviceId = d.DeviceId;").OrderByDescending(l => l.EventDate).Take(5));
 
 
             // Symulacja ostatnich logów urządzeń (5 ostatnich)
@@ -103,15 +100,21 @@ namespace car_storage_odometer.ViewModels
             LatestDeviceLogs.Clear();
             LatestDeviceLogs = SqliteDataAccess.LoadDevicesLogsLastFiveLogs();
 
-            // Symulacja ostatnich napraw (5 ostatnich)
-            // Pamiętaj, RepairHistoryModel powinien zawierać nazwy elementów itp.
+            // Ostatnie naprawy (5 ostatnich)
             LatestRepairs.Clear();
-            LatestRepairs.Add(new RepairHistoryModel { RepairId = 5, DeviceId = 201, DeviceName = "Licznik-005", Description = "Wymiana baterii", StartDate = new DateTime(2025, 5, 30), UserId = 1, UserName = "Jan Kowalski" });
-            LatestRepairs.Add(new RepairHistoryModel { RepairId = 4, DeviceId = 202, DeviceName = "Licznik-002", Description = "Czyszczenie styków", StartDate = new DateTime(2025, 5, 28), UserId = 2, UserName = "Anna Nowak" });
-            LatestRepairs.Add(new RepairHistoryModel { RepairId = 3, DeviceId = 203, DeviceName = "Licznik-010", Description = "Naprawa obudowy", StartDate = new DateTime(2025, 5, 24), UserId = 1, UserName = "Jan Kowalski" });
-            LatestRepairs.Add(new RepairHistoryModel { RepairId = 2, DeviceId = 204, DeviceName = "Moduł-ABC", Description = "Kalibracja", StartDate = new DateTime(2025, 5, 21), UserId = 3, UserName = "Piotr Zieliński" });
-            LatestRepairs.Add(new RepairHistoryModel { RepairId = 1, DeviceId = 205, DeviceName = "Licznik-002", Description = "Wymiana wyświetlacza", StartDate = new DateTime(2025, 5, 17), UserId = 2, UserName = "Anna Nowak" });
-            LatestRepairs = new ObservableCollection<RepairHistoryModel>(LatestRepairs.OrderByDescending(r => r.StartDate).Take(5));
+            LatestRepairs = new ObservableCollection<RepairHistoryModel>(SqliteDataAccess<RepairHistoryModel>.LoadQuery(
+                @"SELECT 
+                    rh.RepairId,
+                    dt.Name AS DeviceName,
+                    rh.Description,
+                    rh.StartDate,
+                    rh.EndDate,
+                    u.FirstName || ' ' || u.LastName AS UserName
+                FROM repairhistory rh
+                LEFT JOIN devices d ON rh.DeviceId = d.DeviceId
+                LEFT JOIN devicetypes dt ON d.TypeId = dt.TypeId
+                LEFT JOIN users u ON rh.UserId = u.UserId;").OrderByDescending(r => r.StartDate).Take(5));
+
         }
     }
 }
