@@ -1,9 +1,11 @@
 ﻿using Prism.Mvvm;
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace car_storage_odometer.Models
 {
-    public class UserLogModel : BindableBase
+    public class UserLogModel : BindableBase, INotifyPropertyChanged
     {
         private int _logId;
         public int LogId // odpowiada log_id z logi_uzytkownikow
@@ -45,6 +47,12 @@ namespace car_storage_odometer.Models
         {
             get => _serialNumber;
             set => SetProperty(ref _serialNumber, value);
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }

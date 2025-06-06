@@ -1,16 +1,18 @@
 ﻿using car_storage_odometer.Models;
-using car_storage_odometer.DataBaseModules;
 using Prism.Commands;
 using Prism.Mvvm;
+using Prism.Regions; 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using car_storage_odometer.DataBaseModules;
 
 namespace car_storage_odometer.ViewModels
 {
-    public class HistoryOfRepairViewModel : BindableBase
+    // Zaktualizowano, aby implementował INavigationAware
+    public class HistoryOfRepairViewModel : BindableBase, INavigationAware
     {
         private ObservableCollection<RepairHistoryModel> _allRepairHistory;
         private ObservableCollection<RepairHistoryModel> _latestRepairHistory;
@@ -25,21 +27,39 @@ namespace car_storage_odometer.ViewModels
         public DateTime? FilterDateFrom
         {
             get => _filterDateFrom;
-            set { SetProperty(ref _filterDateFrom, value); /* Usunięto ApplyFilters() */ }
+            set
+            {
+                if (SetProperty(ref _filterDateFrom, value))
+                {
+                    ApplyFilters(); // Zastosuj filtry po zmianie daty
+                }
+            }
         }
 
         private DateTime? _filterDateTo;
         public DateTime? FilterDateTo
         {
             get => _filterDateTo;
-            set { SetProperty(ref _filterDateTo, value); /* Usunięto ApplyFilters() */ }
+            set
+            {
+                if (SetProperty(ref _filterDateTo, value))
+                {
+                    ApplyFilters(); // Zastosuj filtry po zmianie daty
+                }
+            }
         }
 
         private string _selectedUserFilter;
         public string SelectedUserFilter
         {
             get => _selectedUserFilter;
-            set { SetProperty(ref _selectedUserFilter, value); /* Usunięto ApplyFilters() */ }
+            set
+            {
+                if (SetProperty(ref _selectedUserFilter, value))
+                {
+                    ApplyFilters(); // Zastosuj filtry po zmianie użytkownika
+                }
+            }
         }
         private ObservableCollection<string> _availableUsers;
         public ObservableCollection<string> AvailableUsers
@@ -48,24 +68,38 @@ namespace car_storage_odometer.ViewModels
             set => SetProperty(ref _availableUsers, value);
         }
 
+
         private string _selectedDeviceFilter;
         public string SelectedDeviceFilter
         {
             get => _selectedDeviceFilter;
-            set { SetProperty(ref _selectedDeviceFilter, value); /* Usunięto ApplyFilters() */ }
+            set
+            {
+                if (SetProperty(ref _selectedDeviceFilter, value))
+                {
+                    ApplyFilters(); // Zastosuj filtry po zmianie urządzenia
+                }
+            }
         }
-        private ObservableCollection<string> _availableDeviceTypes; // Zmieniona nazwa
-        public ObservableCollection<string> AvailableDeviceTypes // Zmieniona nazwa
+        private ObservableCollection<string> _availableDevices;
+        public ObservableCollection<string> AvailableDevices
         {
-            get => _availableDeviceTypes;
-            set => SetProperty(ref _availableDeviceTypes, value);
+            get => _availableDevices;
+            set => SetProperty(ref _availableDevices, value);
         }
+
 
         private string _selectedActionFilter;
         public string SelectedActionFilter
         {
             get => _selectedActionFilter;
-            set { SetProperty(ref _selectedActionFilter, value); /* Usunięto ApplyFilters() */ }
+            set
+            {
+                if (SetProperty(ref _selectedActionFilter, value))
+                {
+                    ApplyFilters(); // Zastosuj filtry po zmianie akcji
+                }
+            }
         }
         private ObservableCollection<string> _availableActions;
         public ObservableCollection<string> AvailableActions
@@ -75,49 +109,60 @@ namespace car_storage_odometer.ViewModels
         }
 
 
-        // Commands
-        public DelegateCommand FilterCommand { get; private set; }
+        public DelegateCommand LoadRepairHistoryCommand { get; private set; } // Zmieniono nazwę komendy
         public DelegateCommand ResetFiltersCommand { get; private set; }
 
         public HistoryOfRepairViewModel()
         {
-            LoadDummyData(); // Load initial data
-            InitializeFilterOptions(); // Populate filter dropdowns
+            LoadRepairHistoryCommand = new DelegateCommand(async () => await LoadRepairHistoryAsync());
+            ResetFiltersCommand = new DelegateCommand(ResetAllFilters); // Zmieniono nazwę metody
 
-            // Initially, display all repair history, posortowane domyślnie
-            LatestRepairHistory = new ObservableCollection<RepairHistoryModel>(_allRepairHistory.OrderByDescending(log => log.StartDate));
+            _allRepairHistory = new ObservableCollection<RepairHistoryModel>();
+            LatestRepairHistory = new ObservableCollection<RepairHistoryModel>();
 
-            FilterCommand = new DelegateCommand(ApplyFilters);
-            ResetFiltersCommand = new DelegateCommand(ResetAllFilters);
+            AvailableUsers = new ObservableCollection<string>();
+            AvailableDevices = new ObservableCollection<string>();
+            AvailableActions = new ObservableCollection<string>();
+
+            ResetAllFilters(); // Ustaw domyślne wartości filtrów
         }
 
-        private void LoadDummyData()
+        private async Task LoadRepairHistoryAsync()
         {
-            // Sample data for repair history
-            _allRepairHistory = new ObservableCollection<RepairHistoryModel>
+            try
             {
-                new RepairHistoryModel { RepairId = 1, DeviceId = 101, DeviceName = "Odometer A1", Description = "Wymiana baterii", StartDate = new DateTime(2024, 1, 15, 10, 0, 0), EndDate = new DateTime(2024, 1, 15, 12, 0, 0), UserId = 1, UserName = "Jan Kowalski" },
-                new RepairHistoryModel { RepairId = 2, DeviceId = 102, DeviceName = "Odometer B2", Description = "Naprawa ekranu", StartDate = new DateTime(2024, 2, 10, 14, 30, 0), EndDate = new DateTime(2024, 2, 11, 10, 0, 0), UserId = 2, UserName = "Anna Nowak" },
-                new RepairHistoryModel { RepairId = 3, DeviceId = 101, DeviceName = "Odometer A1", Description = "Aktualizacja oprogramowania", StartDate = new DateTime(2024, 3, 5, 9, 0, 0), UserId = 1, UserName = "Jan Kowalski" },
-                new RepairHistoryModel { RepairId = 4, DeviceId = 103, DeviceName = "Tracker C3", Description = "Wymiana modułu GPS", StartDate = new DateTime(2024, 4, 20, 11,0,0), EndDate = new DateTime(2024, 4, 21, 16,30,0), UserId = 3, UserName = "Piotr Zieliński" },
-                new RepairHistoryModel { RepairId = 5, DeviceId = 102, DeviceName = "Odometer B2", Description = "Wymiana baterii", StartDate = new DateTime(2024, 5, 1, 13,0,0), UserId = 2, UserName = "Anna Nowak" }
-            };
-        }
+                // Zakładam, że masz metodę LoadRepairHistoryAsync w SqliteDataAccess
+                _allRepairHistory = await SqliteDataAccess<RepairHistoryModel>.LoadQuery(@"SELECT 
+                    rh.RepairId,
+                    dt.Name AS DeviceName,
+                    rh.Description,
+                    rh.StartDate,
+                    rh.EndDate,
+                    u.FirstName || ' ' || u.LastName AS UserName
+                FROM repairhistory rh
+                LEFT JOIN devices d ON rh.DeviceId = d.DeviceId
+                LEFT JOIN devicetypes dt ON d.TypeId = dt.TypeId
+                LEFT JOIN users u ON rh.UserId = u.UserId");
 
-        private void InitializeFilterOptions()
-        {
-            // Add "All" option and populate from distinct values in the data
-            AvailableUsers = new ObservableCollection<string>(
-                new[] { "Wszyscy" }.Concat(_allRepairHistory.Select(log => log.UserName).Where(u => u != null).Distinct().OrderBy(u => u)));
-            SelectedUserFilter = "Wszyscy";
+                // Uzupełnij ComboBoxy do filtrowania
+                AvailableUsers = new ObservableCollection<string>(
+                    new[] { "Wszyscy" }.Concat(_allRepairHistory.Select(log => log.UserName).Where(u => u != null).Distinct().OrderBy(u => u))
+                );
+                AvailableDevices = new ObservableCollection<string>(
+                    new[] { "Wszystkie" }.Concat(_allRepairHistory.Select(log => log.DeviceName).Where(d => d != null).Distinct().OrderBy(d => d))
+                );
+                AvailableActions = new ObservableCollection<string>(
+                    new[] { "Wszystkie" }.Concat(_allRepairHistory.Select(log => log.Description).Where(a => a != null).Distinct().OrderBy(a => a))
+                );
 
-            AvailableDeviceTypes = new ObservableCollection<string>( // Użycie nowej nazwy
-                 new[] { "Wszystkie" }.Concat(_allRepairHistory.Select(log => log.DeviceName).Where(d => d != null).Distinct().OrderBy(d => d)));
-            SelectedDeviceFilter = "Wszystkie";
-
-            AvailableActions = new ObservableCollection<string>(
-                 new[] { "Wszystkie" }.Concat(_allRepairHistory.Select(log => log.Description).Where(a => a != null).Distinct().OrderBy(a => a)));
-            SelectedActionFilter = "Wszystkie";
+                // Po załadowaniu danych, zastosuj filtry (uwzględniając domyślne wartości)
+                ApplyFilters();
+            }
+            catch (Exception ex)
+            {
+                // Tutaj możesz dodać obsługę błędów, np. MessageBox.Show
+                System.Windows.MessageBox.Show($"Błąd ładowania historii napraw: {ex.Message}", "Błąd", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
         }
 
         private void ApplyFilters()
@@ -150,8 +195,36 @@ namespace car_storage_odometer.ViewModels
             SelectedDeviceFilter = "Wszystkie";
             SelectedActionFilter = "Wszystkie";
 
-            // Po zresetowaniu filtrów, również posortuj domyślnie
-            LatestRepairHistory = new ObservableCollection<RepairHistoryModel>(_allRepairHistory.OrderByDescending(log => log.StartDate));
+            // Upewnij się, że ComboBoxy mają "Wszyscy" i "Wszystkie" jako domyślne wybrane po resecie
+            if (AvailableUsers.Contains("Wszyscy")) SelectedUserFilter = "Wszyscy";
+            if (AvailableDevices.Contains("Wszystkie")) SelectedDeviceFilter = "Wszystkie";
+            if (AvailableActions.Contains("Wszystkie")) SelectedActionFilter = "Wszystkie";
+
+            // Ponowne zastosowanie filtrów spowoduje odświeżenie LatestRepairHistory
+            ApplyFilters();
+        }
+
+        // --- Implementacja INavigationAware ---
+
+        // Wywoływana, gdy widok jest aktywowany
+        public void OnNavigatedTo(NavigationContext navigationContext)
+        {
+            // Ładuj dane za każdym razem, gdy widok jest aktywowany
+            LoadRepairHistoryCommand.Execute();
+        }
+
+        // Określa, czy widok powinien być ponownie użyty
+        public bool IsNavigationTarget(NavigationContext navigationContext)
+        {
+            return true; // Zwróć true, aby ponownie używać istniejącej instancji ViewModelu
+        }
+
+        // Wywoływana, gdy widok jest dezaktywowany
+        public void OnNavigatedFrom(NavigationContext navigationContext)
+        {
+            _allRepairHistory.Clear(); // Jeśli chcesz zwolnić pamięć
+            LatestRepairHistory.Clear();
+            ResetAllFilters(); // Resetuj filtry po opuszczeniu widoku
         }
     }
 }

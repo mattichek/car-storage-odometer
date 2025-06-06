@@ -1,15 +1,18 @@
 ﻿using car_storage_odometer.Models; // Zakładam, że UserLogModel będzie w Models
 using Prism.Commands;
 using Prism.Mvvm;
+using Prism.Regions; // Dodano, aby używać INavigationAware
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using car_storage_odometer.DataBaseModules;
 
 namespace car_storage_odometer.ViewModels
 {
-    public class LogsUsersViewModel : BindableBase
+    // Zaktualizowano, aby implementował INavigationAware
+    public class LogsUsersViewModel : BindableBase, INavigationAware
     {
         private ObservableCollection<UserLogModel> _allUserLogs;
         private ObservableCollection<UserLogModel> _latestUserLogs;
@@ -24,22 +27,41 @@ namespace car_storage_odometer.ViewModels
         public DateTime? FilterDateFrom
         {
             get => _filterDateFrom;
-            set { SetProperty(ref _filterDateFrom, value); }
+            set
+            {
+                if (SetProperty(ref _filterDateFrom, value))
+                {
+                    ApplyFilters(); // Zastosuj filtry po zmianie daty
+                }
+            }
         }
 
         private DateTime? _filterDateTo;
         public DateTime? FilterDateTo
         {
             get => _filterDateTo;
-            set { SetProperty(ref _filterDateTo, value); }
+            set
+            {
+                if (SetProperty(ref _filterDateTo, value))
+                {
+                    ApplyFilters(); // Zastosuj filtry po zmianie daty
+                }
+            }
         }
 
         private string _selectedUserFilter;
         public string SelectedUserFilter
         {
             get => _selectedUserFilter;
-            set { SetProperty(ref _selectedUserFilter, value); }
+            set
+            {
+                if (SetProperty(ref _selectedUserFilter, value))
+                {
+                    ApplyFilters(); // Zastosuj filtry po zmianie użytkownika
+                }
+            }
         }
+
         private ObservableCollection<string> _availableUsers;
         public ObservableCollection<string> AvailableUsers
         {
@@ -51,8 +73,15 @@ namespace car_storage_odometer.ViewModels
         public string SelectedActionFilter
         {
             get => _selectedActionFilter;
-            set { SetProperty(ref _selectedActionFilter, value); }
+            set
+            {
+                if (SetProperty(ref _selectedActionFilter, value))
+                {
+                    ApplyFilters(); // Zastosuj filtry po zmianie akcji
+                }
+            }
         }
+
         private ObservableCollection<string> _availableActions;
         public ObservableCollection<string> AvailableActions
         {
@@ -60,45 +89,50 @@ namespace car_storage_odometer.ViewModels
             set => SetProperty(ref _availableActions, value);
         }
 
-        // Commands
-        public DelegateCommand FilterCommand { get; private set; }
+        public DelegateCommand LoadUserLogsCommand { get; private set; } // Zmieniono nazwę na LoadUserLogsCommand
         public DelegateCommand ResetFiltersCommand { get; private set; }
 
         public LogsUsersViewModel()
         {
-            LoadDummyData(); // Load initial data
-            InitializeFilterOptions(); // Populate filter dropdowns
+            LoadUserLogsCommand = new DelegateCommand(async () => await LoadUserLogsAsync()); // Przypisanie asynchronicznej metody
+            ResetFiltersCommand = new DelegateCommand(ResetAllFilters); // Zmieniono nazwę metody
 
-            // Initially, display all user logs, sorted by date
-            LatestUserLogs = new ObservableCollection<UserLogModel>(_allUserLogs.OrderByDescending(log => log.EventDate));
+            _allUserLogs = new ObservableCollection<UserLogModel>();
+            LatestUserLogs = new ObservableCollection<UserLogModel>();
 
-            FilterCommand = new DelegateCommand(ApplyFilters);
-            ResetFiltersCommand = new DelegateCommand(ResetAllFilters);
+            AvailableUsers = new ObservableCollection<string>();
+            AvailableActions = new ObservableCollection<string>();
+
+            ResetAllFilters(); // Resetuj filtry przy inicjalizacji
         }
 
-        private void LoadDummyData()
+        private async Task LoadUserLogsAsync()
         {
-            // Sample data for user logs
-            _allUserLogs = new ObservableCollection<UserLogModel>
+            try
             {
-                new UserLogModel { LogId = 1, EventDate = new DateTime(2024, 5, 20, 9, 0, 0), UserName = "Admin", Event = "Logowanie" },
-                new UserLogModel { LogId = 2, EventDate = new DateTime(2024, 5, 20, 9, 5, 0), UserName = "Jan Kowalski", Event = "Dodanie urządzenia" },
-                new UserLogModel { LogId = 3, EventDate = new DateTime(2024, 5, 21, 10, 30, 0), UserName = "Admin", Event = "Zmiana uprawnień" },
-                new UserLogModel { LogId = 4, EventDate = new DateTime(2024, 5, 21, 11, 0, 0), UserName = "Anna Nowak", Event = "Wydanie urządzenia" },
-                new UserLogModel { LogId = 5, EventDate = new DateTime(2024, 5, 22, 14, 15, 0), UserName = "Jan Kowalski", Event = "Wylogowanie" },
-                new UserLogModel { LogId = 6, EventDate = new DateTime(2024, 5, 22, 14, 20, 0), UserName = "Admin", Event = "Logowanie" }
-            };
-        }
+                _allUserLogs = await SqliteDataAccess<UserLogModel>.LoadQuery(@"SELECT 
+                    l.LogId,
+                    u.FirstName || ' ' || u.LastName AS UserName,
+                    d.DeviceId, 
+                    l.Event, 
+                    l.EventDate
+                FROM UserLogs l
+                LEFT JOIN Users u ON l.UserId = u.UserId
+                LEFT JOIN Devices d ON l.DeviceId = d.DeviceId;");
 
-        private void InitializeFilterOptions()
-        {
-            AvailableUsers = new ObservableCollection<string>(
-                new[] { "Wszyscy" }.Concat(_allUserLogs.Select(log => log.UserName).Where(u => u != null).Distinct().OrderBy(u => u)));
-            SelectedUserFilter = "Wszyscy";
+                AvailableUsers = new ObservableCollection<string>(
+                    new[] { "Wszyscy" }.Concat(_allUserLogs.Select(log => log.UserName).Where(u => u != null).Distinct().OrderBy(u => u))
+                );
+                AvailableActions = new ObservableCollection<string>(
+                    new[] { "Wszystkie" }.Concat(_allUserLogs.Select(log => log.Event).Where(a => a != null).Distinct().OrderBy(a => a))
+                );
 
-            AvailableActions = new ObservableCollection<string>(
-                new[] { "Wszystkie" }.Concat(_allUserLogs.Select(log => log.Event).Where(a => a != null).Distinct().OrderBy(a => a)));
-            SelectedActionFilter = "Wszystkie";
+                ApplyFilters();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Błąd ładowania logów użytkowników: {ex.Message}", "Błąd", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
         }
 
         private void ApplyFilters()
@@ -127,7 +161,35 @@ namespace car_storage_odometer.ViewModels
             SelectedUserFilter = "Wszyscy";
             SelectedActionFilter = "Wszystkie";
 
-            LatestUserLogs = new ObservableCollection<UserLogModel>(_allUserLogs.OrderByDescending(log => log.EventDate));
+            // Upewnij się, że ComboBoxy mają "Wszyscy" i "Wszystkie" jako domyślne wybrane po resecie
+            if (AvailableUsers.Contains("Wszyscy")) SelectedUserFilter = "Wszyscy";
+            if (AvailableActions.Contains("Wszystkie")) SelectedActionFilter = "Wszystkie";
+
+            // Ponowne zastosowanie filtrów spowoduje odświeżenie LatestUserLogs
+            ApplyFilters();
+        }
+
+        // --- Implementacja INavigationAware ---
+
+        // Wywoływana, gdy widok jest aktywowany
+        public void OnNavigatedTo(NavigationContext navigationContext)
+        {
+            // Ładuj dane za każdym razem, gdy widok jest aktywowany
+            LoadUserLogsCommand.Execute();
+        }
+
+        // Określa, czy widok powinien być ponownie użyty
+        public bool IsNavigationTarget(NavigationContext navigationContext)
+        {
+            return true; // Zwróć true, aby ponownie używać istniejącej instancji ViewModelu
+        }
+
+        // Wywoływana, gdy widok jest dezaktywowany
+        public void OnNavigatedFrom(NavigationContext navigationContext)
+        {
+            _allUserLogs.Clear(); // Jeśli chcesz zwolnić pamięć, ale wtedy będziesz musiał ponownie ładować AvailableUsers/Actions
+            LatestUserLogs.Clear();
+            ResetAllFilters(); // Resetuj filtry po opuszczeniu widoku
         }
     }
 }

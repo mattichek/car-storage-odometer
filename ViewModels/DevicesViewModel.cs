@@ -164,8 +164,8 @@ namespace car_storage_odometer.ViewModels
             DeleteDeviceCommand = new RelayCommand(async (obj) => await ExecuteDeleteDeviceAsync(), CanExecuteOnSelectedDevice);
             ResetFiltersCommand = new RelayCommand(ExecuteResetFilters);
             MoveDeviceCommand = new RelayCommand(async (obj) => await ExecuteMoveDeviceAsync(), CanExecuteMoveDevice);
-            ReportRepairCommand = new RelayCommand(async (obj) => await ExecuteReportRepairAsync(), CanExecuteOnSelectedDevice);
-            FinishRepairCommand = new RelayCommand(async (obj) => await ExecuteFinishRepairAsync(), CanExecuteOnSelectedDevice);
+            ReportRepairCommand = new RelayCommand(async (obj) => await ExecuteReportRepairAsync(), CanExecuteReportRepair);
+            FinishRepairCommand = new RelayCommand(async (obj) => await ExecuteFinishRepairAsync(), CanExecuteFinishRepair);
 
             _devices = new ObservableCollection<DeviceModel>();
             _allDevices = new ObservableCollection<DeviceModel>();
@@ -432,6 +432,18 @@ namespace car_storage_odometer.ViewModels
             {
                 MessageBox.Show($"Błąd podczas kończenia naprawy: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private bool CanExecuteReportRepair(object parameter)
+        {
+            return SelectedDevice != null &&
+                   SelectedDevice.StatusName != "W naprawie"; 
+        }
+
+        private bool CanExecuteFinishRepair(object parameter)
+        {
+            return SelectedDevice != null &&
+                   SelectedDevice.StatusName == "W naprawie";
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

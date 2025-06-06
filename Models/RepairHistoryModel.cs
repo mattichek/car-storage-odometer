@@ -1,9 +1,11 @@
 ﻿using Prism.Mvvm;
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace car_storage_odometer.Models
 {
-    public class RepairHistoryModel : BindableBase
+    public class RepairHistoryModel : BindableBase, INotifyPropertyChanged
     {
         private int _repairId;
         public int RepairId // odpowiada naprawa_id
@@ -60,5 +62,12 @@ namespace car_storage_odometer.Models
             get => _deviceName;
             set => SetProperty(ref _deviceName, value);
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
     }
 }

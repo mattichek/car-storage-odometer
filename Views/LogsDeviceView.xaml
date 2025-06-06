@@ -161,6 +161,7 @@
                           AutoGenerateColumns="False"
                           CanUserSortColumns="True"
                           IsEnabled="{Binding IsLoading, Converter={StaticResource InvertBooleanConverter}}">
+
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Id" Binding="{Binding LogId}" Width="Auto" SortMemberPath="LogId"/>
                         <DataGridTextColumn Header="Numer ser." Binding="{Binding SerialNumber}" Width="*" SortMemberPath="SerialNumber"/>

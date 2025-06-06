@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:prism="http://prismlibrary.com/"
+             xmlns:converters="clr-namespace:car_storage_odometer.Converters"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
              Width="Auto" Height="Auto">
@@ -13,6 +14,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/car-storage-odometer;component/Styles/DashboardStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <converters:InvertBooleanConverter x:Key="InvertBooleanConverter"/>
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -39,8 +42,14 @@
                     BorderThickness="1"
                     CornerRadius="5"
                     Padding="20" Margin="0,0,10,0">
-                <StackPanel>
-                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <WrapPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,15">
                         <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
                             <TextBlock Text="Numer ser.:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
                             <TextBox Text="{Binding FilterSerialNumber, UpdateSourceTrigger=PropertyChanged}" Width="150" Style="{StaticResource StandardTextBoxStyle}"/>
@@ -108,13 +117,22 @@
                         </Button>
                     </WrapPanel>
 
-                    <Separator Background="{StaticResource BorderBrush}" Height="1" Margin="0,0,0,15"/>
+                    <Separator Grid.Row="1" Background="{StaticResource BorderBrush}" Height="1" Margin="0,0,0,15"/>
 
-                    <DataGrid ItemsSource="{Binding Devices}"
+                    <ProgressBar Grid.Row="2"
+                                 IsIndeterminate="True"
+                                 Height="10"
+                                 Margin="0,20,0,0"
+                                 VerticalAlignment="Top"
+                                 Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding Devices}"
                               SelectedItem="{Binding SelectedDevice}"
                               Style="{StaticResource {x:Type DataGrid}}"
                               AutoGenerateColumns="False"
-                              CanUserSortColumns="True">
+                              CanUserSortColumns="True"
+                              IsEnabled="{Binding IsLoading, Converter={StaticResource InvertBooleanConverter}}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="ID" Binding="{Binding DeviceId}" Width="Auto" SortMemberPath="Id"/>
                             <DataGridTextColumn Header="Numer seryjny" Binding="{Binding SerialNumber}" Width="*" SortMemberPath="SerialNumber"/>
@@ -125,7 +143,7 @@
                             <DataGridTextColumn Header="Uwagi" Binding="{Binding Note}" Width="2*" SortMemberPath="Notes"/>
                         </DataGrid.Columns>
                     </DataGrid>
-                </StackPanel>
+                </Grid>
             </Border>
 
             <GridSplitter Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" Background="{StaticResource BorderBrush}" ResizeBehavior="PreviousAndNext"/>
@@ -223,57 +241,13 @@
                             </StackPanel>
 
                             <Button Content="Zgłoś naprawę" Command="{Binding ReportRepairCommand}" Style="{StaticResource {x:Type Button}}" Margin="0,0,0,10"/>
-                            <Button Content="Zakończ naprawę" Command="{Binding FinishRepairCommand}" Style="{StaticResource {x:Type Button}}" Margin="0,0,0,10">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="{x:Type Button}">
-                                        <Border Background="#28A745"
-                                                BorderBrush="#28A745"
-                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                CornerRadius="3">
-                                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                              Margin="{TemplateBinding Padding}"
-                                                              Content="{TemplateBinding Content}"/>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#218838"/>
-                                                <Setter Property="BorderBrush" Value="#218838"/>
-                                            </Trigger>
-                                            <Trigger Property="IsPressed" Value="True">
-                                                <Setter Property="Background" Value="#1E7E34"/>
-                                                <Setter Property="BorderBrush" Value="#1E7E34"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
+                            <Button Content="Zakończ naprawę" Command="{Binding FinishRepairCommand}" Style="{StaticResource {x:Type Button}}" Margin="0,0,0,10"/>
 
-                            <Button Content="Usuń urządzenie" Command="{Binding DeleteDeviceCommand}" Style="{StaticResource {x:Type Button}}">
-                                <Button.Template>
-                                    <ControlTemplate TargetType="{x:Type Button}">
-                                        <Border Background="#DC3545"
-                                                BorderBrush="#DC3545"
-                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                CornerRadius="3">
-                                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                              Margin="{TemplateBinding Padding}"
-                                                              Content="{TemplateBinding Content}"/>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#C82333"/>
-                                                <Setter Property="BorderBrush" Value="#C82333"/>
-                                            </Trigger>
-                                            <Trigger Property="IsPressed" Value="True">
-                                                <Setter Property="Background" Value="#C82333"/>
-                                                <Setter Property="BorderBrush" Value="#C82333"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
+
+
+                            <Button Content="Usuń urządzenie" Command="{Binding DeleteDeviceCommand}" Style="{StaticResource {x:Type Button}}" Margin="0,0,0,10"/>
+
+
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
