@@ -111,16 +111,18 @@ namespace car_storage_odometer.ViewModels
             LatestRepairs = await SqliteDataAccess<RepairHistoryModel>.LoadQuery(
                 @"SELECT 
                     rh.RepairId,
-                    dt.Name AS DeviceName,
+                    sn.SerialNumber AS SerialNumber,
                     rh.Description,
                     rh.StartDate,
                     rh.EndDate,
                     u.FirstName || ' ' || u.LastName AS UserName
                 FROM repairhistory rh
                 LEFT JOIN devices d ON rh.DeviceId = d.DeviceId
-                LEFT JOIN devicetypes dt ON d.TypeId = dt.TypeId
+                LEFT JOIN serialnumbers sn ON d.DeviceId = sn.DeviceId
                 LEFT JOIN users u ON rh.UserId = u.UserId
-                ORDER BY rh.RepairId DESC LIMIT 5;");
+                ORDER BY rh.RepairId DESC
+                LIMIT 5;"
+            );
         }
     }
 }

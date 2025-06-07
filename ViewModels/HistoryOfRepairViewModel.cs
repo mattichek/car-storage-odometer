@@ -132,24 +132,27 @@ namespace car_storage_odometer.ViewModels
             try
             {
                 // Zakładam, że masz metodę LoadRepairHistoryAsync w SqliteDataAccess
-                _allRepairHistory = await SqliteDataAccess<RepairHistoryModel>.LoadQuery(@"SELECT 
+                _allRepairHistory = await SqliteDataAccess<RepairHistoryModel>.LoadQuery(
+                @"SELECT 
                     rh.RepairId,
-                    dt.Name AS DeviceName,
+                    sn.SerialNumber AS SerialNumber,
                     rh.Description,
                     rh.StartDate,
                     rh.EndDate,
                     u.FirstName || ' ' || u.LastName AS UserName
                 FROM repairhistory rh
                 LEFT JOIN devices d ON rh.DeviceId = d.DeviceId
-                LEFT JOIN devicetypes dt ON d.TypeId = dt.TypeId
-                LEFT JOIN users u ON rh.UserId = u.UserId");
+                LEFT JOIN serialnumbers sn ON d.DeviceId = sn.DeviceId
+                LEFT JOIN users u ON rh.UserId = u.UserId
+                ;"
+                );
 
                 // Uzupełnij ComboBoxy do filtrowania
                 AvailableUsers = new ObservableCollection<string>(
                     new[] { "Wszyscy" }.Concat(_allRepairHistory.Select(log => log.UserName).Where(u => u != null).Distinct().OrderBy(u => u))
                 );
                 AvailableDevices = new ObservableCollection<string>(
-                    new[] { "Wszystkie" }.Concat(_allRepairHistory.Select(log => log.DeviceName).Where(d => d != null).Distinct().OrderBy(d => d))
+                    new[] { "Wszystkie" }.Concat(_allRepairHistory.Select(log => log.SerialNumber).Where(d => d != null).Distinct().OrderBy(d => d))
                 );
                 AvailableActions = new ObservableCollection<string>(
                     new[] { "Wszystkie" }.Concat(_allRepairHistory.Select(log => log.Description).Where(a => a != null).Distinct().OrderBy(a => a))
@@ -179,7 +182,7 @@ namespace car_storage_odometer.ViewModels
                 filteredData = filteredData.Where(log => log.UserName == SelectedUserFilter);
 
             if (SelectedDeviceFilter != null && SelectedDeviceFilter != "Wszystkie")
-                filteredData = filteredData.Where(log => log.DeviceName == SelectedDeviceFilter);
+                filteredData = filteredData.Where(log => log.SerialNumber == SelectedDeviceFilter);
 
             if (SelectedActionFilter != null && SelectedActionFilter != "Wszystkie")
                 filteredData = filteredData.Where(log => log.Description == SelectedActionFilter);

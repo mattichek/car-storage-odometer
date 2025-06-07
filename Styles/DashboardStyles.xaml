@@ -396,7 +396,7 @@
         </Setter>
     </Style>
     
-        <Style x:Key="StandardTextBoxStyle" TargetType="TextBox">
+    <Style x:Key="StandardTextBoxStyle" TargetType="TextBox">
         <Setter Property="Background" Value="#3C3C3C"/>
         <Setter Property="Foreground" Value="{StaticResource TextForegroundBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>

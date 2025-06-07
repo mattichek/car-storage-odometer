@@ -56,11 +56,11 @@ namespace car_storage_odometer.Models
             set => SetProperty(ref _userName, value);
         }
 
-        private string _deviceName;
-        public string DeviceName
+        private string _serialNumber;
+        public string SerialNumber
         {
-            get => _deviceName;
-            set => SetProperty(ref _deviceName, value);
+            get => _serialNumber;
+            set => SetProperty(ref _serialNumber, value);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

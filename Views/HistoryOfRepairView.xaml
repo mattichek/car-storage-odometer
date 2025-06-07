@@ -156,7 +156,7 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Urządzenie" Binding="{Binding DeviceName}" Width="*" SortMemberPath="DeviceTypeName">
+                        <DataGridTextColumn Header="Urządzenie" Binding="{Binding SerialNumber}" Width="*" SortMemberPath="DeviceTypeName">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
