@@ -67,20 +67,15 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
-                        <TextBlock Text="Użytkownik:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <ComboBox ItemsSource="{Binding AvailableUsers}"
-                                  SelectedItem="{Binding SelectedUserFilter}"
-                                  Width="150">
-                            <ComboBox.ItemContainerStyle>
-                                <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>
-                            </ComboBox.ItemContainerStyle>
-                        </ComboBox>
+                        <TextBlock Text="Numer ser.:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <TextBox Text="{Binding SearchSerialNumber, UpdateSourceTrigger=PropertyChanged}" Width="150"
+                                Style="{StaticResource StandardTextBoxStyle}" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,20,10">
-                        <TextBlock Text="Urządzenie:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
-                        <ComboBox ItemsSource="{Binding AvailableDeviceTypes}" 
-                                  SelectedItem="{Binding SelectedDeviceTypeFilter}"
+                        <TextBlock Text="Użytkownik:" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource BaseTextBlockStyle}"/>
+                        <ComboBox ItemsSource="{Binding AvailableUsers}"
+                                  SelectedItem="{Binding SelectedUserFilter}"
                                   Width="150">
                             <ComboBox.ItemContainerStyle>
                                 <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}"/>

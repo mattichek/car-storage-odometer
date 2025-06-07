@@ -22,6 +22,7 @@ namespace car_storage_odometer.Views
         public MainPageView()
         {
             InitializeComponent();
+            this.Icon = new BitmapImage(new Uri("pack://application:,,,/Assets/logo_icon.ico"));
         }
     }
 }

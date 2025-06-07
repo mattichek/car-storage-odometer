@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:car_storage_odometer.Views"
         mc:Ignorable="d"
-        Title="MainPageView" WindowState="Maximized"
+        Title="Car Storage Odometer - Main Page" WindowState="Maximized"
+        Icon="/Assets/logo_icon.ico"
         xmlns:prism="http://prismlibrary.com/">
     <Grid Background="#23272E">
         <Border Background="#2C2F36" 
