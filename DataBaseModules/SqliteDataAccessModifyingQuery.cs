@@ -1,4 +1,5 @@
 ﻿using car_storage_odometer.Models;
+using car_storage_odometer.Helpers;
 using Dapper;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.SQLite;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -263,10 +265,10 @@ namespace car_storage_odometer.DataBaseModules
 
                         // Aktualizacja statusu i magazynu w jednej operacji
                         string updateSql = @"
-                    UPDATE Devices
-                    SET StatusId = @StatusId,
-                        WarehouseId = @WarehouseId
-                    WHERE DeviceId = @DeviceId;";
+                            UPDATE Devices
+                            SET StatusId = @StatusId,
+                                WarehouseId = @WarehouseId
+                            WHERE DeviceId = @DeviceId;";
 
                         await cnn.ExecuteAsync(updateSql, new
                         {
@@ -469,5 +471,67 @@ namespace car_storage_odometer.DataBaseModules
                 return new ObservableCollection<string>(statuses);
             }
         }
+
+        // Metoda do ładowania danych użytkownika po ID
+        public static async Task<UserModel> LoadUserByIdAsync(int userId)
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                string sql = "SELECT UserId, FirstName, LastName, Email, Password, RegistrationDate, IsActive, Role FROM Users WHERE UserId = @UserId;";
+                var user = await cnn.QuerySingleOrDefaultAsync<UserModel>(sql, new { UserId = userId });
+                return user;
+            }
+        }
+
+        // Metoda do aktualizacji danych profilu użytkownika (bez hasła)
+        public static async Task UpdateUserProfileAsync(UserModel user)
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                string sql = @"
+                    UPDATE Users
+                    SET FirstName = @FirstName,
+                        LastName = @LastName,
+                        Email = @Email,
+                        IsActive = @IsActive,
+                        Role = @Role
+                    WHERE UserId = @UserId;";
+                await cnn.ExecuteAsync(sql, user);
+            }
+        }
+
+        // Metoda do bezpiecznego haszowania hasła (PRZYKŁAD, użyj silniejszego algorytmu)
+        // W PRZYKŁADZIE UŻYWAM SHA256, ALE W PRAWDZIWEJ APLIKACJI UŻYJ BCrypt, PBKDF2, lub scrypt!
+
+
+        // Metoda do weryfikacji hasła (porównuje jawne hasło z zahaszowanym z bazy)
+        public static async Task<bool> VerifyUserPasswordAsync(int userId, string plainPassword)
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                // Pobierz zahaszowane hasło z bazy danych
+                string sql = "SELECT Password FROM Users WHERE UserId = @UserId;";
+                string hashedPasswordFromDb = await cnn.ExecuteScalarAsync<string>(sql, new { UserId = userId });
+
+                if (string.IsNullOrEmpty(hashedPasswordFromDb))
+                    return false; // Użytkownik nie istnieje lub nie ma hasła
+
+                // Zahaszuj podane hasło i porównaj z zahaszowanym hasłem z bazy
+                string hashedPlainPassword = PasswordBoxHelper.HashPassword(plainPassword); // Użyj tej samej funkcji haszującej
+                return hashedPlainPassword == hashedPasswordFromDb;
+            }
+        }
+
+        // Metoda do aktualizacji hasła użytkownika (z haszowaniem)
+        public static async Task UpdateUserPasswordAsync(int userId, string newPlainPassword)
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                string hashedPassword = PasswordBoxHelper.HashPassword(newPlainPassword); // Zahaszuj nowe hasło
+                string sql = "UPDATE Users SET Password = @Password WHERE UserId = @UserId;";
+                await cnn.ExecuteAsync(sql, new { Password = hashedPassword, UserId = userId });
+            }
+        }
+
     }
 }

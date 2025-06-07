@@ -14,7 +14,7 @@ using System.Windows.Input;
 
 namespace car_storage_odometer.ViewModels
 {
-    public class DevicesViewModel : INotifyPropertyChanged
+    public class DevicesViewModel : INotifyPropertyChanged, INavigationAware
     {
         private ObservableCollection<DeviceModel> _allDevices;
 
@@ -169,8 +169,6 @@ namespace car_storage_odometer.ViewModels
 
             _devices = new ObservableCollection<DeviceModel>();
             _allDevices = new ObservableCollection<DeviceModel>();
-
-            _ = LoadInitialDataAsync();
         }
 
         private void RaiseAllCanExecuteChanged()
@@ -459,5 +457,38 @@ namespace car_storage_odometer.ViewModels
             OnPropertyChanged(propertyName);
             return true;
         }
+
+        public async void OnNavigatedTo(NavigationContext navigationContext)
+        {
+            // Load data when the view is navigated to
+            await LoadInitialDataAsync();
+            // Clear any previous selection or edit state when navigating to the view
+            SelectedDevice = null;
+            CurrentEditDevice = null;
+            SelectedTargetWarehouse = null;
+            RaiseAllCanExecuteChanged();
+        }
+
+        public bool IsNavigationTarget(NavigationContext navigationContext)
+        {
+            // Always return true to reuse the existing instance of DevicesViewModel
+            // This prevents unnecessary reloads of data and maintains the state (filters, etc.)
+            return true;
+        }
+
+        public void OnNavigatedFrom(NavigationContext navigationContext)
+        {
+            Devices.Clear();
+            _allDevices.Clear(); 
+            SelectedDevice = null; // Clear selected device
+            CurrentEditDevice = null; // Clear current edit device
+            SelectedTargetWarehouse = null; // Clear selected target warehouse
+            FilterSerialNumber = string.Empty;
+            FilterDeviceType = "Wszystkie";
+            FilterWarehouse = "Wszystkie";
+            FilterStatus = "Wszystkie";
+            RaiseAllCanExecuteChanged();
+        }
+
     }
 }

@@ -88,33 +88,35 @@
                             </ComboBox>
                         </StackPanel>
 
-                        <Button Content="Resetuj Filtry"
-                                Command="{Binding ResetFiltersCommand}"
-                                Style="{StaticResource {x:Type Button}}">
-                            <Button.Template>
-                                <ControlTemplate TargetType="{x:Type Button}">
-                                    <Border Background="#6C757D"
-                                            BorderBrush="#6C757D"
-                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                            CornerRadius="3">
-                                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                          Margin="{TemplateBinding Padding}"
-                                                          Content="{TemplateBinding Content}"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#5a6268"/>
-                                            <Setter Property="BorderBrush" Value="#5a6268"/>
-                                        </Trigger>
-                                        <Trigger Property="IsPressed" Value="True">
-                                            <Setter Property="Background" Value="#5a6268"/>
-                                            <Setter Property="BorderBrush" Value="#5a6268"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <Button Content="Resetuj"
+                                    Command="{Binding ResetFiltersCommand}"
+                                    Style="{StaticResource {x:Type Button}}">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border Background="#6C757D"
+                                                BorderBrush="#6C757D"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="3">
+                                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                              Margin="{TemplateBinding Padding}"
+                                                              Content="{TemplateBinding Content}"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#5a6268"/>
+                                                <Setter Property="BorderBrush" Value="#5a6268"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter Property="Background" Value="#5a6268"/>
+                                                <Setter Property="BorderBrush" Value="#5a6268"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </StackPanel>
                     </WrapPanel>
 
                     <Separator Grid.Row="1" Background="{StaticResource BorderBrush}" Height="1" Margin="0,0,0,15"/>
@@ -267,7 +269,7 @@
                         </Grid>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,20">
-                            <Button Content="Nowe urządzenie" Command="{Binding NewDeviceCommand}" Style="{StaticResource {x:Type Button}}" Margin="0,0,10,0"/>
+                            <Button Content="Nowe urządzenie" Command="{Binding NewDeviceCommand}" Style="{StaticResource AccentButtonStyle}" Margin="0,0,10,0"/>
                             <Button Content="Dodaj urządzenie" Command="{Binding AddDeviceCommand}" Style="{StaticResource {x:Type Button}}" Margin="0,0,10,0"/>
                             <Button Content="Aktualizuj urządzenie" Command="{Binding UpdateDeviceCommand}" Style="{StaticResource {x:Type Button}}"/>
                         </StackPanel>
@@ -290,11 +292,11 @@
                             </StackPanel>
 
                             <Button Content="Zgłoś naprawę" Command="{Binding ReportRepairCommand}" Style="{StaticResource {x:Type Button}}" Margin="0,0,0,10"/>
-                            <Button Content="Zakończ naprawę" Command="{Binding FinishRepairCommand}" Style="{StaticResource {x:Type Button}}" Margin="0,0,0,10"/>
+                            <Button Content="Zakończ naprawę" Command="{Binding FinishRepairCommand}" Style="{StaticResource AccentButtonStyle}" Margin="0,0,0,10"/>
 
 
 
-                            <Button Content="Usuń urządzenie" Command="{Binding DeleteDeviceCommand}" Style="{StaticResource {x:Type Button}}" Margin="0,0,0,10"/>
+                            <Button Content="Usuń urządzenie" Command="{Binding DeleteDeviceCommand}" Style="{StaticResource DangerButtonStyle}" Margin="0,0,0,10"/>
 
 
                         </StackPanel>

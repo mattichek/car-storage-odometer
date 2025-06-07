@@ -1,9 +1,11 @@
 ﻿using Prism.Mvvm;
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace car_storage_odometer.Models
 {
-    public class UserModel : BindableBase
+    public class UserModel : BindableBase, INotifyPropertyChanged
     {
         private int _userId;
         public int UserId // odpowiada user_id
@@ -34,7 +36,7 @@ namespace car_storage_odometer.Models
         }
 
         private string _password;
-        public string Password // odpowiada haslo
+        public string Password // odpowiada haslo (UWAGA: powinno być haszowane!)
         {
             get => _password;
             set => SetProperty(ref _password, value);
@@ -63,6 +65,8 @@ namespace car_storage_odometer.Models
 
         // Pomocnicza właściwość do wyświetlania pełnej nazwy użytkownika
         public string UserName => $"{FirstName} {LastName}";
+
+        // Metoda do tworzenia głębokiej kopii obiektu UserModel
         public UserModel Clone()
         {
             return new UserModel
@@ -71,11 +75,27 @@ namespace car_storage_odometer.Models
                 FirstName = this.FirstName,
                 LastName = this.LastName,
                 Email = this.Email,
-                Password = this.Password, // Kluczowe: NIE klonuj hasła w ten sposób w prod!
+                Password = this.Password,
                 RegistrationDate = this.RegistrationDate,
                 IsActive = this.IsActive,
                 Role = this.Role
             };
+        }
+
+        // Implementacja INotifyPropertyChanged
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
         }
     }
 }

@@ -4,7 +4,6 @@
     <SolidColorBrush x:Key="TextForegroundBrush" Color="#F0F0F0"/>
     <SolidColorBrush x:Key="SubtleTextForegroundBrush" Color="#AAAAAA"/>
     <SolidColorBrush x:Key="PressedBackgroundBrush" Color="#005C99"/>
-    <SolidColorBrush x:Key="ErrorBrush" Color="#FF4500"/>
     <SolidColorBrush x:Key="PrimaryBackgroundBrush" Color="#1C1C1C"/>
     <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="#2A2A2A"/>
     <SolidColorBrush x:Key="SurfaceBackgroundBrush" Color="#3C3C3C"/>
@@ -18,6 +17,11 @@
     <SolidColorBrush x:Key="DisabledBackgroundBrush" Color="#3C3C3C"/>
     <SolidColorBrush x:Key="DisabledBorderBrush" Color="#5A5A5A"/>
     <SolidColorBrush x:Key="DisabledForegroundBrush" Color="#8E8E8E"/>
+
+    <SolidColorBrush x:Key="ErrorBrush" Color="#FF4500"/>
+    <SolidColorBrush x:Key="GreenAccentBrush" Color="#4CAF50"/>
+    <SolidColorBrush x:Key="GreenAccentDarkBrush" Color="#388E3C"/>
+    <SolidColorBrush x:Key="GreenPressedBrush" Color="#2E7D32"/>
 
     <Style x:Key="BaseTextBlockStyle" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{StaticResource TextForegroundBrush}"/>
@@ -417,5 +421,80 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
+    <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="{StaticResource GreenAccentBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource GreenAccentDarkBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource PrimaryForegroundBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="10,5"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="3">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      Margin="{TemplateBinding Padding}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource GreenAccentDarkBrush}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource GreenAccentDarkBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="{StaticResource GreenPressedBrush}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource GreenPressedBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background" Value="{StaticResource DisabledBackgroundBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource DisabledForegroundBrush}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource DisabledBorderBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="{StaticResource ErrorBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource PrimaryForegroundBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="10,5"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="3">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  Margin="{TemplateBinding Padding}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#C82333"/>
+                            <Setter Property="BorderBrush" Value="#C82333"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="#A81C2A"/>
+                            <Setter Property="BorderBrush" Value="#A81C2A"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background" Value="{StaticResource DisabledBackgroundBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource DisabledForegroundBrush}"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource DisabledBorderBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

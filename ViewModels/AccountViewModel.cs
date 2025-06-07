@@ -1,22 +1,27 @@
-﻿using car_storage_odometer.Models;
-using ImTools;
+﻿using car_storage_odometer.DataBaseModules;
+using car_storage_odometer.Helpers; // Zmieniono na Helpers, zakładając tam SqliteDataAccess
+using car_storage_odometer.Models;
 using Prism.Commands;
 using Prism.Mvvm;
+using Prism.Regions; // Dodano, aby używać INavigationAware
 using System;
+using System.ComponentModel;
+using System.Threading.Tasks; // Dodano dla async/await
 using System.Windows;
 
 namespace car_storage_odometer.ViewModels
 {
-    public class AccountViewModel : BindableBase
+    // Zaktualizowano, aby implementował INavigationAware
+    public class AccountViewModel : BindableBase, INavigationAware
     {
-        private UserModel _loggedInUser; // Symulacja zalogowanego użytkownika
-        private UserModel _editedUser;   // Kopia użytkownika do edycji
+        private UserModel _loggedInUser; // Symulacja zalogowanego użytkownika (do autoryzacji zmiany hasła)
+        private UserModel _editedUser;   // Kopia użytkownika do edycji w formularzu
 
         private string _oldPassword;
         private string _newPassword;
         private string _confirmNewPassword;
 
-        private bool _isEditing;
+        private bool _isEditing; // Kontroluje, czy pola edycji są aktywne
 
         // --- Właściwości Publiczne (do wiązania z XAML) ---
         public UserModel EditedUser
@@ -62,117 +67,116 @@ namespace car_storage_odometer.ViewModels
         }
 
         // --- Komendy ---
-        public DelegateCommand EditAccountCommand { get; private set; }
-        public DelegateCommand SaveAccountCommand { get; private set; }
+        public DelegateCommand EditCommand { get; private set; }
+        public DelegateCommand SaveCommand { get; private set; }
         public DelegateCommand CancelEditCommand { get; private set; }
         public DelegateCommand ChangePasswordCommand { get; private set; }
 
-        // --- Konstruktor ---
+        // Założenie: Id zalogowanego użytkownika jest dostępne globalnie lub przekazywane
+        // Zastąp to rzeczywistym sposobem pobierania ID zalogowanego użytkownika.
+        private int CurrentUserId { get; set; } = 1; // PRZYKŁAD: Ustaw na ID zalogowanego użytkownika
+
         public AccountViewModel()
         {
-            EditAccountCommand = new DelegateCommand(ExecuteEditAccount, CanExecuteEditAccount);
-            SaveAccountCommand = new DelegateCommand(ExecuteSaveAccount, CanSaveAccount);
+            // Inicjalizacja ViewModelu
+            EditedUser = new UserModel(); // Ustawienie początkowej pustej instancji
+
+            EditCommand = new DelegateCommand(ExecuteEdit);
+            SaveCommand = new DelegateCommand(async () => await ExecuteSave(), CanExecuteSave);
             CancelEditCommand = new DelegateCommand(ExecuteCancelEdit);
-            ChangePasswordCommand = new DelegateCommand(ExecuteChangePassword, () => CanChangePassword());
+            ChangePasswordCommand = new DelegateCommand(async () => await ExecuteChangePassword(), CanChangePassword);
 
-            // Symulacja ładowania danych zalogowanego użytkownika
-            LoadLoggedInUser();
-
-            // Ustaw początkowy stan
-            ExecuteCancelEdit(); // Inicjalizuje EditedUser jako kopię
+            IsEditing = false; // Domyślnie pola nie są edytowalne
         }
 
-        // --- Metody Prywatne (implementacje komend i pomocnicze) ---
-        private void LoadLoggedInUser()
+        // --- Metody do ładowania danych (wywoływane przez INavigationAware) ---
+        private async Task LoadUserData(int userId)
         {
-            _loggedInUser = new UserModel
+            try
             {
-                UserId = 1,
-                FirstName = "Jan",
-                LastName = "Kowalski",
-                Email = "jan.kowalski@example.com",
-                Password = "hashed_password_123", // Nigdy nie przechowuj hasła jawnie!
-                RegistrationDate = new DateTime(2023, 1, 15),
-                IsActive = true,
-                Role = "Administrator"
-            };
+                // Załaduj dane użytkownika z bazy danych
+                // Używamy SqliteDataAccess.LoadUserByIdAsync, którą za chwilę dodamy
+                _loggedInUser = await SqliteDataAccessModifyingQuery.LoadUserByIdAsync(userId);
+                if (_loggedInUser != null)
+                {
+                    EditedUser = _loggedInUser.Clone(); // Tworzymy kopię do edycji
+                    // Resetujemy pola hasła
+                    OldPassword = string.Empty;
+                    NewPassword = string.Empty;
+                    ConfirmNewPassword = string.Empty;
+                }
+                else
+                {
+                    MessageBox.Show("Nie można załadować danych użytkownika.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Błąd ładowania danych użytkownika: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                RaiseCanExecuteChangedForUserCommands();
+            }
         }
 
-        private void ExecuteEditAccount()
+        // --- Metody wykonawcze dla komend ---
+
+        private void ExecuteEdit()
         {
             IsEditing = true;
-            SaveAccountCommand.RaiseCanExecuteChanged();
-            CancelEditCommand.RaiseCanExecuteChanged();
-            EditAccountCommand.RaiseCanExecuteChanged(); // Zablokuj przycisk Edytuj
+            RaiseCanExecuteChangedForUserCommands();
         }
 
-        private bool CanExecuteEditAccount()
+        private async Task ExecuteSave()
         {
-            return !IsEditing;
-        }
-
-        private void ExecuteSaveAccount()
-        {
-            if (EditedUser == null) return;
-
-            // Walidacja podstawowych pól
-            if (string.IsNullOrWhiteSpace(EditedUser.FirstName) ||
-                string.IsNullOrWhiteSpace(EditedUser.LastName) ||
-                string.IsNullOrWhiteSpace(EditedUser.Email))
+            try
             {
-                MessageBox.Show("Wszystkie pola (Imię, Nazwisko, Email) muszą być wypełnione.", "Błąd walidacji", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+                // Walidacja danych EditedUser (np. Email, FirstName, LastName)
+                if (string.IsNullOrWhiteSpace(EditedUser.FirstName) ||
+                    string.IsNullOrWhiteSpace(EditedUser.LastName) ||
+                    string.IsNullOrWhiteSpace(EditedUser.Email))
+                {
+                    MessageBox.Show("Wszystkie pola (Imię, Nazwisko, Email) muszą być wypełnione.", "Błąd walidacji", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
 
-            // Walidacja formatu email (uproszczona)
-            if (!EditedUser.Email.Contains("@") || !EditedUser.Email.Contains("."))
+                // Zapisz zmienione dane do bazy danych
+                // Użyj SqliteDataAccess.UpdateUserProfileAsync, którą za chwilę dodamy
+                await SqliteDataAccessModifyingQuery.UpdateUserProfileAsync(EditedUser);
+
+                // Zaktualizuj _loggedInUser danymi z EditedUser
+                _loggedInUser = EditedUser.Clone();
+
+                IsEditing = false;
+                MessageBox.Show("Dane użytkownika zostały zaktualizowane pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
             {
-                MessageBox.Show("Wprowadź poprawny format adresu email.", "Błąd walidacji", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                MessageBox.Show($"Błąd podczas zapisu danych użytkownika: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-            // W prawdziwej aplikacji: wyślij zaktualizowane dane do serwisu/repozytorium
-            // Pamiętaj, aby nie aktualizować hasła tą samą metodą co inne dane profilu.
-            // Sprawdź, czy Email nie jest już używany przez innego użytkownika (jeśli zmieniono)
-            // ... logika zapisu do bazy danych ...
-
-            _loggedInUser.FirstName = EditedUser.FirstName;
-            _loggedInUser.LastName = EditedUser.LastName;
-            _loggedInUser.Email = EditedUser.Email;
-            // Pozostałe pola są tylko do odczytu lub zmieniane inną metodą (np. hasło)
-
-            MessageBox.Show("Dane konta zostały zaktualizowane.", "Zapisano", MessageBoxButton.OK, MessageBoxImage.Information);
-            IsEditing = false;
-            SaveAccountCommand.RaiseCanExecuteChanged();
-            CancelEditCommand.RaiseCanExecuteChanged();
-            EditAccountCommand.RaiseCanExecuteChanged(); // Odblokuj przycisk Edytuj
+            finally
+            {
+                RaiseCanExecuteChangedForUserCommands();
+            }
         }
 
-        private bool CanSaveAccount()
+        private bool CanExecuteSave()
         {
-            // Można zapisać tylko w trybie edycji
-            return IsEditing;
+            // Można zapisać tylko wtedy, gdy jest tryb edycji i wybrano użytkownika
+            return IsEditing && EditedUser != null && EditedUser.UserId > 0;
         }
 
         private void ExecuteCancelEdit()
         {
-            // Przywróć oryginalne dane użytkownika
-            EditedUser = _loggedInUser.Clone(); 
-
+            // Przywróć oryginalne dane z _loggedInUser
+            EditedUser = _loggedInUser.Clone();
             IsEditing = false;
-            OldPassword = string.Empty;
-            NewPassword = string.Empty;
-            ConfirmNewPassword = string.Empty;
-
-            SaveAccountCommand.RaiseCanExecuteChanged();
-            ChangePasswordCommand.RaiseCanExecuteChanged();
-            CancelEditCommand.RaiseCanExecuteChanged();
-            EditAccountCommand.RaiseCanExecuteChanged();
+            RaiseCanExecuteChangedForUserCommands();
         }
 
-        private void ExecuteChangePassword()
+        private async Task ExecuteChangePassword()
         {
-            
             if (string.IsNullOrWhiteSpace(OldPassword) ||
                 string.IsNullOrWhiteSpace(NewPassword) ||
                 string.IsNullOrWhiteSpace(ConfirmNewPassword))
@@ -187,32 +191,89 @@ namespace car_storage_odometer.ViewModels
                 return;
             }
 
-            if (NewPassword.Length < 6) 
+            if (NewPassword.Length < 6)
             {
                 MessageBox.Show("Nowe hasło musi mieć co najmniej 6 znaków.", "Błąd walidacji", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (OldPassword != "admin123") 
+            try
             {
-                MessageBox.Show("Niepoprawne stare hasło.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                // Sprawdź stare hasło (w prawdziwej aplikacji HASZUJ I PORÓWNUJ HASZE!)
+                // Użyj SqliteDataAccess.VerifyUserPasswordAsync, którą za chwilę dodamy
+                // W tej symulacji przyjmuję, że OldPassword to jawne hasło, które jest porównywane.
+                // W rzeczywistości powinieneś przekazać OldPassword do metody weryfikującej hasło,
+                // która następnie porówna zahaszowane wersje.
+                bool isPasswordCorrect = await SqliteDataAccessModifyingQuery.VerifyUserPasswordAsync(CurrentUserId, OldPassword);
+
+                if (!isPasswordCorrect)
+                {
+                    MessageBox.Show("Niepoprawne stare hasło.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Zmień hasło w bazie danych
+                // Użyj SqliteDataAccess.UpdateUserPasswordAsync, którą za chwilę dodamy
+                await SqliteDataAccessModifyingQuery.UpdateUserPasswordAsync(CurrentUserId, NewPassword); // Przekazuj jawne hasło, metoda powinna je haszować
+
+                MessageBox.Show("Hasło zostało zmienione pomyślnie.", "Zmieniono hasło", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // Wyczyść pola hasła po zmianie
+                OldPassword = string.Empty;
+                NewPassword = string.Empty;
+                ConfirmNewPassword = string.Empty;
             }
-
-            _loggedInUser.Password = "hashed_" + NewPassword; 
-            MessageBox.Show("Hasło zostało zmienione pomyślnie.", "Zmieniono hasło", MessageBoxButton.OK, MessageBoxImage.Information);
-
-            
-            OldPassword = string.Empty;
-            NewPassword = string.Empty;
-            ConfirmNewPassword = string.Empty;
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Błąd podczas zmiany hasła: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                ChangePasswordCommand.RaiseCanExecuteChanged(); // Zaktualizuj stan przycisku
+            }
         }
 
         private bool CanChangePassword()
         {
+            // Można zmieniać hasło, gdy wszystkie pola hasła są wypełnione
             return !string.IsNullOrWhiteSpace(OldPassword) &&
                    !string.IsNullOrWhiteSpace(NewPassword) &&
                    !string.IsNullOrWhiteSpace(ConfirmNewPassword);
+        }
+
+        // Metoda do aktualizowania stanu aktywności komend
+        private void RaiseCanExecuteChangedForUserCommands()
+        {
+            SaveCommand.RaiseCanExecuteChanged();
+            ChangePasswordCommand.RaiseCanExecuteChanged();
+            EditCommand.RaiseCanExecuteChanged();
+            CancelEditCommand.RaiseCanExecuteChanged();
+        }
+
+        // --- Implementacja INavigationAware ---
+
+        // Wywoływana, gdy widok jest aktywowany
+        public void OnNavigatedTo(NavigationContext navigationContext)
+        {
+            _ = LoadUserData(CurrentUserId);
+            IsEditing = false; // Resetuj tryb edycji po nawigacji
+        }
+
+        // Określa, czy widok powinien być ponownie użyty
+        public bool IsNavigationTarget(NavigationContext navigationContext)
+        {
+            return true; // Zwróć true, aby ponownie używać istniejącej instancji ViewModelu
+        }
+
+        // Wywoływana, gdy widok jest dezaktywowany
+        public void OnNavigatedFrom(NavigationContext navigationContext)
+        {
+             EditedUser = new UserModel();
+            _loggedInUser = null;
+            OldPassword = string.Empty;
+            NewPassword = string.Empty;
+            ConfirmNewPassword = string.Empty;
+            IsEditing = false;
         }
     }
 }
