@@ -278,7 +278,6 @@ namespace car_storage_odometer.ViewModels
             {
                 await SqliteDataAccessModifyingQuery.AddDeviceAsync(CurrentEditDevice, CurrentUserId);
                 await SqliteDataAccessModifyingQuery.AddUserLogAsync(CurrentUserId, "Dodano urządznie");
-                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Dodano nowe urządzenie", CurrentEditDevice.WarehouseId);
                 MessageBox.Show("Urządzenie zostało dodane pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
                 await LoadInitialDataAsync();
                 CurrentEditDevice = null;

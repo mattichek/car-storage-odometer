@@ -30,8 +30,8 @@ namespace car_storage_odometer.DataBaseModules
             using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
             {
                 string insertSql = @"
-            INSERT INTO UserLogs (UserId, Event, EventDate)
-            VALUES (@UserId, @Event, @EventDate);";
+                    INSERT INTO UserLogs (UserId, Event, EventDate)
+                    VALUES (@UserId, @Event, @EventDate);";
 
                 await cnn.ExecuteAsync(insertSql, new
                 {
@@ -48,9 +48,17 @@ namespace car_storage_odometer.DataBaseModules
             {
                 cnn.Open();
 
-                int? fromWarehouseId = await cnn.ExecuteScalarAsync<int?>(
-                    "SELECT WarehouseId FROM Devices WHERE DeviceId = @DeviceId",
-                    new { DeviceId = deviceId });
+                int? fromWarehouseId;
+
+                // Jeśli dodano nowe urządzenie, fromWarehouseId ma być puste
+                if (eventDescription == "Dodano nowe urządzenie")
+                    fromWarehouseId = null;
+                else
+                {
+                    fromWarehouseId = await cnn.ExecuteScalarAsync<int?>(
+                        "SELECT WarehouseId FROM Devices WHERE DeviceId = @DeviceId",
+                        new { DeviceId = deviceId });
+                }
 
                 string insertSql = @"
                     INSERT INTO DeviceLogs (UserId, DeviceId, Event, EventDate, FromWarehouseId, ToWarehouseId)
@@ -62,11 +70,12 @@ namespace car_storage_odometer.DataBaseModules
                     DeviceId = deviceId,
                     Event = eventDescription,
                     EventDate = DateTime.Now,
-                    FromWarehouseId = fromWarehouseId,
-                    ToWarehouseId = toWarehouseId
+                    FromWarehouseId = toWarehouseId,
+                    ToWarehouseId = fromWarehouseId
                 });
             }
         }
+
 
         public static async Task AddRepairHistoryAsync(int deviceId, string description, int userId, DateTime? endDate = null)
         {
@@ -422,6 +431,8 @@ namespace car_storage_odometer.DataBaseModules
                         }, transaction);
 
                         transaction.Commit();
+
+                        await AddDeviceLogAsync(userId, newDeviceId, "Dodano nowe urządzenie", warehouseId);
                     }
                     catch (Exception ex)
                     {
@@ -456,29 +467,6 @@ namespace car_storage_odometer.DataBaseModules
             {
                 var statuses = await cnn.QueryAsync<string>("SELECT Name FROM statuses ORDER BY Name");
                 return new ObservableCollection<string>(statuses);
-            }
-        }
-
-        public static async Task<ObservableCollection<DeviceLogModel>> LoadDevicesLastFiveLogsAsync()
-        {
-            return await Task.Run(() =>
-            {
-                using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-                {
-                    var output = cnn.Query<DeviceLogModel>("SELECT dl.LogId, sn.SerialNumber, dt.Name AS DeviceName, dl.EventDate, dl.Event, w1.Name AS FromWarehouseName, w2.Name AS ToWarehouseName, u.FirstName || ' ' || u.LastName AS UserName FROM DeviceLogs dl JOIN Devices d ON dl.DeviceId = d.DeviceId JOIN SerialNumbers sn ON d.DeviceId = sn.DeviceId JOIN DeviceTypes dt ON d.TypeId = dt.TypeId LEFT JOIN Warehouses w1 ON dl.FromWarehouseId = w1.WarehouseId LEFT JOIN Warehouses w2 ON dl.ToWarehouseId = w2.WarehouseId JOIN Users u ON dl.UserId = u.UserId ORDER BY dl.LogId DESC LIMIT 5;"
-                        , new DynamicParameters());
-                    return new ObservableCollection<DeviceLogModel>(output);
-                }
-            });
-        }
-
-        public static ObservableCollection<DeviceLogModel> LoadDevicesLogsLastFiveLogs()
-        {
-            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-            {
-                var output = cnn.Query<DeviceLogModel>(""
-                    , new DynamicParameters());
-                return new ObservableCollection<DeviceLogModel>(output);
             }
         }
     }
