@@ -1,6 +1,9 @@
-﻿using car_storage_odometer.Views;
-using car_storage_odometer.Modules;
+﻿using car_storage_odometer.Modules;
+using car_storage_odometer.Services;
+using car_storage_odometer.ViewModels;
+using car_storage_odometer.Views;
 using Prism.DryIoc;
+using Prism.Events;
 using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
@@ -22,21 +25,26 @@ namespace car_storage_odometer
         {
             //throw new System.NotImplementedException();
             containerRegistry.RegisterForNavigation<MainPageView>();
+            
+            containerRegistry.RegisterForNavigation<LoginPageView, LoginPageViewModel>();
+            containerRegistry.RegisterForNavigation<DashboardWithSideBarView, DashboardWithSideBarViewModel>(); // Nowy widok po zalogowaniu
+            
+            containerRegistry.RegisterForNavigation<DashboardView, DashboardViewModel>();
+            containerRegistry.RegisterForNavigation<LogsUsersView, LogsUsersViewModel>();
+            containerRegistry.RegisterForNavigation<LogsDeviceView, LogsDeviceViewModel>();
+            containerRegistry.RegisterForNavigation<HistoryOfRepairView, HistoryOfRepairViewModel>();
+            containerRegistry.RegisterForNavigation<AccountView, AccountViewModel>();
+            containerRegistry.RegisterForNavigation<DevicesView, DevicesViewModel>();
 
+            containerRegistry.RegisterSingleton<IAuthenticationService, AuthenticationService>();
+            containerRegistry.RegisterSingleton<IEventAggregator, EventAggregator>();
         }
 
         protected override void OnInitialized()
         {
             base.OnInitialized();
             var regionManager = ContainerLocator.Container.Resolve<IRegionManager>();
-            regionManager.RegisterViewWithRegion("DashboardRegion", typeof(DashboardView));
-            regionManager.RegisterViewWithRegion("LogsUsersRegion", typeof(LogsUsersView));
-            regionManager.RegisterViewWithRegion("LogsDeviceRegion", typeof(LogsDeviceView));
-            regionManager.RegisterViewWithRegion("HistoryOfRepairRegion", typeof(HistoryOfRepairView));
-            //regionManager.RegisterViewWithRegion("StorageRegion", typeof(StorageView));
-            regionManager.RegisterViewWithRegion("DevicesRegion", typeof(DevicesView));
-            regionManager.RegisterViewWithRegion("AccountRegion", typeof(AccountView));
-
+            regionManager.RequestNavigate("FullScreenRegion", "LoginPageView");
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

@@ -96,6 +96,7 @@
     <Compile Include="Converters\InvertBooleanConverter.cs" />
     <Compile Include="Converters\PercentageToWidthConverter.cs" />
     <Compile Include="Converters\SortDirectionToArrowConverter .cs" />
+    <Compile Include="Events\LogoutEvent.cs" />
     <Compile Include="Helpers\PasswordBoxHelper.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="DataBaseModules\SqliteDataAccess.cs" />
@@ -112,10 +113,13 @@
     <Compile Include="Models\UserModel.cs" />
     <Compile Include="Models\WarehouseStatusModel.cs" />
     <Compile Include="Modules\SideBarModule.cs" />
+    <Compile Include="Services\AuthenticationService.cs" />
     <Compile Include="Services\DeviceLogFilterService.cs" />
+    <Compile Include="Services\IAuthenticationService.cs" />
     <Compile Include="Services\UserLogFilterService.cs" />
     <Compile Include="ViewModels\AccountViewModel.cs" />
     <Compile Include="ViewModels\DashboardViewModel.cs" />
+    <Compile Include="ViewModels\DashboardWithSideBarViewModel.cs" />
     <Compile Include="ViewModels\DevicesViewModel.cs" />
     <Compile Include="ViewModels\HistoryOfRepairViewModel.cs" />
     <Compile Include="ViewModels\LoginPageViewModel.cs" />
@@ -128,6 +132,9 @@
     </Compile>
     <Compile Include="Views\DashboardView.xaml.cs">
       <DependentUpon>DashboardView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DashboardWithSideBarView.xaml.cs">
+      <DependentUpon>DashboardWithSideBarView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\DevicesView.xaml.cs">
       <DependentUpon>DevicesView.xaml</DependentUpon>
@@ -196,6 +203,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DashboardView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DashboardWithSideBarView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
