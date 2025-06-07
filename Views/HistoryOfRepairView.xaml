@@ -148,12 +148,54 @@
                           CanUserSortColumns="True"
                           IsEnabled="{Binding IsLoading, Converter={StaticResource InvertBooleanConverter}}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID" Binding="{Binding RepairId}" Width="Auto" SortMemberPath="Id"/>
-                        <DataGridTextColumn Header="Urządzenie" Binding="{Binding DeviceName}" Width="*" SortMemberPath="DeviceTypeName"/>
-                        <DataGridTextColumn Header="Opis" Binding="{Binding Description}" Width="*" SortMemberPath="ActionDescription"/>
-                        <DataGridTextColumn Header="Data Start" Binding="{Binding StartDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*" SortMemberPath="Date"/>
-                        <DataGridTextColumn Header="Data Koniec" Binding="{Binding EndDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*" SortMemberPath="Date"/>
-                        <DataGridTextColumn Header="Użytkownik" Binding="{Binding UserName}" Width="*" SortMemberPath="UserName"/>
+                        <DataGridTextColumn Header="ID" Binding="{Binding RepairId}" Width="Auto" SortMemberPath="Id">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="TextAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Urządzenie" Binding="{Binding DeviceName}" Width="*" SortMemberPath="DeviceTypeName">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="TextAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Opis" Binding="{Binding Description}" Width="*" SortMemberPath="ActionDescription">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="TextAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Data Start" Binding="{Binding StartDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*" SortMemberPath="Date">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="TextAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Data Koniec" Binding="{Binding EndDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="*" SortMemberPath="Date">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="TextAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Użytkownik" Binding="{Binding UserName}" Width="*" SortMemberPath="UserName">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="TextAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
