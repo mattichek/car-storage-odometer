@@ -4,11 +4,10 @@ Car Storage Odometer to profesjonalna aplikacja desktopowa stworzona w technolog
 
 ## ✨ Kluczowe funkcje
 
-- 🚗 **Zarządzanie pojazdami** - dodawanie, edycja i usuwanie pojazdów z magazynu
-- 📊 **Śledzenie przebiegu** - rejestracja aktualnego przebiegu i historia odczytów
-- 🔍 **Wyszukiwanie i filtrowanie** - szybki dostęp do pojazdów po parametrach
-- 📈 **Statystyki i raporty** - analiza danych o przebiegu i stanie floty
-- 🛠 **Historia przeglądów** - rejestracja przeglądów i napraw pojazdów
+- 🚗 **Zarządzanie pojazdami** - dodawanie, edycja i usuwanie urządzeń z magazynu
+- 📊 **Śledzenie poczynań użytkowników z urządzeniami** - rejestracja aktualnego stanu urządzeń 
+- 🔍 **Wyszukiwanie i filtrowanie** - szybki dostęp do urządzeń po parametrach
+- 🛠 **Historia napraw** - rejestracja napraw urządzeń
 - 💾 **Lokalna baza danych** - przechowywanie danych w SQLite
 
 ## 🛠 Stos technologiczny
@@ -18,7 +17,6 @@ Car Storage Odometer to profesjonalna aplikacja desktopowa stworzona w technolog
 - **Baza danych**: SQLite
 - **Wzorce projektowe**: MVVM, Repository, Dependency Injection
 - **Narzędzia**: Visual Studio 2022, Git, GitHub
-- **Testy**: xUnit, Moq
 
 ## 💻 Wymagania systemowe
 
@@ -39,24 +37,6 @@ git clone https://github.com/mattichek/car-storage-odometer.git
 CarStorageOdometer.sln
 ```
 
-3. Przywróć pakiety NuGet:
-```bash
-dotnet restore
-```
-
-4. Uruchom aplikację:
-```bash
-dotnet run --project CarStorageOdometer
-```
-
-Lub użyj skrótu F5 w Visual Studio
-
-## 🔧 Konfiguracja
-
-Baza danych SQLite jest automatycznie tworzona w ścieżce:
-```
-%LocalAppData%/CarStorageOdometer/OdometerWarehouse.db
-```
 
 Aplikacja nie wymaga dodatkowej konfiguracji do działania podstawowego.
 
