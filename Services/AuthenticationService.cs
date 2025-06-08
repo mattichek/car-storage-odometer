@@ -1,11 +1,11 @@
-﻿using car_storage_odometer.DataBaseModules; // Zakładam, że tu masz dostęp do bazy
+﻿using car_storage_odometer.DataBaseModules; 
 using car_storage_odometer.Helpers;
 using Prism.Services.Dialogs;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-// using car_storage_odometer.Models; // Jeśli masz model użytkownika
+using car_storage_odometer.Models;
 
 namespace car_storage_odometer.Services
 {
@@ -38,7 +38,7 @@ namespace car_storage_odometer.Services
                 }
                 else
                 {
-                    _currentUserService.ClearLoggedInUser(); // Upewnij się, że UserID jest wyczyszczone
+                    _currentUserService.ClearLoggedInUser();
                     return false;
                 }
             }
@@ -63,8 +63,8 @@ namespace car_storage_odometer.Services
                 }
             }
 
-            _currentUserService.ClearLoggedInUser(); // Wyczyść ID zalogowanego użytkownika
-            LoggedOut?.Invoke(); // Wywołaj event
+            _currentUserService.ClearLoggedInUser();
+            LoggedOut?.Invoke();
         }
     }
 }

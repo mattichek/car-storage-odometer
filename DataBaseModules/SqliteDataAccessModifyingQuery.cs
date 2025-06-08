@@ -52,7 +52,6 @@ namespace car_storage_odometer.DataBaseModules
 
                 int? fromWarehouseId;
 
-                // Jeśli dodano nowe urządzenie, fromWarehouseId ma być puste
                 if (eventDescription == "Dodano nowe urządzenie")
                     fromWarehouseId = null;
                 else
@@ -86,8 +85,8 @@ namespace car_storage_odometer.DataBaseModules
                 cnn.Open();
 
                 string insertSql = @"
-            INSERT INTO RepairHistory (DeviceId, Description, StartDate, EndDate, UserId)
-            VALUES (@DeviceId, @Description, @StartDate, @EndDate, @UserId);";
+                    INSERT INTO RepairHistory (DeviceId, Description, StartDate, EndDate, UserId)
+                    VALUES (@DeviceId, @Description, @StartDate, @EndDate, @UserId);";
 
                 await cnn.ExecuteAsync(insertSql, new
                 {
@@ -109,7 +108,6 @@ namespace car_storage_odometer.DataBaseModules
                 {
                     try
                     {
-                        // 1. Sprawdź, czy ten numer seryjny nie należy do innego urządzenia
                         var existingDeviceId = await cnn.ExecuteScalarAsync<int?>(
                             "SELECT DeviceId FROM SerialNumbers WHERE SerialNumber = @SerialNumber",
                             new { device.SerialNumber }, transaction);
@@ -119,7 +117,6 @@ namespace car_storage_odometer.DataBaseModules
                             throw new InvalidOperationException($"Numer seryjny '{device.SerialNumber}' jest już przypisany do innego urządzenia.");
                         }
 
-                        // 2. Pobierz ID typu, statusu, magazynu
                         int typeId = await cnn.ExecuteScalarAsync<int>(
                             "SELECT TypeId FROM DeviceTypes WHERE Name = @Name",
                             new { Name = device.TypeName }, transaction);
@@ -132,15 +129,14 @@ namespace car_storage_odometer.DataBaseModules
                             "SELECT WarehouseId FROM Warehouses WHERE Name = @Name",
                             new { Name = device.WarehouseName }, transaction);
 
-                        // 3. Aktualizacja rekordu w Devices
                         string updateDeviceSql = @"
-                    UPDATE Devices
-                    SET TypeId = @TypeId,
-                        StatusId = @StatusId,
-                        WarehouseId = @WarehouseId,
-                        Note = @Note,
-                        EventDate = @EventDate
-                    WHERE DeviceId = @DeviceId;";
+                            UPDATE Devices
+                            SET TypeId = @TypeId,
+                                StatusId = @StatusId,
+                                WarehouseId = @WarehouseId,
+                                Note = @Note,
+                                EventDate = @EventDate
+                            WHERE DeviceId = @DeviceId;";
 
                         await cnn.ExecuteAsync(updateDeviceSql, new
                         {
@@ -152,11 +148,10 @@ namespace car_storage_odometer.DataBaseModules
                             DeviceId = device.DeviceId
                         }, transaction);
 
-                        // 4. Aktualizacja numeru seryjnego
                         string updateSerialSql = @"
-                    UPDATE SerialNumbers
-                    SET SerialNumber = @SerialNumber
-                    WHERE DeviceId = @DeviceId;";
+                            UPDATE SerialNumbers
+                            SET SerialNumber = @SerialNumber
+                            WHERE DeviceId = @DeviceId;";
 
                         await cnn.ExecuteAsync(updateSerialSql, new
                         {
@@ -184,11 +179,9 @@ namespace car_storage_odometer.DataBaseModules
                 {
                     try
                     {
-                        // 1. Usuń powiązany numer seryjny
                         string deleteSerialSql = "DELETE FROM SerialNumbers WHERE DeviceId = @DeviceId;";
                         await cnn.ExecuteAsync(deleteSerialSql, new { DeviceId = deviceId }, transaction);
 
-                        // 2. Usuń urządzenie
                         string deleteDeviceSql = "DELETE FROM Devices WHERE DeviceId = @DeviceId;";
                         await cnn.ExecuteAsync(deleteDeviceSql, new { DeviceId = deviceId }, transaction);
 
@@ -213,16 +206,14 @@ namespace car_storage_odometer.DataBaseModules
                 {
                     try
                     {
-                        // 1. Pobierz ID nowego magazynu
                         int newWarehouseId = await cnn.ExecuteScalarAsync<int>(
                             "SELECT WarehouseId FROM Warehouses WHERE Name = @Name",
                             new { Name = newWarehouseName }, transaction);
 
-                        // 2. Zaktualizuj magazyn urządzenia
                         string updateSql = @"
-                    UPDATE Devices
-                    SET WarehouseId = @WarehouseId
-                    WHERE DeviceId = @DeviceId;";
+                            UPDATE Devices
+                            SET WarehouseId = @WarehouseId
+                            WHERE DeviceId = @DeviceId;";
 
                         await cnn.ExecuteAsync(updateSql, new
                         {
@@ -250,11 +241,9 @@ namespace car_storage_odometer.DataBaseModules
                 {
                     try
                     {
-                        // Pobierz najniższy StatusId
                         int? defaultStatusId = await cnn.ExecuteScalarAsync<int?>(
                             "SELECT MIN(StatusId) FROM Statuses", transaction);
 
-                        // Pobierz najniższy WarehouseId
                         int? defaultWarehouseId = await cnn.ExecuteScalarAsync<int?>(
                             "SELECT MIN(WarehouseId) FROM Warehouses", transaction);
 
@@ -263,7 +252,6 @@ namespace car_storage_odometer.DataBaseModules
                             throw new InvalidOperationException("Nie znaleziono domyślnego statusu lub magazynu.");
                         }
 
-                        // Aktualizacja statusu i magazynu w jednej operacji
                         string updateSql = @"
                             UPDATE Devices
                             SET StatusId = @StatusId,
@@ -297,7 +285,6 @@ namespace car_storage_odometer.DataBaseModules
                 {
                     try
                     {
-                        // 1. Pobierz StatusId dla statusu "W naprawie"
                         int? repairStatusId = await cnn.ExecuteScalarAsync<int?>(
                             "SELECT StatusId FROM Statuses WHERE Name = 'W naprawie';", transaction);
 
@@ -306,7 +293,6 @@ namespace car_storage_odometer.DataBaseModules
                             throw new InvalidOperationException("Nie znaleziono statusu 'W naprawie'.");
                         }
 
-                        // 2. Pobierz ostatni (największy) WarehouseId
                         int? lastWarehouseId = await cnn.ExecuteScalarAsync<int?>(
                             "SELECT MAX(WarehouseId) FROM Warehouses;", transaction);
 
@@ -315,12 +301,11 @@ namespace car_storage_odometer.DataBaseModules
                             throw new InvalidOperationException("Nie znaleziono żadnego magazynu.");
                         }
 
-                        // 3. Aktualizuj status i magazyn w tabeli Devices
                         string updateSql = @"
-                    UPDATE Devices
-                    SET StatusId = @StatusId,
-                        WarehouseId = @WarehouseId
-                    WHERE DeviceId = @DeviceId;";
+                            UPDATE Devices
+                            SET StatusId = @StatusId,
+                                WarehouseId = @WarehouseId
+                            WHERE DeviceId = @DeviceId;";
 
                         await cnn.ExecuteAsync(updateSql, new
                         {
@@ -340,7 +325,6 @@ namespace car_storage_odometer.DataBaseModules
             }
         }
 
-        // --- Metody dla DeviceModel ---
         public static async Task AddDeviceAsync(DeviceModel device, int userId)
         {
             using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
@@ -350,7 +334,6 @@ namespace car_storage_odometer.DataBaseModules
                 {
                     try
                     {
-                        // 1. Sprawdzenie czy numer seryjny istnieje
                         bool serialExists = await cnn.ExecuteScalarAsync<bool>(
                             "SELECT COUNT(1) FROM SerialNumbers WHERE SerialNumber = @SerialNumber",
                             new { device.SerialNumber }, transaction);
@@ -360,7 +343,6 @@ namespace car_storage_odometer.DataBaseModules
                             throw new InvalidOperationException($"Numer seryjny '{device.SerialNumber}' już istnieje.");
                         }
 
-                        // 2. Pobierz ID typu, statusu i magazynu
                         int typeId = await cnn.ExecuteScalarAsync<int>(
                             "SELECT TypeId FROM DeviceTypes WHERE Name = @Name",
                             new { Name = device.TypeName }, transaction);
@@ -373,7 +355,6 @@ namespace car_storage_odometer.DataBaseModules
                             "SELECT WarehouseId FROM Warehouses WHERE Name = @Name",
                             new { Name = device.WarehouseName }, transaction);
 
-                        // 3. Wstawienie urządzenia
                         string insertDeviceSql = @"
                                 INSERT INTO Devices (TypeId, StatusId, WarehouseId, UserId, Note, EventDate)
                                 VALUES (@TypeId, @StatusId, @WarehouseId, @UserId, @Note, @EventDate);
@@ -389,7 +370,6 @@ namespace car_storage_odometer.DataBaseModules
                             device.EventDate
                         }, transaction);
 
-                        // 4. Dodanie numeru seryjnego
                         string insertSerialSql = @"
                                 INSERT INTO SerialNumbers (DeviceId, SerialNumber)
                                 VALUES (@DeviceId, @SerialNumber);";
@@ -413,7 +393,6 @@ namespace car_storage_odometer.DataBaseModules
             }
         }
 
-        // Metoda do ładowania danych użytkownika po ID
         public static async Task<UserModel> LoadUserByIdAsync(int userId)
         {
             using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
@@ -424,7 +403,6 @@ namespace car_storage_odometer.DataBaseModules
             }
         }
 
-        // Metoda do aktualizacji danych profilu użytkownika (bez hasła)
         public static async Task UpdateUserProfileAsync(UserModel user)
         {
             using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
@@ -441,16 +419,10 @@ namespace car_storage_odometer.DataBaseModules
             }
         }
 
-        // Metoda do bezpiecznego haszowania hasła (PRZYKŁAD, użyj silniejszego algorytmu)
-        // W PRZYKŁADZIE UŻYWAM SHA256, ALE W PRAWDZIWEJ APLIKACJI UŻYJ BCrypt, PBKDF2, lub scrypt!
-
-
-        // Metoda do weryfikacji hasła (porównuje jawne hasło z zahaszowanym z bazy)
         public static async Task<bool> VerifyUserPasswordAsync(int userId, string plainPassword)
         {
             using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
             {
-                // Pobierz zahaszowane hasło z bazy danych
                 string sql = "SELECT Password FROM Users WHERE UserId = @UserId;";
                 string hashedPasswordFromDb = await cnn.ExecuteScalarAsync<string>(sql, new { UserId = userId });
 
@@ -462,7 +434,6 @@ namespace car_storage_odometer.DataBaseModules
             }
         }
 
-        // Metoda do aktualizacji hasła użytkownika (z haszowaniem)
         public static async Task UpdateUserPasswordAsync(int userId, string newPlainPassword)
         {
             using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))

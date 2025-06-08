@@ -109,11 +109,7 @@
     <Compile Include="Models\DeviceLogModel.cs" />
     <Compile Include="Models\DeviceModel.cs" />
     <Compile Include="Models\DeviceStatusModel.cs" />
-    <Compile Include="Models\DeviceTypeModel.cs" />
     <Compile Include="Models\RepairHistoryModel.cs" />
-    <Compile Include="Models\SerialNumberModel.cs" />
-    <Compile Include="Models\StatusModel.cs" />
-    <Compile Include="Models\StorageDeviceModel.cs" />
     <Compile Include="Models\UserLogModel.cs" />
     <Compile Include="Models\UserModel.cs" />
     <Compile Include="Models\WarehouseStatusModel.cs" />

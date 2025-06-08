@@ -64,30 +64,20 @@ namespace car_storage_odometer.ViewModels
         {
             try
             {
-                // Wyczyszczenie przed załadowaniem nowych danych
-                // Ważne, aby upewnić się, że Dashboard jest zawsze aktualny
                 WarehouseStatuses.Clear();
                 DeviceStatuses.Clear();
                 LatestUserLogs.Clear();
                 LatestDeviceLogs.Clear();
                 LatestRepairs.Clear();
 
-                // PRZYWRÓCONO ORYGINALNE KWERENDY, KTÓRE MÓWIŁEŚ, ŻE DZIAŁAŁY
-                // Upewnij się, że nazwa SqliteDataAccess jest poprawna.
-
                 WarehouseStatuses = await SqliteDataAccess<WarehouseStatusModel>.LoadQuery(SqliteQuery.LoadWarehouseStatusesQuery);
-
                 DeviceStatuses = await SqliteDataAccess<DeviceStatusModel>.LoadQuery(SqliteQuery.LoadDeviceStatusesQuery);
-
                 LatestUserLogs = await SqliteDataAccess<UserLogModel>.LoadQuery(SqliteQuery.LoadLatestUserLogsQuery);
-
                 LatestDeviceLogs = await SqliteDataAccess<DeviceLogModel>.LoadQuery(SqliteQuery.LoadLatestDeviceLogsQuery);
-
                 LatestRepairs = await SqliteDataAccess<RepairHistoryModel>.LoadQuery(SqliteQuery.LoadLatestRepairsQuery);
             }
             catch (Exception ex)
             {
-                // Tutaj możesz dodać obsługę błędów, np. MessageBox.Show
                 System.Windows.MessageBox.Show($"Błąd ładowania danych Dashboardu: {ex.Message}", "Błąd", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
         }

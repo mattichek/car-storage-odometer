@@ -3,7 +3,6 @@ using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
-using System.Security.AccessControl;
 
 namespace car_storage_odometer.ViewModels
 {
@@ -21,7 +20,6 @@ namespace car_storage_odometer.ViewModels
             _eventAggregator = eventAggregator;
 
             NavigateCommand = new DelegateCommand<string>(Navigate, _ => CanNavigate);
-            //LogoutCommand = new DelegateCommand(Logout);
             LogoutCommand = new DelegateCommand(ExecuteLogout);
         }
 

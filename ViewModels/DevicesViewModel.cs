@@ -2,7 +2,6 @@
 using car_storage_odometer.Helpers;
 using car_storage_odometer.Models;
 using car_storage_odometer.Services;
-using Prism.Commands;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
@@ -11,7 +10,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 
 namespace car_storage_odometer.ViewModels
@@ -478,9 +476,7 @@ namespace car_storage_odometer.ViewModels
 
         public async void OnNavigatedTo(NavigationContext navigationContext)
         {
-            // Load data when the view is navigated to
             await LoadInitialDataAsync();
-            // Clear any previous selection or edit state when navigating to the view
             SelectedDevice = null;
             CurrentEditDevice = null;
             SelectedTargetWarehouse = null;
@@ -489,8 +485,6 @@ namespace car_storage_odometer.ViewModels
 
         public bool IsNavigationTarget(NavigationContext navigationContext)
         {
-            // Always return true to reuse the existing instance of DevicesViewModel
-            // This prevents unnecessary reloads of data and maintains the state (filters, etc.)
             return true;
         }
 
@@ -498,9 +492,9 @@ namespace car_storage_odometer.ViewModels
         {
             Devices.Clear();
             _allDevices.Clear(); 
-            SelectedDevice = null; // Clear selected device
-            CurrentEditDevice = null; // Clear current edit device
-            SelectedTargetWarehouse = null; // Clear selected target warehouse
+            SelectedDevice = null; 
+            CurrentEditDevice = null; 
+            SelectedTargetWarehouse = null;
             FilterSerialNumber = string.Empty;
             FilterDeviceType = "Wszystkie";
             FilterWarehouse = "Wszystkie";

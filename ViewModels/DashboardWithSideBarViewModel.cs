@@ -6,8 +6,6 @@ using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System.Linq;
-using System.Windows;
-using System.Windows.Forms;
 
 namespace car_storage_odometer.ViewModels
 {

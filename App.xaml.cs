@@ -1,5 +1,4 @@
-﻿using car_storage_odometer.Modules;
-using car_storage_odometer.Services;
+﻿using car_storage_odometer.Services;
 using car_storage_odometer.ViewModels;
 using car_storage_odometer.Views;
 using Prism.DryIoc;
@@ -23,7 +22,6 @@ namespace car_storage_odometer
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            //throw new System.NotImplementedException();
             containerRegistry.RegisterForNavigation<MainPageView>();
             
             containerRegistry.RegisterForNavigation<LoginPageView, LoginPageViewModel>();

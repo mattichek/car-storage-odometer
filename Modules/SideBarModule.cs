@@ -1,13 +1,7 @@
-﻿using car_storage_odometer.ViewModels;
-using car_storage_odometer.Views;
+﻿using car_storage_odometer.Views;
 using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace car_storage_odometer.Modules
 {
@@ -21,13 +15,7 @@ namespace car_storage_odometer.Modules
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            //containerRegistry.RegisterForNavigation<DashboardView>();
-            //containerRegistry.RegisterForNavigation<LogsUsersView>();
-            //containerRegistry.RegisterForNavigation<LogsDeviceView>();
-            //containerRegistry.RegisterForNavigation<HistoryOfRepairView>();
-            //containerRegistry.RegisterForNavigation<DevicesView>();
 
-            //containerRegistry.RegisterForNavigation<AccountView>();
         }
     }
 }

@@ -8,14 +8,14 @@ namespace car_storage_odometer.Models
     public class UserLogModel : BindableBase, INotifyPropertyChanged
     {
         private int _logId;
-        public int LogId // odpowiada log_id z logi_uzytkownikow
+        public int LogId
         {
             get => _logId;
             set => SetProperty(ref _logId, value);
         }
 
         private int _userId;
-        public int UserId // odpowiada user_id (Foreign Key do User)
+        public int UserId
         {
             get => _userId;
             set => SetProperty(ref _userId, value);
@@ -29,21 +29,21 @@ namespace car_storage_odometer.Models
         }
 
         private string _event;
-        public string Event // odpowiada akcja
+        public string Event
         {
             get => _event;
             set => SetProperty(ref _event, value);
         }
 
         private DateTime _eventDate;
-        public DateTime EventDate // odpowiada data_zdarzenia
+        public DateTime EventDate
         {
             get => _eventDate;
             set => SetProperty(ref _eventDate, value);
         }
 
         private string _serialNumber;
-        public string SerialNumber // Numer seryjny urządzenia
+        public string SerialNumber
         {
             get => _serialNumber;
             set => SetProperty(ref _serialNumber, value);

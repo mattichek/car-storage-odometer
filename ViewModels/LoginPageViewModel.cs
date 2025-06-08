@@ -4,10 +4,7 @@ using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace car_storage_odometer.ViewModels
 {
@@ -43,7 +40,7 @@ namespace car_storage_odometer.ViewModels
         public LoginPageViewModel(IRegionManager regionManager, IAuthenticationService authenticationService, IDialogService dialogService, ICurrentUserService currentUserService){
             _currentUserService = currentUserService;
             _regionManager = regionManager;
-            _authenticationService = authenticationService; // Przypisanie serwisu
+            _authenticationService = authenticationService;
             _dialogService = dialogService;
 
             LoginCommand = new DelegateCommand(async () => await ExecuteLogin());
@@ -72,6 +69,7 @@ namespace car_storage_odometer.ViewModels
             if (loginSuccessful)
             {
                 _regionManager.RequestNavigate("FullScreenRegion", "DashboardWithSideBarView");
+                _regionManager.RequestNavigate("MainContentRegion", "DashboardView");
             }
             else
             {

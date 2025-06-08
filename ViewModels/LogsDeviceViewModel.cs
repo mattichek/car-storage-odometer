@@ -1,7 +1,5 @@
 ﻿using car_storage_odometer.DataBaseModules;
-using car_storage_odometer.Helpers;
 using car_storage_odometer.Models;
-using ImTools;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions;
@@ -9,9 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
-using System.Windows.Controls.Primitives;
 
 namespace car_storage_odometer.ViewModels
 {
@@ -50,7 +46,6 @@ namespace car_storage_odometer.ViewModels
             set => SetProperty(ref _latestDeviceLogs, value);
         }
 
-        // --- Filter properties ---
         private DateTime? _filterDateFrom;
         public DateTime? FilterDateFrom
         {

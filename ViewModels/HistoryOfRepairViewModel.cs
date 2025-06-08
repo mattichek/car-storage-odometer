@@ -11,7 +11,6 @@ using car_storage_odometer.DataBaseModules;
 
 namespace car_storage_odometer.ViewModels
 {
-    // Zaktualizowano, aby implementował INavigationAware
     public class HistoryOfRepairViewModel : BindableBase, INavigationAware
     {
         private ObservableCollection<RepairHistoryModel> _allRepairHistory;
@@ -22,7 +21,6 @@ namespace car_storage_odometer.ViewModels
             set => SetProperty(ref _latestRepairHistory, value);
         }
 
-        // Filter properties
         private DateTime? _filterDateFrom;
         public DateTime? FilterDateFrom
         {
@@ -31,7 +29,7 @@ namespace car_storage_odometer.ViewModels
             {
                 if (SetProperty(ref _filterDateFrom, value))
                 {
-                    ApplyFilters(); // Zastosuj filtry po zmianie daty
+                    ApplyFilters();
                 }
             }
         }
@@ -44,7 +42,7 @@ namespace car_storage_odometer.ViewModels
             {
                 if (SetProperty(ref _filterDateTo, value))
                 {
-                    ApplyFilters(); // Zastosuj filtry po zmianie daty
+                    ApplyFilters();
                 }
             }
         }
@@ -57,7 +55,7 @@ namespace car_storage_odometer.ViewModels
             {
                 if (SetProperty(ref _selectedUserFilter, value))
                 {
-                    ApplyFilters(); // Zastosuj filtry po zmianie użytkownika
+                    ApplyFilters();
                 }
             }
         }
@@ -77,7 +75,7 @@ namespace car_storage_odometer.ViewModels
             {
                 if (SetProperty(ref _selectedDeviceFilter, value))
                 {
-                    ApplyFilters(); // Zastosuj filtry po zmianie urządzenia
+                    ApplyFilters();
                 }
             }
         }
@@ -97,7 +95,7 @@ namespace car_storage_odometer.ViewModels
             {
                 if (SetProperty(ref _selectedActionFilter, value))
                 {
-                    ApplyFilters(); // Zastosuj filtry po zmianie akcji
+                    ApplyFilters();
                 }
             }
         }
@@ -109,27 +107,26 @@ namespace car_storage_odometer.ViewModels
         }
 
 
-        public DelegateCommand LoadRepairHistoryCommand { get; private set; } // Zmieniono nazwę komendy
+        public DelegateCommand LoadRepairHistoryCommand { get; private set; } 
         public DelegateCommand ResetFiltersCommand { get; private set; }
 
         public HistoryOfRepairViewModel()
         {
             LoadRepairHistoryCommand = new DelegateCommand(async () => await LoadRepairHistoryAsync());
-            ResetFiltersCommand = new DelegateCommand(ResetAllFilters); // Zmieniono nazwę metody
+            ResetFiltersCommand = new DelegateCommand(ResetAllFilters);
 
             _allRepairHistory = new ObservableCollection<RepairHistoryModel>();
             LatestRepairHistory = new ObservableCollection<RepairHistoryModel>();
             AvailableUsers = new ObservableCollection<string>();
             AvailableActions = new ObservableCollection<string>();
 
-            ResetAllFilters(); // Ustaw domyślne wartości filtrów
+            ResetAllFilters();
         }
 
         private async Task LoadRepairHistoryAsync()
         {
             try
             {
-                // Zakładam, że masz metodę LoadRepairHistoryAsync w SqliteDataAccess
                 _allRepairHistory = await SqliteDataAccess<RepairHistoryModel>.LoadQuery(SqliteQuery.LoadHistroyOfRepairQuery);
 
                 AvailableUsers = new ObservableCollection<string>(
@@ -184,7 +181,6 @@ namespace car_storage_odometer.ViewModels
             ApplyFilters();
         }
 
-        // --- Implementacja INavigationAware ---
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
             LoadRepairHistoryCommand.Execute();

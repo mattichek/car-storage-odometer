@@ -8,71 +8,68 @@ namespace car_storage_odometer.Models
     public class UserModel : BindableBase, INotifyPropertyChanged
     {
         private int _userId;
-        public int UserId // odpowiada user_id
+        public int UserId
         {
             get => _userId;
             set => SetProperty(ref _userId, value);
         }
 
         private string _firstName;
-        public string FirstName // odpowiada imie
+        public string FirstName
         {
             get => _firstName;
             set => SetProperty(ref _firstName, value);
         }
 
         private string _lastName;
-        public string LastName // odpowiada nazwisko
+        public string LastName
         {
             get => _lastName;
             set => SetProperty(ref _lastName, value);
         }
 
         private string _email;
-        public string Email // odpowiada email
+        public string Email
         {
             get => _email;
             set => SetProperty(ref _email, value);
         }
 
         private string _password;
-        public string Password // odpowiada haslo (UWAGA: powinno być haszowane!)
+        public string Password
         {
             get => _password;
             set => SetProperty(ref _password, value);
         }
 
         private DateTime _registrationDate;
-        public DateTime RegistrationDate // odpowiada data_rejestracji
+        public DateTime RegistrationDate
         {
             get => _registrationDate;
             set => SetProperty(ref _registrationDate, value);
         }
 
         private bool _isActive;
-        public bool IsActive // odpowiada czy_aktywny
+        public bool IsActive
         {
             get => _isActive;
             set => SetProperty(ref _isActive, value);
         }
 
         private string _role;
-        public string Role // odpowiada rola
+        public string Role 
         {
             get => _role;
             set => SetProperty(ref _role, value);
         }
 
-        // Pomocnicza właściwość do wyświetlania pełnej nazwy użytkownika
         public string UserName => $"{FirstName} {LastName}";
 
-        // Metoda do tworzenia głębokiej kopii obiektu UserModel
         public UserModel Clone()
         {
             return (UserModel)this.MemberwiseClone();
         }
 
-        // Implementacja INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

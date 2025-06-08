@@ -22,7 +22,6 @@ namespace car_storage_odometer.Models
         }
 
         private int _typeId;
-        // TypeId jest używane wewnętrznie, ale do bindowania używamy TypeName
         public int TypeId
         {
             get { return _typeId; }
@@ -37,7 +36,6 @@ namespace car_storage_odometer.Models
         }
 
         private int _statusId;
-        // StatusId jest używane wewnętrznie, ale do bindowania używamy StatusName
         public int StatusId
         {
             get { return _statusId; }
@@ -52,7 +50,6 @@ namespace car_storage_odometer.Models
         }
 
         private int _warehouseId;
-        // WarehouseId jest używane wewnętrznie, ale do bindowania używamy WarehouseName
         public int WarehouseId
         {
             get { return _warehouseId; }
@@ -94,7 +91,6 @@ namespace car_storage_odometer.Models
             set { _eventDate = value; OnPropertyChanged(); }
         }
 
-        // Implementacja interfejsu INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -102,7 +98,6 @@ namespace car_storage_odometer.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        // Metoda do tworzenia głębokiej kopii obiektu (potrzebna przy edycji)
         public DeviceModel DeepCopy()
         {
             return new DeviceModel

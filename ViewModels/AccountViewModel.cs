@@ -1,32 +1,28 @@
 ﻿using car_storage_odometer.DataBaseModules;
-using car_storage_odometer.Helpers; // Zmieniono na Helpers, zakładając tam SqliteDataAccess
+using car_storage_odometer.Helpers;
 using car_storage_odometer.Models;
 using car_storage_odometer.Services;
 using Prism.Commands;
 using Prism.Mvvm;
-using Prism.Regions; // Dodano, aby używać INavigationAware
+using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
-using System.ComponentModel;
-using System.Threading.Tasks; // Dodano dla async/await
-using System.Windows;
+using System.Threading.Tasks;
 
 namespace car_storage_odometer.ViewModels
 {
-    // Zaktualizowano, aby implementował INavigationAware
     public class AccountViewModel : BindableBase, INavigationAware
     {
-        private readonly IDialogService _dialogService; // Usługa dialogów do wyświetlania komunikatów
+        private readonly IDialogService _dialogService; 
         private readonly ICurrentUserService _currentUserService;
-        private UserModel _loggedInUser; // Symulacja zalogowanego użytkownika (do autoryzacji zmiany hasła)
-        private UserModel _editedUser;   // Kopia użytkownika do edycji w formularzu
+        private UserModel _loggedInUser; 
+        private UserModel _editedUser;
         private string _oldPassword;
         private string _newPassword;
         private string _confirmNewPassword;
 
-        private bool _isEditing; // Kontroluje, czy pola edycji są aktywne
+        private bool _isEditing; 
 
-        // --- Właściwości Publiczne (do wiązania z XAML) ---
         public UserModel EditedUser
         {
             get => _editedUser;
@@ -69,36 +65,30 @@ namespace car_storage_odometer.ViewModels
             set => SetProperty(ref _isEditing, value);
         }
 
-        // --- Komendy ---
         public DelegateCommand EditCommand { get; private set; }
         public DelegateCommand SaveCommand { get; private set; }
         public DelegateCommand CancelEditCommand { get; private set; }
         public DelegateCommand ChangePasswordCommand { get; private set; }
 
-        // Założenie: Id zalogowanego użytkownika jest dostępne globalnie lub przekazywane
-        // Zastąp to rzeczywistym sposobem pobierania ID zalogowanego użytkownika.
-        private int CurrentUserId { get; set; } = 1; // PRZYKŁAD: Ustaw na ID zalogowanego użytkownika
 
         public AccountViewModel(IDialogService dialogService, ICurrentUserService currentUserService)
         {
             _dialogService = dialogService;
             _currentUserService = currentUserService;
 
-            // Inicjalizacja ViewModelu
-            EditedUser = new UserModel(); // Ustawienie początkowej pustej instancji
+            EditedUser = new UserModel(); 
 
             EditCommand = new DelegateCommand(ExecuteEdit);
             SaveCommand = new DelegateCommand(async () => await ExecuteSave(), CanExecuteSave);
             CancelEditCommand = new DelegateCommand(ExecuteCancelEdit);
             ChangePasswordCommand = new DelegateCommand(async () => await ExecuteChangePassword(), CanChangePassword);
 
-            IsEditing = false; // Domyślnie pola nie są edytowalne
+            IsEditing = false; 
         }
 
-        // --- Metody do ładowania danych (wywoływane przez INavigationAware) ---
-        private async Task LoadUserData() // Usunięto parametr userId
+        private async Task LoadUserData() 
         {
-            if (!_currentUserService.IsUserLoggedIn) // Sprawdź, czy użytkownik jest zalogowany
+            if (!_currentUserService.IsUserLoggedIn) 
             {
                 ShowMessageBoxOk("Błąd: Brak zalogowanego użytkownika. Zaloguj się ponownie.", "Błąd autoryzacji");
                 return;
@@ -131,8 +121,6 @@ namespace car_storage_odometer.ViewModels
             }
         }
 
-        // --- Metody wykonawcze dla komend ---
-
         private void ExecuteEdit()
         {
             IsEditing = true;
@@ -143,7 +131,6 @@ namespace car_storage_odometer.ViewModels
         {
             try
             {
-                // Walidacja danych EditedUser (np. Email, FirstName, LastName)
                 if (string.IsNullOrWhiteSpace(EditedUser.FirstName) ||
                     string.IsNullOrWhiteSpace(EditedUser.LastName) ||
                     string.IsNullOrWhiteSpace(EditedUser.Email))
@@ -152,11 +139,8 @@ namespace car_storage_odometer.ViewModels
                     return;
                 }
 
-                // Zapisz zmienione dane do bazy danych
-                // Użyj SqliteDataAccess.UpdateUserProfileAsync, którą za chwilę dodamy
                 await SqliteDataAccessModifyingQuery.UpdateUserProfileAsync(EditedUser);
 
-                // Zaktualizuj _loggedInUser danymi z EditedUser
                 _loggedInUser = EditedUser.Clone();
 
                 IsEditing = false;
@@ -174,13 +158,11 @@ namespace car_storage_odometer.ViewModels
 
         private bool CanExecuteSave()
         {
-            // Można zapisać tylko wtedy, gdy jest tryb edycji i wybrano użytkownika
             return IsEditing && EditedUser != null && EditedUser.UserId > 0;
         }
 
         private void ExecuteCancelEdit()
         {
-            // Przywróć oryginalne dane z _loggedInUser
             EditedUser = _loggedInUser.Clone();
             IsEditing = false;
             RaiseCanExecuteChangedForUserCommands();
@@ -237,13 +219,11 @@ namespace car_storage_odometer.ViewModels
 
         private bool CanChangePassword()
         {
-            // Można zmieniać hasło, gdy wszystkie pola hasła są wypełnione
             return !string.IsNullOrWhiteSpace(OldPassword) &&
                    !string.IsNullOrWhiteSpace(NewPassword) &&
                    !string.IsNullOrWhiteSpace(ConfirmNewPassword);
         }
 
-        // Metoda do aktualizowania stanu aktywności komend
         private void RaiseCanExecuteChangedForUserCommands()
         {
             SaveCommand.RaiseCanExecuteChanged();
@@ -252,22 +232,17 @@ namespace car_storage_odometer.ViewModels
             CancelEditCommand.RaiseCanExecuteChanged();
         }
 
-        // --- Implementacja INavigationAware ---
-
-        // Wywoływana, gdy widok jest aktywowany
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
             _ = LoadUserData();
-            IsEditing = false; // Resetuj tryb edycji po nawigacji
+            IsEditing = false;
         }
 
-        // Określa, czy widok powinien być ponownie użyty
         public bool IsNavigationTarget(NavigationContext navigationContext)
         {
-            return true; // Zwróć true, aby ponownie używać istniejącej instancji ViewModelu
+            return true; 
         }
 
-        // Wywoływana, gdy widok jest dezaktywowany
         public void OnNavigatedFrom(NavigationContext navigationContext)
         {
              EditedUser = new UserModel();
@@ -287,7 +262,7 @@ namespace car_storage_odometer.ViewModels
             { "title", title },
             { "buttons", CustomMessageBoxButtons.Ok }
                 },
-                r => { /* brak akcji po OK */ });
+                r => { });
         }
     }
 }

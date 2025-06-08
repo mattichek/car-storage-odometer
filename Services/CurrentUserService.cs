@@ -1,5 +1,4 @@
-﻿// CurrentUserService.cs
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace car_storage_odometer.Services

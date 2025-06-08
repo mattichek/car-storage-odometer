@@ -2,7 +2,6 @@
 {
     public class SqliteQuery
     {
-        // Kwerendy używane w DashboardView
         public static readonly string LoadWarehouseStatusesQuery = @"SELECT * from Warehouses";
         
         public static readonly string LoadDeviceStatusesQuery = 
@@ -62,7 +61,6 @@
             LIMIT 5;";
 
 
-        // Kwerendy używane w LogsUserView
         public static readonly string LoadAllUserLogsQuery =
             @"SELECT 
                 l.LogId,
@@ -74,9 +72,6 @@
             LEFT JOIN Users u ON l.UserId = u.UserId
             LEFT JOIN Devices d ON l.DeviceId = d.DeviceId;";
 
-
-
-        // Kwerendy używane w LogsDeviceView
         public static readonly string LoadAllDeviceLogsQuery = 
             @"SELECT 
                 dl.LogId, 
@@ -94,9 +89,6 @@
             LEFT JOIN Warehouses w2 ON dl.ToWarehouseId = w2.WarehouseId 
             JOIN Users u ON dl.UserId = u.UserId;";
 
-
-
-        // Kwerendy używane w HistoryOfRepairView
         public static readonly string LoadHistroyOfRepairQuery =
             @"SELECT 
                 rh.RepairId,
@@ -110,7 +102,6 @@
             LEFT JOIN serialnumbers sn ON d.DeviceId = sn.DeviceId
             LEFT JOIN users u ON rh.UserId = u.UserId;";
 
-        // Kwerendy używane w DevicesView
         public static readonly string LoadAllDevicesQuery =
             @"SELECT 
                 d.DeviceId,
