@@ -95,9 +95,6 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <Button Content="Filtruj"
-                                Command="{Binding FilterCommand}"
-                                Style="{StaticResource {x:Type Button}}" Margin="0,0,10,0"/>
                         <Button Content="Resetuj"
                                 Command="{Binding ResetFiltersCommand}">
                             <Button.Template>
