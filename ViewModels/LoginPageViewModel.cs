@@ -1,7 +1,9 @@
-﻿using car_storage_odometer.Services;
+﻿using car_storage_odometer.Helpers;
+using car_storage_odometer.Services;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions;
+using Prism.Services.Dialogs;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +15,7 @@ namespace car_storage_odometer.ViewModels
     {
         private readonly IRegionManager _regionManager;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IDialogService _dialogService;
 
         public DelegateCommand LoginCommand { get; private set; }
 
@@ -42,10 +45,11 @@ namespace car_storage_odometer.ViewModels
             }
         }
 
-        public LoginPageViewModel(IRegionManager regionManager, IAuthenticationService authenticationService) // Zmieniono konstruktor
+        public LoginPageViewModel(IRegionManager regionManager, IAuthenticationService authenticationService, IDialogService dialogService) // Zmieniono konstruktor
         {
             _regionManager = regionManager;
             _authenticationService = authenticationService; // Przypisanie serwisu
+            _dialogService = dialogService;
             LoginCommand = new DelegateCommand(async () => await ExecuteLogin());
             Title = "Logowanie do systemu";
         }
@@ -54,11 +58,19 @@ namespace car_storage_odometer.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Mail) || string.IsNullOrWhiteSpace(Password))
             {
-                MessageBox.Show("Proszę podać adres e-mail i hasło.", "Błąd walidacji", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _dialogService.ShowDialog(
+                    "CustomMessageBoxView",
+                    new DialogParameters
+                    {
+                        { "title", "Błąd logowania" },
+                        { "message", "Proszę podać adres e-mail i hasło." },
+                        { "buttons", CustomMessageBoxButtons.Ok }
+                    },
+                    r => {});
+
                 return;
             }
 
-            // Użyj serwisu do logowania
             bool loginSuccessful = await _authenticationService.LoginAsync(Mail, Password);
 
             if (loginSuccessful)
@@ -67,7 +79,15 @@ namespace car_storage_odometer.ViewModels
             }
             else
             {
-                MessageBox.Show("Nieprawidłowy adres e-mail lub hasło.", "Błąd logowania", MessageBoxButton.OK, MessageBoxImage.Error);
+                _dialogService.ShowDialog(
+                    "CustomMessageBoxView",
+                    new DialogParameters
+                    {
+                        { "title", "Błąd logowania" },
+                        { "message", "Nieprawidłowy adres e-mail lub hasło." },
+                        { "buttons", CustomMessageBoxButtons.Ok }
+                    },
+                    r => { });
             }
         }
 

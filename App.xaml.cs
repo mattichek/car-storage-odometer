@@ -35,7 +35,7 @@ namespace car_storage_odometer
             containerRegistry.RegisterForNavigation<HistoryOfRepairView, HistoryOfRepairViewModel>();
             containerRegistry.RegisterForNavigation<AccountView, AccountViewModel>();
             containerRegistry.RegisterForNavigation<DevicesView, DevicesViewModel>();
-
+            containerRegistry.RegisterDialog<CustomMessageBoxView, CustomMessageBoxViewModel>();
             containerRegistry.RegisterSingleton<IAuthenticationService, AuthenticationService>();
             containerRegistry.RegisterSingleton<IEventAggregator, EventAggregator>();
         }
