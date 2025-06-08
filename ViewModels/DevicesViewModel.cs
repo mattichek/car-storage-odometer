@@ -190,12 +190,15 @@ namespace car_storage_odometer.ViewModels
         {
             try
             {
-                _allDevices = await SqliteDataAccessModifyingQuery.LoadDevicesAsync();
+                _allDevices = await SqliteDataAccess<DeviceModel>.LoadQuery(SqliteQuery.LoadAllDevicesQuery);
                 Devices = new ObservableCollection<DeviceModel>(_allDevices);
 
-                AvailableDeviceTypes = await SqliteDataAccessModifyingQuery.LoadDeviceTypesAsync();
-                AvailableWarehouses = await SqliteDataAccessModifyingQuery.LoadWarehousesAsync();
-                AvailableStatuses = await SqliteDataAccessModifyingQuery.LoadStatusesAsync();
+                //AvailableDeviceTypes = await SqliteDataAccessModifyingQuery.LoadDeviceTypesAsync();
+                AvailableDeviceTypes = await SqliteDataAccess<string>.LoadQuery(SqliteQuery.LoadDeviceTypesAsyncQuery);
+                //AvailableWarehouses = await SqliteDataAccessModifyingQuery.LoadWarehousesAsync();
+                AvailableWarehouses = await SqliteDataAccess<string>.LoadQuery(SqliteQuery.LoadWarehousesAsyncQuery);
+                //AvailableStatuses = await SqliteDataAccessModifyingQuery.LoadStatusesAsync();
+                AvailableStatuses = await SqliteDataAccess<string>.LoadQuery(SqliteQuery.LoadStatusesAsyncQuery);
 
                 if (AvailableDeviceTypes != null && !AvailableDeviceTypes.Contains("Wszystkie"))
                     AvailableDeviceTypes.Insert(0, "Wszystkie");
@@ -250,6 +253,7 @@ namespace car_storage_odometer.ViewModels
 
         private void ExecuteNewDevice(object parameter)
         {
+            SelectedDevice = null; 
             CurrentEditDevice = new DeviceModel
             {
                 EventDate = DateTime.Now,
@@ -259,7 +263,6 @@ namespace car_storage_odometer.ViewModels
                 SerialNumber = string.Empty,
                 Note = string.Empty
             };
-            SelectedDevice = null;
             RaiseAllCanExecuteChanged();
         }
 
@@ -513,7 +516,7 @@ namespace car_storage_odometer.ViewModels
             { "title", title },
             { "buttons", CustomMessageBoxButtons.Ok }
                 },
-                r => { /* brak akcji po OK */ });
+                r => { });
         }
         private Task<bool> ShowMessageButtonYesNo(string message, string title)
         {

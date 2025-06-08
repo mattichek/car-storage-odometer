@@ -340,38 +340,6 @@ namespace car_storage_odometer.DataBaseModules
             }
         }
 
-        public static async Task<ObservableCollection<DeviceModel>> LoadDevicesAsync()
-        {
-            return await Task.Run(() =>
-            {
-                using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-                {
-                    var output = cnn.Query<DeviceModel>(
-                        @"SELECT 
-                            d.DeviceId,
-                            sn.SerialNumber,
-                            d.TypeId,
-                            dt.Name AS TypeName,
-                            d.StatusId,
-                            s.Name AS StatusName,
-                            d.WarehouseId,
-                            w.Name AS WarehouseName,
-                            d.UserId,
-                            u.FirstName || ' ' || u.LastName AS UserName,
-                            d.Note,
-                            d.EventDate
-                        FROM devices d
-                        LEFT JOIN serialnumbers sn ON d.DeviceId = sn.DeviceId
-                        LEFT JOIN devicetypes dt ON d.TypeId = dt.TypeId
-                        LEFT JOIN statuses s ON d.StatusId = s.StatusId
-                        LEFT JOIN warehouses w ON d.WarehouseId = w.WarehouseId
-                        LEFT JOIN users u ON d.UserId = u.UserId;"
-                        , new DynamicParameters());
-                    return new ObservableCollection<DeviceModel>(output);
-                }
-            });
-        }
-
         // --- Metody dla DeviceModel ---
         public static async Task AddDeviceAsync(DeviceModel device, int userId)
         {
@@ -442,33 +410,6 @@ namespace car_storage_odometer.DataBaseModules
                         throw new Exception("Błąd przy dodawaniu urządzenia: " + ex.Message, ex);
                     }
                 }
-            }
-        }
-
-        public static async Task<ObservableCollection<string>> LoadDeviceTypesAsync()
-        {
-            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-            {
-                var types = await cnn.QueryAsync<string>("SELECT Name FROM devicetypes ORDER BY Name");
-                return new ObservableCollection<string>(types);
-            }
-        }
-
-        public static async Task<ObservableCollection<string>> LoadWarehousesAsync()
-        {
-            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-            {
-                var warehouses = await cnn.QueryAsync<string>("SELECT Name FROM warehouses ORDER BY Name");
-                return new ObservableCollection<string>(warehouses);
-            }
-        }
-
-        public static async Task<ObservableCollection<string>> LoadStatusesAsync()
-        {
-            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
-            {
-                var statuses = await cnn.QueryAsync<string>("SELECT Name FROM statuses ORDER BY Name");
-                return new ObservableCollection<string>(statuses);
             }
         }
 

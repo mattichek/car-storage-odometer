@@ -75,64 +75,15 @@ namespace car_storage_odometer.ViewModels
                 // PRZYWRÓCONO ORYGINALNE KWERENDY, KTÓRE MÓWIŁEŚ, ŻE DZIAŁAŁY
                 // Upewnij się, że nazwa SqliteDataAccess jest poprawna.
 
-                WarehouseStatuses = await SqliteDataAccess<WarehouseStatusModel>.LoadQuery("select * from Warehouses");
+                WarehouseStatuses = await SqliteDataAccess<WarehouseStatusModel>.LoadQuery(SqliteQuery.LoadWarehouseStatusesQuery);
 
-                DeviceStatuses = await SqliteDataAccess<DeviceStatusModel>.LoadQuery(
-                    @"SELECT
-                        s.Name,
-                        COUNT(d.DeviceId) AS Quantity
-                    FROM Devices d
-                    JOIN Statuses s ON d.StatusId = s.StatusId GROUP BY s.Name;"
-                );
+                DeviceStatuses = await SqliteDataAccess<DeviceStatusModel>.LoadQuery(SqliteQuery.LoadDeviceStatusesQuery);
 
-                LatestUserLogs = await SqliteDataAccess<UserLogModel>.LoadQuery(
-                    @"SELECT
-                        l.LogId,
-                        u.FirstName || ' ' || u.LastName AS UserName,
-                        d.DeviceId,
-                        l.Event,
-                        l.EventDate
-                    FROM UserLogs l
-                    LEFT JOIN Users u ON l.UserId = u.UserId
-                    LEFT JOIN Devices d ON l.DeviceId = d.DeviceId
-                    ORDER BY l.LogId DESC LIMIT 5;"
-                );
+                LatestUserLogs = await SqliteDataAccess<UserLogModel>.LoadQuery(SqliteQuery.LoadLatestUserLogsQuery);
 
-                LatestDeviceLogs = await SqliteDataAccess<DeviceLogModel>.LoadQuery("" +
-                    @"SELECT
-                        dl.LogId,
-                        sn.SerialNumber,
-                        dt.Name AS DeviceName,
-                        dl.EventDate,
-                        dl.Event,
-                        w1.Name AS FromWarehouseName,
-                        w2.Name AS ToWarehouseName,
-                        u.FirstName || ' ' || u.LastName AS UserName
-                    FROM DeviceLogs dl
-                    JOIN Devices d ON dl.DeviceId = d.DeviceId
-                    JOIN SerialNumbers sn ON d.DeviceId = sn.DeviceId
-                    JOIN DeviceTypes dt ON d.TypeId = dt.TypeId
-                    LEFT JOIN Warehouses w1 ON dl.FromWarehouseId = w1.WarehouseId
-                    LEFT JOIN Warehouses w2 ON dl.ToWarehouseId = w2.WarehouseId
-                    JOIN Users u ON dl.UserId = u.UserId
-                    ORDER BY dl.LogId DESC LIMIT 5;"
-                );
+                LatestDeviceLogs = await SqliteDataAccess<DeviceLogModel>.LoadQuery(SqliteQuery.LoadLatestDeviceLogsQuery);
 
-                LatestRepairs = await SqliteDataAccess<RepairHistoryModel>.LoadQuery(
-                    @"SELECT
-                        rh.RepairId,
-                        sn.SerialNumber AS SerialNumber,
-                        rh.Description,
-                        rh.StartDate,
-                        rh.EndDate,
-                        u.FirstName || ' ' || u.LastName AS UserName
-                    FROM repairhistory rh
-                    LEFT JOIN devices d ON rh.DeviceId = d.DeviceId
-                    LEFT JOIN serialnumbers sn ON d.DeviceId = sn.DeviceId
-                    LEFT JOIN users u ON rh.UserId = u.UserId
-                    ORDER BY rh.RepairId DESC
-                    LIMIT 5;"
-                );
+                LatestRepairs = await SqliteDataAccess<RepairHistoryModel>.LoadQuery(SqliteQuery.LoadLatestRepairsQuery);
             }
             catch (Exception ex)
             {

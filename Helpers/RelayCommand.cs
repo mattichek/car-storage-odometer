@@ -3,7 +3,6 @@ using System.Windows.Input;
 
 namespace car_storage_odometer.Helpers
 {
-    // Prosta implementacja ICommand do użycia w ViewModelach
     public class RelayCommand : ICommand
     {
         private readonly Action<object> _execute;

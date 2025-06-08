@@ -98,6 +98,7 @@
     <Compile Include="Converters\InvertBooleanConverter.cs" />
     <Compile Include="Converters\PercentageToWidthConverter.cs" />
     <Compile Include="Converters\SortDirectionToArrowConverter .cs" />
+    <Compile Include="DataBaseModules\SqliteQuery.cs" />
     <Compile Include="Events\LogoutEvent.cs" />
     <Compile Include="Helpers\CustomMessageBox.cs" />
     <Compile Include="Helpers\CustomMessageBoxButtons.cs" />
