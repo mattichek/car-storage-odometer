@@ -50,7 +50,7 @@
                     Command="{Binding NavigateCommand}"
                     CommandParameter="DashboardView"/>
 
-            <Button Content="Logi Użytkoników" Style="{StaticResource SideBarItemStyle}"
+            <Button Content="Logi Użytkowników" Style="{StaticResource SideBarItemStyle}"
                     Command="{Binding NavigateCommand}"
                     CommandParameter="LogsUsersView"/>
 
@@ -58,7 +58,7 @@
                     Command="{Binding NavigateCommand}"
                     CommandParameter="LogsDeviceView"/>
 
-            <Button Content="Histaria Napraw" Style="{StaticResource SideBarItemStyle}"
+            <Button Content="Historia Napraw" Style="{StaticResource SideBarItemStyle}"
                     Command="{Binding NavigateCommand}"
                     CommandParameter="HistoryOfRepairView"/>
 
