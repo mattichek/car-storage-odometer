@@ -69,17 +69,7 @@ namespace car_storage_odometer.Models
         // Metoda do tworzenia głębokiej kopii obiektu UserModel
         public UserModel Clone()
         {
-            return new UserModel
-            {
-                UserId = this.UserId,
-                FirstName = this.FirstName,
-                LastName = this.LastName,
-                Email = this.Email,
-                Password = this.Password,
-                RegistrationDate = this.RegistrationDate,
-                IsActive = this.IsActive,
-                Role = this.Role
-            };
+            return (UserModel)this.MemberwiseClone();
         }
 
         // Implementacja INotifyPropertyChanged

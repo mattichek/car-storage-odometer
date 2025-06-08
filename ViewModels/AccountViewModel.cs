@@ -1,9 +1,11 @@
 ﻿using car_storage_odometer.DataBaseModules;
 using car_storage_odometer.Helpers; // Zmieniono na Helpers, zakładając tam SqliteDataAccess
 using car_storage_odometer.Models;
+using car_storage_odometer.Services;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions; // Dodano, aby używać INavigationAware
+using Prism.Services.Dialogs;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks; // Dodano dla async/await
@@ -14,9 +16,10 @@ namespace car_storage_odometer.ViewModels
     // Zaktualizowano, aby implementował INavigationAware
     public class AccountViewModel : BindableBase, INavigationAware
     {
+        private readonly IDialogService _dialogService; // Usługa dialogów do wyświetlania komunikatów
+        private readonly ICurrentUserService _currentUserService;
         private UserModel _loggedInUser; // Symulacja zalogowanego użytkownika (do autoryzacji zmiany hasła)
         private UserModel _editedUser;   // Kopia użytkownika do edycji w formularzu
-
         private string _oldPassword;
         private string _newPassword;
         private string _confirmNewPassword;
@@ -76,8 +79,11 @@ namespace car_storage_odometer.ViewModels
         // Zastąp to rzeczywistym sposobem pobierania ID zalogowanego użytkownika.
         private int CurrentUserId { get; set; } = 1; // PRZYKŁAD: Ustaw na ID zalogowanego użytkownika
 
-        public AccountViewModel()
+        public AccountViewModel(IDialogService dialogService, ICurrentUserService currentUserService)
         {
+            _dialogService = dialogService;
+            _currentUserService = currentUserService;
+
             // Inicjalizacja ViewModelu
             EditedUser = new UserModel(); // Ustawienie początkowej pustej instancji
 
@@ -90,29 +96,34 @@ namespace car_storage_odometer.ViewModels
         }
 
         // --- Metody do ładowania danych (wywoływane przez INavigationAware) ---
-        private async Task LoadUserData(int userId)
+        private async Task LoadUserData() // Usunięto parametr userId
         {
+            if (!_currentUserService.IsUserLoggedIn) // Sprawdź, czy użytkownik jest zalogowany
+            {
+                ShowMessageBoxOk("Błąd: Brak zalogowanego użytkownika. Zaloguj się ponownie.", "Błąd autoryzacji");
+                return;
+            }
+
+
             try
             {
-                // Załaduj dane użytkownika z bazy danych
-                // Używamy SqliteDataAccess.LoadUserByIdAsync, którą za chwilę dodamy
-                _loggedInUser = await SqliteDataAccessModifyingQuery.LoadUserByIdAsync(userId);
+                _loggedInUser = await SqliteDataAccessModifyingQuery.LoadUserByIdAsync(_currentUserService.LoggedInUserId.Value);
                 if (_loggedInUser != null)
                 {
-                    EditedUser = _loggedInUser.Clone(); // Tworzymy kopię do edycji
-                    // Resetujemy pola hasła
+                    EditedUser = _loggedInUser.Clone();
                     OldPassword = string.Empty;
                     NewPassword = string.Empty;
                     ConfirmNewPassword = string.Empty;
                 }
                 else
                 {
-                    MessageBox.Show("Nie można załadować danych użytkownika.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ShowMessageBoxOk("Nie znaleziono użytkownika o podanym ID. Proszę skontaktować się z administratorem.", "Błąd ładowania danych");
+                    _currentUserService.ClearLoggedInUser();
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Błąd ładowania danych użytkownika: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowMessageBoxOk($"Błąd podczas ładowania danych użytkownika: {ex.Message}", "Błąd ładowania danych");
             }
             finally
             {
@@ -137,7 +148,7 @@ namespace car_storage_odometer.ViewModels
                     string.IsNullOrWhiteSpace(EditedUser.LastName) ||
                     string.IsNullOrWhiteSpace(EditedUser.Email))
                 {
-                    MessageBox.Show("Wszystkie pola (Imię, Nazwisko, Email) muszą być wypełnione.", "Błąd walidacji", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    ShowMessageBoxOk("Wszystkie pola (Imię, Nazwisko, Email) muszą być wypełnione.", "Błąd walidacji");
                     return;
                 }
 
@@ -149,11 +160,11 @@ namespace car_storage_odometer.ViewModels
                 _loggedInUser = EditedUser.Clone();
 
                 IsEditing = false;
-                MessageBox.Show("Dane użytkownika zostały zaktualizowane pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                ShowMessageBoxOk("Dane użytkownika zostały zaktualizowane pomyślnie.", "Sukces");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Błąd podczas zapisu danych użytkownika: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowMessageBoxOk($"Błąd podczas zapisu danych użytkownika: {ex.Message}", "Błąd zapisu danych");
             }
             finally
             {
@@ -181,55 +192,46 @@ namespace car_storage_odometer.ViewModels
                 string.IsNullOrWhiteSpace(NewPassword) ||
                 string.IsNullOrWhiteSpace(ConfirmNewPassword))
             {
-                MessageBox.Show("Wszystkie pola hasła muszą być wypełnione.", "Błąd walidacji", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowMessageBoxOk("Wszystkie pola hasła muszą być wypełnione.", "Błąd walidacji");
                 return;
             }
 
             if (NewPassword != ConfirmNewPassword)
             {
-                MessageBox.Show("Nowe hasło i potwierdzenie hasła nie są zgodne.", "Błąd walidacji", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowMessageBoxOk("Nowe hasło i potwierdzenie hasła nie są zgodne.", "Błąd walidacji");
                 return;
             }
 
             if (NewPassword.Length < 6)
             {
-                MessageBox.Show("Nowe hasło musi mieć co najmniej 6 znaków.", "Błąd walidacji", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowMessageBoxOk("Nowe hasło musi mieć co najmniej 6 znaków.", "Błąd walidacji");
                 return;
             }
 
             try
             {
-                // Sprawdź stare hasło (w prawdziwej aplikacji HASZUJ I PORÓWNUJ HASZE!)
-                // Użyj SqliteDataAccess.VerifyUserPasswordAsync, którą za chwilę dodamy
-                // W tej symulacji przyjmuję, że OldPassword to jawne hasło, które jest porównywane.
-                // W rzeczywistości powinieneś przekazać OldPassword do metody weryfikującej hasło,
-                // która następnie porówna zahaszowane wersje.
-                bool isPasswordCorrect = await SqliteDataAccessModifyingQuery.VerifyUserPasswordAsync(CurrentUserId, OldPassword);
+                bool isPasswordCorrect = await SqliteDataAccessModifyingQuery.VerifyUserPasswordAsync(_currentUserService.LoggedInUserId.Value, OldPassword);
 
                 if (!isPasswordCorrect)
                 {
-                    MessageBox.Show("Niepoprawne stare hasło.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ShowMessageBoxOk("Niepoprawne stare hasło.", "Błąd autoryzacji");
                     return;
                 }
 
-                // Zmień hasło w bazie danych
-                // Użyj SqliteDataAccess.UpdateUserPasswordAsync, którą za chwilę dodamy
-                await SqliteDataAccessModifyingQuery.UpdateUserPasswordAsync(CurrentUserId, NewPassword); // Przekazuj jawne hasło, metoda powinna je haszować
+                await SqliteDataAccessModifyingQuery.UpdateUserPasswordAsync(_currentUserService.LoggedInUserId.Value, NewPassword);
+                ShowMessageBoxOk("Hasło zostało zmienione pomyślnie.", "Sukces");
 
-                MessageBox.Show("Hasło zostało zmienione pomyślnie.", "Zmieniono hasło", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                // Wyczyść pola hasła po zmianie
                 OldPassword = string.Empty;
                 NewPassword = string.Empty;
                 ConfirmNewPassword = string.Empty;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Błąd podczas zmiany hasła: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowMessageBoxOk($"Błąd podczas zmiany hasła: {ex.Message}", "Błąd zmiany hasła");
             }
             finally
             {
-                ChangePasswordCommand.RaiseCanExecuteChanged(); // Zaktualizuj stan przycisku
+                ChangePasswordCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -255,7 +257,7 @@ namespace car_storage_odometer.ViewModels
         // Wywoływana, gdy widok jest aktywowany
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            _ = LoadUserData(CurrentUserId);
+            _ = LoadUserData();
             IsEditing = false; // Resetuj tryb edycji po nawigacji
         }
 
@@ -274,6 +276,18 @@ namespace car_storage_odometer.ViewModels
             NewPassword = string.Empty;
             ConfirmNewPassword = string.Empty;
             IsEditing = false;
+        }
+
+        private void ShowMessageBoxOk(string message, string title)
+        {
+            _dialogService.ShowDialog("CustomMessageBoxView",
+                new DialogParameters
+                {
+            { "message", message },
+            { "title", title },
+            { "buttons", CustomMessageBoxButtons.Ok }
+                },
+                r => { /* brak akcji po OK */ });
         }
     }
 }

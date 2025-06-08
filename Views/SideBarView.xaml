@@ -76,8 +76,7 @@
                 Command="{Binding NavigateCommand}"
                 CommandParameter="AccountView"/>
             <Button Content="Logout" Style="{StaticResource SideBarItemStyle}"
-                Command="{Binding NavigateCommand}"
-                CommandParameter="AccountView"/>
+                Command="{Binding LogoutCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>

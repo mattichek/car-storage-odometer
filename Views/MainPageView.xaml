@@ -5,34 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:car_storage_odometer.Views"
         mc:Ignorable="d"
-        Title="Car Storage Odometer - Main Page" WindowState="Maximized"
+        Title="Car Storage Odometer" WindowState="Maximized"
         Icon="/Assets/logo_icon.ico"
         xmlns:prism="http://prismlibrary.com/">
     <Grid Background="#23272E">
-        <Border Background="#2C2F36" 
-            HorizontalAlignment="Center" VerticalAlignment="Center"
-             Width="1650" Height="950">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="50" ShadowDepth="0"/>
-            </Border.Effect>
-
-            <Grid >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <ContentControl prism:RegionManager.RegionName="SideBarRegion"
-                            Grid.Column="0"
-                            VerticalAlignment="Stretch"
-                            HorizontalAlignment="Stretch"/>
-
-                <ContentControl prism:RegionManager.RegionName="MainContentRegion"
-                            Grid.Column="1"
-                            VerticalAlignment="Stretch"
-                            HorizontalAlignment="Stretch"/>
-
-            </Grid>
-        </Border>
+        <ContentControl prism:RegionManager.RegionName="FullScreenRegion"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"/>
     </Grid>
+
 </Window>

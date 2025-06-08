@@ -1,8 +1,10 @@
 ﻿using car_storage_odometer.DataBaseModules;
 using car_storage_odometer.Helpers;
 using car_storage_odometer.Models;
+using car_storage_odometer.Services;
 using Prism.Commands;
 using Prism.Regions;
+using Prism.Services.Dialogs;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -16,6 +18,8 @@ namespace car_storage_odometer.ViewModels
 {
     public class DevicesViewModel : INotifyPropertyChanged, INavigationAware
     {
+        private readonly IDialogService _dialogService;
+        private readonly ICurrentUserService _currentUserService;
         private ObservableCollection<DeviceModel> _allDevices;
 
         private ObservableCollection<DeviceModel> _devices;
@@ -156,8 +160,11 @@ namespace car_storage_odometer.ViewModels
 
         private const int CurrentUserId = 1;
 
-        public DevicesViewModel()
+        public DevicesViewModel(IDialogService dialogService, ICurrentUserService currentUserService)
         {
+            _dialogService = dialogService;
+            _currentUserService = currentUserService;
+
             NewDeviceCommand = new RelayCommand(ExecuteNewDevice);
             AddDeviceCommand = new RelayCommand(async (obj) => await ExecuteAddDeviceAsync(), CanExecuteAddDevice);
             UpdateDeviceCommand = new RelayCommand(async (obj) => await ExecuteUpdateDeviceAsync(), CanExecuteUpdateDevice);
@@ -187,12 +194,12 @@ namespace car_storage_odometer.ViewModels
         {
             try
             {
-                _allDevices = await SqliteDataAccessModifyingQuery.LoadDevicesAsync();
+                _allDevices = await SqliteDataAccess<DeviceModel>.LoadQuery(SqliteQuery.LoadAllDevicesQuery);
                 Devices = new ObservableCollection<DeviceModel>(_allDevices);
 
-                AvailableDeviceTypes = await SqliteDataAccessModifyingQuery.LoadDeviceTypesAsync();
-                AvailableWarehouses = await SqliteDataAccessModifyingQuery.LoadWarehousesAsync();
-                AvailableStatuses = await SqliteDataAccessModifyingQuery.LoadStatusesAsync();
+                AvailableDeviceTypes = await SqliteDataAccess<string>.LoadQuery(SqliteQuery.LoadDeviceTypesAsyncQuery);
+                AvailableWarehouses = await SqliteDataAccess<string>.LoadQuery(SqliteQuery.LoadWarehousesAsyncQuery);
+                AvailableStatuses = await SqliteDataAccess<string>.LoadQuery(SqliteQuery.LoadStatusesAsyncQuery);
 
                 if (AvailableDeviceTypes != null && !AvailableDeviceTypes.Contains("Wszystkie"))
                     AvailableDeviceTypes.Insert(0, "Wszystkie");
@@ -210,7 +217,8 @@ namespace car_storage_odometer.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Błąd ładowania danych: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowMessageBoxOk($"Błąd ładowania danych: {ex.Message}", "Błąd");
+
             }
         }
 
@@ -246,6 +254,7 @@ namespace car_storage_odometer.ViewModels
 
         private void ExecuteNewDevice(object parameter)
         {
+            SelectedDevice = null; 
             CurrentEditDevice = new DeviceModel
             {
                 EventDate = DateTime.Now,
@@ -255,7 +264,6 @@ namespace car_storage_odometer.ViewModels
                 SerialNumber = string.Empty,
                 Note = string.Empty
             };
-            SelectedDevice = null;
             RaiseAllCanExecuteChanged();
         }
 
@@ -263,31 +271,34 @@ namespace car_storage_odometer.ViewModels
         {
             if (CurrentEditDevice == null || string.IsNullOrWhiteSpace(CurrentEditDevice.SerialNumber))
             {
-                MessageBox.Show("Numer seryjny jest wymagany.", "Walidacja", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowMessageBoxOk("Numer seryjny jest wymagany.", "Walidacja");
                 return;
             }
+
             if (CurrentEditDevice.DeviceId != 0)
             {
-                MessageBox.Show("To urządzenie już istnieje. Użyj przycisku 'Aktualizuj urządzenie'.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowMessageBoxOk("To urządzenie już istnieje. Użyj przycisku 'Aktualizuj urządzenie'.", "Błąd");
                 return;
             }
 
             try
             {
-                await SqliteDataAccessModifyingQuery.AddDeviceAsync(CurrentEditDevice, CurrentUserId);
-                await SqliteDataAccessModifyingQuery.AddUserLogAsync(CurrentUserId, "Dodano urządznie");
-                MessageBox.Show("Urządzenie zostało dodane pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                await SqliteDataAccessModifyingQuery.AddDeviceAsync(CurrentEditDevice, _currentUserService.LoggedInUserId.Value);
+                await SqliteDataAccessModifyingQuery.AddUserLogAsync(_currentUserService.LoggedInUserId.Value, "Dodano urządznie");
+
+                ShowMessageBoxOk("Urządzenie zostało dodane pomyślnie.", "Sukces");
+
                 await LoadInitialDataAsync();
                 CurrentEditDevice = null;
                 SelectedDevice = null;
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show($"Błąd walidacji: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowMessageBoxOk($"Błąd walidacji: {ex.Message}", "Błąd");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Wystąpił błąd podczas dodawania urządzenia: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowMessageBoxOk($"Wystąpił błąd podczas dodawania urządzenia: {ex.Message}", "Błąd");
             }
         }
 
@@ -298,67 +309,71 @@ namespace car_storage_odometer.ViewModels
         {
             if (CurrentEditDevice == null || CurrentEditDevice.DeviceId == 0)
             {
-                MessageBox.Show("Wybierz urządzenie do aktualizacji z listy lub użyj 'Dodaj urządzenie' dla nowego.", "Walidacja", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowMessageBoxOk("Wybierz urządzenie do aktualizacji z listy lub użyj 'Dodaj urządzenie' dla nowego.", "Walidacja");
                 return;
             }
+
             if (string.IsNullOrWhiteSpace(CurrentEditDevice.SerialNumber))
             {
-                MessageBox.Show("Numer seryjny jest wymagany.", "Walidacja", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowMessageBoxOk("Numer seryjny jest wymagany.", "Walidacja");
                 return;
             }
 
             try
             {
                 await SqliteDataAccessModifyingQuery.UpdateDeviceAsync(CurrentEditDevice);
-                await SqliteDataAccessModifyingQuery.AddUserLogAsync(CurrentUserId, "Zaktualizowano status urządzenia");
-                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Zaktualizowano status urządzenia", CurrentEditDevice.WarehouseId);
-                MessageBox.Show("Urządzenie zostało zaktualizowane pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                await SqliteDataAccessModifyingQuery.AddUserLogAsync(_currentUserService.LoggedInUserId.Value, "Zaktualizowano status urządzenia");
+                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(_currentUserService.LoggedInUserId.Value, CurrentEditDevice.DeviceId, "Zaktualizowano status urządzenia", CurrentEditDevice.WarehouseId);
+
+                ShowMessageBoxOk("Urządzenie zostało zaktualizowane pomyślnie.", "Sukces");
+
                 await LoadInitialDataAsync();
                 CurrentEditDevice = null;
                 SelectedDevice = null;
             }
             catch (InvalidOperationException ex)
             {
-                MessageBox.Show($"Błąd walidacji: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowMessageBoxOk($"Błąd walidacji: {ex.Message}", "Błąd");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Wystąpił błąd podczas aktualizacji urządzenia: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowMessageBoxOk($"Wystąpił błąd podczas aktualizacji urządzenia: {ex.Message}", "Błąd");
             }
-        }
 
+        }
         private bool CanExecuteUpdateDevice(object parameter)
             => CurrentEditDevice != null && !string.IsNullOrWhiteSpace(CurrentEditDevice.SerialNumber) && CurrentEditDevice.DeviceId > 0;
 
         private async Task ExecuteDeleteDeviceAsync()
         {
-            if (SelectedDevice == null) 
+            if (SelectedDevice == null)
                 return;
 
-            MessageBoxResult result = MessageBox.Show(
+            bool confirm = await ShowMessageButtonYesNo(
                 $"Czy na pewno chcesz usunąć urządzenie o numerze seryjnym: {SelectedDevice.SerialNumber}?",
-                "Potwierdź usunięcie",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
+                "Potwierdź usunięcie");
 
-            if (result == MessageBoxResult.Yes)
+            if (!confirm)
+                return;
+
+            try
             {
-                try
-                {
-                    await SqliteDataAccessModifyingQuery.DeleteDeviceAsync(SelectedDevice.DeviceId);
-                    await SqliteDataAccessModifyingQuery.AddUserLogAsync(CurrentUserId, "Usunięto urządzenie");
-                    await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Usunięto urządzenie", null);
-                    MessageBox.Show("Urządzenie zostało usunięte pomyślnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
-                    await LoadInitialDataAsync();
-                    SelectedDevice = null;
-                    CurrentEditDevice = null;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Wystąpił błąd podczas usuwania urządzenia: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                await SqliteDataAccessModifyingQuery.DeleteDeviceAsync(SelectedDevice.DeviceId);
+                await SqliteDataAccessModifyingQuery.AddUserLogAsync(_currentUserService.LoggedInUserId.Value, "Usunięto urządzenie");
+                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(_currentUserService.LoggedInUserId.Value, CurrentEditDevice.DeviceId, "Usunięto urządzenie", null);
+
+                ShowMessageBoxOk("Urządzenie zostało usunięte pomyślnie.", "Sukces");
+
+                await LoadInitialDataAsync();
+                SelectedDevice = null;
+                CurrentEditDevice = null;
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBoxOk($"Wystąpił błąd podczas usuwania urządzenia: {ex.Message}", "Błąd");
             }
         }
+
 
         private bool CanExecuteOnSelectedDevice(object parameter)
             => SelectedDevice != null && SelectedDevice.DeviceId > 0;
@@ -367,22 +382,25 @@ namespace car_storage_odometer.ViewModels
         {
             if (SelectedDevice == null || SelectedTargetWarehouse == null || SelectedTargetWarehouse == "Wszystkie")
             {
-                MessageBox.Show("Wybierz urządzenie do przeniesienia i magazyn docelowy.", "Walidacja", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                ShowMessageBoxOk("Wybierz urządzenie do przeniesienia i magazyn docelowy.", "Walidacja");
                 return;
             }
 
             try
             {
                 await SqliteDataAccessModifyingQuery.MoveDeviceToWarehouseAsync(SelectedDevice.DeviceId, SelectedTargetWarehouse);
-                await SqliteDataAccessModifyingQuery.AddUserLogAsync(CurrentUserId, "Przeniesiono urządznie między magazynami");
-                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Przeniesiono urządznie między magazynami", CurrentEditDevice.WarehouseId);
-                MessageBox.Show($"Urządzenie {SelectedDevice.SerialNumber} przeniesiono do magazynu {SelectedTargetWarehouse}.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                await SqliteDataAccessModifyingQuery.AddUserLogAsync(_currentUserService.LoggedInUserId.Value, "Przeniesiono urządznie między magazynami");
+                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(_currentUserService.LoggedInUserId.Value, CurrentEditDevice.DeviceId, "Przeniesiono urządznie między magazynami", CurrentEditDevice.WarehouseId);
+
+
+                ShowMessageBoxOk($"Urządzenie {SelectedDevice.SerialNumber} przeniesiono do magazynu {SelectedTargetWarehouse}.", "Sukces");
                 await LoadInitialDataAsync();
                 SelectedTargetWarehouse = null;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Błąd podczas przenoszenia urządzenia: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowMessageBoxOk($"Błąd podczas przenoszenia urządzenia: {ex.Message}", "Błąd");
             }
         }
 
@@ -400,15 +418,15 @@ namespace car_storage_odometer.ViewModels
             try
             {
                 await SqliteDataAccessModifyingQuery.ReportDeviceForRepairAsync(SelectedDevice.DeviceId);
-                await SqliteDataAccessModifyingQuery.AddUserLogAsync(CurrentUserId, "Zgłoszono naprawę");
-                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Zgłoszono naprawę", CurrentEditDevice.WarehouseId);
-                await SqliteDataAccessModifyingQuery.AddRepairHistoryAsync(SelectedDevice.DeviceId, "Naprawa rozpoczęta", CurrentUserId);
-                MessageBox.Show($"Urządzenie {SelectedDevice.SerialNumber} zgłoszono do naprawy.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                await SqliteDataAccessModifyingQuery.AddUserLogAsync(_currentUserService.LoggedInUserId.Value, "Zgłoszono naprawę");
+                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(_currentUserService.LoggedInUserId.Value, CurrentEditDevice.DeviceId, "Zgłoszono naprawę", CurrentEditDevice.WarehouseId);
+                await SqliteDataAccessModifyingQuery.AddRepairHistoryAsync(SelectedDevice.DeviceId, "Naprawa rozpoczęta", _currentUserService.LoggedInUserId.Value);
+                ShowMessageBoxOk($"Urządzenie {SelectedDevice.SerialNumber} zgłoszono do naprawy.", "Sukces");
                 await LoadInitialDataAsync(); 
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Błąd podczas zgłaszania naprawy: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowMessageBoxOk($"Błąd podczas zgłaszania naprawy: {ex.Message}", "Błąd");
             }
         }
 
@@ -419,15 +437,15 @@ namespace car_storage_odometer.ViewModels
             try
             {
                 await SqliteDataAccessModifyingQuery.ResetDeviceAfterRepairAsync(SelectedDevice.DeviceId);
-                await SqliteDataAccessModifyingQuery.AddUserLogAsync(CurrentUserId, "Zakończono naprawę");
-                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Zakończono naprawę", CurrentEditDevice.WarehouseId);
-                await SqliteDataAccessModifyingQuery.AddRepairHistoryAsync(SelectedDevice.DeviceId, "Naprawa zakończona", CurrentUserId, DateTime.Now);
-                MessageBox.Show($"Naprawa urządzenia {SelectedDevice.SerialNumber} została zakończona.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+                await SqliteDataAccessModifyingQuery.AddUserLogAsync(_currentUserService.LoggedInUserId.Value, "Zakończono naprawę");
+                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(_currentUserService.LoggedInUserId.Value, CurrentEditDevice.DeviceId, "Zakończono naprawę", CurrentEditDevice.WarehouseId);
+                await SqliteDataAccessModifyingQuery.AddRepairHistoryAsync(SelectedDevice.DeviceId, "Naprawa zakończona", _currentUserService.LoggedInUserId.Value, DateTime.Now);
+                ShowMessageBoxOk($"Naprawa urządzenia {SelectedDevice.SerialNumber} została zakończona.", "Sukces");
                 await LoadInitialDataAsync();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Błąd podczas kończenia naprawy: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowMessageBoxOk($"Błąd podczas kończenia naprawy: {ex.Message}", "Błąd");
             }
         }
 
@@ -490,5 +508,31 @@ namespace car_storage_odometer.ViewModels
             RaiseAllCanExecuteChanged();
         }
 
+        private void ShowMessageBoxOk(string message, string title)
+        {
+            _dialogService.ShowDialog("CustomMessageBoxView",
+                new DialogParameters
+                {
+            { "message", message },
+            { "title", title },
+            { "buttons", CustomMessageBoxButtons.Ok }
+                },
+                r => { });
+        }
+        private Task<bool> ShowMessageButtonYesNo(string message, string title)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+
+            _dialogService.ShowDialog("CustomMessageBoxView",
+                new DialogParameters
+                {
+            { "message", message },
+            { "title", title },
+            { "buttons", CustomMessageBoxButtons.YesNo}
+                },
+                r => tcs.SetResult(r.Result == ButtonResult.Yes));
+
+            return tcs.Task;
+        }
     }
 }

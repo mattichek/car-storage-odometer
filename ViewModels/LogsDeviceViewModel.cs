@@ -137,8 +137,7 @@ namespace car_storage_odometer.ViewModels
             IsLoading = true;
             try
             {
-                //AllDeviceLogs = await SqliteDataAccess<DeviceLogModel>.LoadDevicesLogsAsync();
-                AllDeviceLogs = await SqliteDataAccess<DeviceLogModel>.LoadQuery("SELECT dl.LogId, sn.SerialNumber, dt.Name AS DeviceName, dl.EventDate, dl.Event, w1.Name AS FromWarehouseName, w2.Name AS ToWarehouseName, u.FirstName || ' ' || u.LastName AS UserName FROM DeviceLogs dl JOIN Devices d ON dl.DeviceId = d.DeviceId JOIN SerialNumbers sn ON d.DeviceId = sn.DeviceId JOIN DeviceTypes dt ON d.TypeId = dt.TypeId LEFT JOIN Warehouses w1 ON dl.FromWarehouseId = w1.WarehouseId LEFT JOIN Warehouses w2 ON dl.ToWarehouseId = w2.WarehouseId JOIN Users u ON dl.UserId = u.UserId;\r\n                ");
+                AllDeviceLogs = await SqliteDataAccess<DeviceLogModel>.LoadQuery(SqliteQuery.LoadAllDeviceLogsQuery);
                 InitializeFilterOptions();
                 ResetAllFiltersAndApply();
                 ApplyFilters();

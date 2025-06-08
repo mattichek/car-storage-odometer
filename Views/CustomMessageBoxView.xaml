@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="car_storage_odometer.Views.CustomMessageBoxView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/"
+             Background="#1E1E1E">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/car-storage-odometer;component/Styles/DashboardStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="{Binding Message}" 
+                   Foreground="White"
+                   FontSize="14"
+                   TextWrapping="Wrap"
+                   TextAlignment="Center"
+                   Margin="10"/>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+            <!-- OK button -->
+            <Button Content="OK"
+                    Width="100" Margin="10"
+                    Command="{Binding OkCommand}"
+                    Visibility="{Binding ShowOkButton, Converter={StaticResource BoolToVisibilityConverter}}"
+                    Style="{StaticResource {x:Type Button}}"/>
+
+            <!-- YES / NO buttons -->
+            <Button Content="Tak"
+                    Width="100" Margin="10"
+                    Command="{Binding YesCommand}"
+                    Visibility="{Binding ShowYesNoButtons, Converter={StaticResource BoolToVisibilityConverter}}"
+                    Style="{StaticResource DangerButtonStyle}"/>
+
+            <Button Content="Nie"
+                    Width="100" Margin="10"
+                    Command="{Binding NoCommand}"
+                    Visibility="{Binding ShowYesNoButtons, Converter={StaticResource BoolToVisibilityConverter}}"
+                    Style="{StaticResource {x:Type Button}}"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

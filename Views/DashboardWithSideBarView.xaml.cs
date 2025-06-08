@@ -10,16 +10,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace car_storage_odometer.Views
 {
     /// <summary>
-    /// Interaction logic for LoginPageView.xaml
+    /// Interaction logic for DashboardWithSideBarView.xaml
     /// </summary>
-    public partial class LoginPageView : UserControl
+    public partial class DashboardWithSideBarView : UserControl
     {
-        public LoginPageView()
+        public DashboardWithSideBarView()
         {
             InitializeComponent();
         }

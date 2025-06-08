@@ -110,15 +110,7 @@ namespace car_storage_odometer.ViewModels
         {
             try
             {
-                _allUserLogs = await SqliteDataAccess<UserLogModel>.LoadQuery(@"SELECT 
-                    l.LogId,
-                    u.FirstName || ' ' || u.LastName AS UserName,
-                    d.DeviceId, 
-                    l.Event, 
-                    l.EventDate
-                FROM UserLogs l
-                LEFT JOIN Users u ON l.UserId = u.UserId
-                LEFT JOIN Devices d ON l.DeviceId = d.DeviceId;");
+                _allUserLogs = await SqliteDataAccess<UserLogModel>.LoadQuery(SqliteQuery.LoadAllUserLogsQuery);
 
                 AvailableUsers = new ObservableCollection<string>(
                     new[] { "Wszyscy" }.Concat(_allUserLogs.Select(log => log.UserName).Where(u => u != null).Distinct().OrderBy(u => u))
