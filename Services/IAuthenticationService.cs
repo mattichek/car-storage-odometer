@@ -8,6 +8,6 @@ namespace car_storage_odometer.Services
         event System.Action LoggedOut;
 
         Task<bool> LoginAsync(string email, string password);
-        void Logout();
+        Task Logout();
     }
 }

@@ -27,7 +27,7 @@ namespace car_storage_odometer
             containerRegistry.RegisterForNavigation<MainPageView>();
             
             containerRegistry.RegisterForNavigation<LoginPageView, LoginPageViewModel>();
-            containerRegistry.RegisterForNavigation<DashboardWithSideBarView, DashboardWithSideBarViewModel>(); // Nowy widok po zalogowaniu
+            containerRegistry.RegisterForNavigation<DashboardWithSideBarView, DashboardWithSideBarViewModel>();
             
             containerRegistry.RegisterForNavigation<DashboardView, DashboardViewModel>();
             containerRegistry.RegisterForNavigation<LogsUsersView, LogsUsersViewModel>();
@@ -36,8 +36,10 @@ namespace car_storage_odometer
             containerRegistry.RegisterForNavigation<AccountView, AccountViewModel>();
             containerRegistry.RegisterForNavigation<DevicesView, DevicesViewModel>();
             containerRegistry.RegisterDialog<CustomMessageBoxView, CustomMessageBoxViewModel>();
+
             containerRegistry.RegisterSingleton<IAuthenticationService, AuthenticationService>();
             containerRegistry.RegisterSingleton<IEventAggregator, EventAggregator>();
+            containerRegistry.RegisterSingleton<ICurrentUserService, CurrentUserService>();
         }
 
         protected override void OnInitialized()

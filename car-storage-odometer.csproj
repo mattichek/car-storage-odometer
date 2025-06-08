@@ -119,8 +119,10 @@
     <Compile Include="Models\WarehouseStatusModel.cs" />
     <Compile Include="Modules\SideBarModule.cs" />
     <Compile Include="Services\AuthenticationService.cs" />
+    <Compile Include="Services\CurrentUserService.cs" />
     <Compile Include="Services\DeviceLogFilterService.cs" />
     <Compile Include="Services\IAuthenticationService.cs" />
+    <Compile Include="Services\ICurrentUserService.cs" />
     <Compile Include="Services\UserLogFilterService.cs" />
     <Compile Include="ViewModels\AccountViewModel.cs" />
     <Compile Include="ViewModels\CustomMessageBoxViewModel.cs" />

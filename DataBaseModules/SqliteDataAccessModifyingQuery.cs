@@ -455,10 +455,9 @@ namespace car_storage_odometer.DataBaseModules
                 string hashedPasswordFromDb = await cnn.ExecuteScalarAsync<string>(sql, new { UserId = userId });
 
                 if (string.IsNullOrEmpty(hashedPasswordFromDb))
-                    return false; // Użytkownik nie istnieje lub nie ma hasła
+                    return false;
 
-                // Zahaszuj podane hasło i porównaj z zahaszowanym hasłem z bazy
-                string hashedPlainPassword = PasswordBoxHelper.HashPassword(plainPassword); // Użyj tej samej funkcji haszującej
+                string hashedPlainPassword = PasswordBoxHelper.HashPassword(plainPassword);
                 return hashedPlainPassword == hashedPasswordFromDb;
             }
         }
@@ -468,9 +467,22 @@ namespace car_storage_odometer.DataBaseModules
         {
             using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
             {
-                string hashedPassword = PasswordBoxHelper.HashPassword(newPlainPassword); // Zahaszuj nowe hasło
+                string hashedPassword = PasswordBoxHelper.HashPassword(newPlainPassword); 
                 string sql = "UPDATE Users SET Password = @Password WHERE UserId = @UserId;";
                 await cnn.ExecuteAsync(sql, new { Password = hashedPassword, UserId = userId });
+            }
+        }
+
+        public static async Task<int?> AuthenticateUserAndGetIdAsync(string email, string password)
+        {
+            using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+            {
+                var p = new { Email = email, Password = password }; 
+                string sql = "SELECT UserId FROM Users WHERE Email = @Email AND Password = @Password AND IsActive = 1";
+
+                var user = await cnn.QueryFirstOrDefaultAsync<UserModel>(sql, p);
+
+                return user?.UserId;
             }
         }
 

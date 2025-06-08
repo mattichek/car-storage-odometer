@@ -1,6 +1,7 @@
 ﻿using car_storage_odometer.DataBaseModules;
 using car_storage_odometer.Helpers;
 using car_storage_odometer.Models;
+using car_storage_odometer.Services;
 using Prism.Commands;
 using Prism.Regions;
 using Prism.Services.Dialogs;
@@ -18,6 +19,7 @@ namespace car_storage_odometer.ViewModels
     public class DevicesViewModel : INotifyPropertyChanged, INavigationAware
     {
         private readonly IDialogService _dialogService;
+        private readonly ICurrentUserService _currentUserService;
         private ObservableCollection<DeviceModel> _allDevices;
 
         private ObservableCollection<DeviceModel> _devices;
@@ -158,9 +160,11 @@ namespace car_storage_odometer.ViewModels
 
         private const int CurrentUserId = 1;
 
-        public DevicesViewModel(IDialogService dialogService)
+        public DevicesViewModel(IDialogService dialogService, ICurrentUserService currentUserService)
         {
             _dialogService = dialogService;
+            _currentUserService = currentUserService;
+
             NewDeviceCommand = new RelayCommand(ExecuteNewDevice);
             AddDeviceCommand = new RelayCommand(async (obj) => await ExecuteAddDeviceAsync(), CanExecuteAddDevice);
             UpdateDeviceCommand = new RelayCommand(async (obj) => await ExecuteUpdateDeviceAsync(), CanExecuteUpdateDevice);
@@ -193,11 +197,8 @@ namespace car_storage_odometer.ViewModels
                 _allDevices = await SqliteDataAccess<DeviceModel>.LoadQuery(SqliteQuery.LoadAllDevicesQuery);
                 Devices = new ObservableCollection<DeviceModel>(_allDevices);
 
-                //AvailableDeviceTypes = await SqliteDataAccessModifyingQuery.LoadDeviceTypesAsync();
                 AvailableDeviceTypes = await SqliteDataAccess<string>.LoadQuery(SqliteQuery.LoadDeviceTypesAsyncQuery);
-                //AvailableWarehouses = await SqliteDataAccessModifyingQuery.LoadWarehousesAsync();
                 AvailableWarehouses = await SqliteDataAccess<string>.LoadQuery(SqliteQuery.LoadWarehousesAsyncQuery);
-                //AvailableStatuses = await SqliteDataAccessModifyingQuery.LoadStatusesAsync();
                 AvailableStatuses = await SqliteDataAccess<string>.LoadQuery(SqliteQuery.LoadStatusesAsyncQuery);
 
                 if (AvailableDeviceTypes != null && !AvailableDeviceTypes.Contains("Wszystkie"))
@@ -282,8 +283,8 @@ namespace car_storage_odometer.ViewModels
 
             try
             {
-                await SqliteDataAccessModifyingQuery.AddDeviceAsync(CurrentEditDevice, CurrentUserId);
-                await SqliteDataAccessModifyingQuery.AddUserLogAsync(CurrentUserId, "Dodano urządznie");
+                await SqliteDataAccessModifyingQuery.AddDeviceAsync(CurrentEditDevice, _currentUserService.LoggedInUserId.Value);
+                await SqliteDataAccessModifyingQuery.AddUserLogAsync(_currentUserService.LoggedInUserId.Value, "Dodano urządznie");
 
                 ShowMessageBoxOk("Urządzenie zostało dodane pomyślnie.", "Sukces");
 
@@ -321,8 +322,8 @@ namespace car_storage_odometer.ViewModels
             try
             {
                 await SqliteDataAccessModifyingQuery.UpdateDeviceAsync(CurrentEditDevice);
-                await SqliteDataAccessModifyingQuery.AddUserLogAsync(CurrentUserId, "Zaktualizowano status urządzenia");
-                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Zaktualizowano status urządzenia", CurrentEditDevice.WarehouseId);
+                await SqliteDataAccessModifyingQuery.AddUserLogAsync(_currentUserService.LoggedInUserId.Value, "Zaktualizowano status urządzenia");
+                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(_currentUserService.LoggedInUserId.Value, CurrentEditDevice.DeviceId, "Zaktualizowano status urządzenia", CurrentEditDevice.WarehouseId);
 
                 ShowMessageBoxOk("Urządzenie zostało zaktualizowane pomyślnie.", "Sukces");
 
@@ -358,8 +359,8 @@ namespace car_storage_odometer.ViewModels
             try
             {
                 await SqliteDataAccessModifyingQuery.DeleteDeviceAsync(SelectedDevice.DeviceId);
-                await SqliteDataAccessModifyingQuery.AddUserLogAsync(CurrentUserId, "Usunięto urządzenie");
-                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Usunięto urządzenie", null);
+                await SqliteDataAccessModifyingQuery.AddUserLogAsync(_currentUserService.LoggedInUserId.Value, "Usunięto urządzenie");
+                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(_currentUserService.LoggedInUserId.Value, CurrentEditDevice.DeviceId, "Usunięto urządzenie", null);
 
                 ShowMessageBoxOk("Urządzenie zostało usunięte pomyślnie.", "Sukces");
 
@@ -389,8 +390,8 @@ namespace car_storage_odometer.ViewModels
             try
             {
                 await SqliteDataAccessModifyingQuery.MoveDeviceToWarehouseAsync(SelectedDevice.DeviceId, SelectedTargetWarehouse);
-                await SqliteDataAccessModifyingQuery.AddUserLogAsync(CurrentUserId, "Przeniesiono urządznie między magazynami");
-                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Przeniesiono urządznie między magazynami", CurrentEditDevice.WarehouseId);
+                await SqliteDataAccessModifyingQuery.AddUserLogAsync(_currentUserService.LoggedInUserId.Value, "Przeniesiono urządznie między magazynami");
+                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(_currentUserService.LoggedInUserId.Value, CurrentEditDevice.DeviceId, "Przeniesiono urządznie między magazynami", CurrentEditDevice.WarehouseId);
 
 
                 ShowMessageBoxOk($"Urządzenie {SelectedDevice.SerialNumber} przeniesiono do magazynu {SelectedTargetWarehouse}.", "Sukces");
@@ -417,9 +418,9 @@ namespace car_storage_odometer.ViewModels
             try
             {
                 await SqliteDataAccessModifyingQuery.ReportDeviceForRepairAsync(SelectedDevice.DeviceId);
-                await SqliteDataAccessModifyingQuery.AddUserLogAsync(CurrentUserId, "Zgłoszono naprawę");
-                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Zgłoszono naprawę", CurrentEditDevice.WarehouseId);
-                await SqliteDataAccessModifyingQuery.AddRepairHistoryAsync(SelectedDevice.DeviceId, "Naprawa rozpoczęta", CurrentUserId);
+                await SqliteDataAccessModifyingQuery.AddUserLogAsync(_currentUserService.LoggedInUserId.Value, "Zgłoszono naprawę");
+                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(_currentUserService.LoggedInUserId.Value, CurrentEditDevice.DeviceId, "Zgłoszono naprawę", CurrentEditDevice.WarehouseId);
+                await SqliteDataAccessModifyingQuery.AddRepairHistoryAsync(SelectedDevice.DeviceId, "Naprawa rozpoczęta", _currentUserService.LoggedInUserId.Value);
                 ShowMessageBoxOk($"Urządzenie {SelectedDevice.SerialNumber} zgłoszono do naprawy.", "Sukces");
                 await LoadInitialDataAsync(); 
             }
@@ -436,9 +437,9 @@ namespace car_storage_odometer.ViewModels
             try
             {
                 await SqliteDataAccessModifyingQuery.ResetDeviceAfterRepairAsync(SelectedDevice.DeviceId);
-                await SqliteDataAccessModifyingQuery.AddUserLogAsync(CurrentUserId, "Zakończono naprawę");
-                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(CurrentUserId, CurrentEditDevice.DeviceId, "Zakończono naprawę", CurrentEditDevice.WarehouseId);
-                await SqliteDataAccessModifyingQuery.AddRepairHistoryAsync(SelectedDevice.DeviceId, "Naprawa zakończona", CurrentUserId, DateTime.Now);
+                await SqliteDataAccessModifyingQuery.AddUserLogAsync(_currentUserService.LoggedInUserId.Value, "Zakończono naprawę");
+                await SqliteDataAccessModifyingQuery.AddDeviceLogAsync(_currentUserService.LoggedInUserId.Value, CurrentEditDevice.DeviceId, "Zakończono naprawę", CurrentEditDevice.WarehouseId);
+                await SqliteDataAccessModifyingQuery.AddRepairHistoryAsync(SelectedDevice.DeviceId, "Naprawa zakończona", _currentUserService.LoggedInUserId.Value, DateTime.Now);
                 ShowMessageBoxOk($"Naprawa urządzenia {SelectedDevice.SerialNumber} została zakończona.", "Sukces");
                 await LoadInitialDataAsync();
             }

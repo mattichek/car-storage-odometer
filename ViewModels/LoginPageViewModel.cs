@@ -16,6 +16,7 @@ namespace car_storage_odometer.ViewModels
         private readonly IRegionManager _regionManager;
         private readonly IAuthenticationService _authenticationService;
         private readonly IDialogService _dialogService;
+        private readonly ICurrentUserService _currentUserService;
 
         public DelegateCommand LoginCommand { get; private set; }
 
@@ -45,11 +46,12 @@ namespace car_storage_odometer.ViewModels
             }
         }
 
-        public LoginPageViewModel(IRegionManager regionManager, IAuthenticationService authenticationService, IDialogService dialogService) // Zmieniono konstruktor
-        {
+        public LoginPageViewModel(IRegionManager regionManager, IAuthenticationService authenticationService, IDialogService dialogService, ICurrentUserService currentUserService){
+            _currentUserService = currentUserService;
             _regionManager = regionManager;
             _authenticationService = authenticationService; // Przypisanie serwisu
             _dialogService = dialogService;
+
             LoginCommand = new DelegateCommand(async () => await ExecuteLogin());
             Title = "Logowanie do systemu";
         }

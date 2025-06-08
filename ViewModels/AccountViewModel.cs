@@ -1,6 +1,7 @@
 ﻿using car_storage_odometer.DataBaseModules;
 using car_storage_odometer.Helpers; // Zmieniono na Helpers, zakładając tam SqliteDataAccess
 using car_storage_odometer.Models;
+using car_storage_odometer.Services;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions; // Dodano, aby używać INavigationAware
@@ -16,6 +17,7 @@ namespace car_storage_odometer.ViewModels
     public class AccountViewModel : BindableBase, INavigationAware
     {
         private readonly IDialogService _dialogService; // Usługa dialogów do wyświetlania komunikatów
+        private readonly ICurrentUserService _currentUserService;
         private UserModel _loggedInUser; // Symulacja zalogowanego użytkownika (do autoryzacji zmiany hasła)
         private UserModel _editedUser;   // Kopia użytkownika do edycji w formularzu
         private string _oldPassword;
@@ -77,9 +79,11 @@ namespace car_storage_odometer.ViewModels
         // Zastąp to rzeczywistym sposobem pobierania ID zalogowanego użytkownika.
         private int CurrentUserId { get; set; } = 1; // PRZYKŁAD: Ustaw na ID zalogowanego użytkownika
 
-        public AccountViewModel(IDialogService dialogService)
+        public AccountViewModel(IDialogService dialogService, ICurrentUserService currentUserService)
         {
             _dialogService = dialogService;
+            _currentUserService = currentUserService;
+
             // Inicjalizacja ViewModelu
             EditedUser = new UserModel(); // Ustawienie początkowej pustej instancji
 
@@ -92,25 +96,29 @@ namespace car_storage_odometer.ViewModels
         }
 
         // --- Metody do ładowania danych (wywoływane przez INavigationAware) ---
-        private async Task LoadUserData(int userId)
+        private async Task LoadUserData() // Usunięto parametr userId
         {
+            if (!_currentUserService.IsUserLoggedIn) // Sprawdź, czy użytkownik jest zalogowany
+            {
+                ShowMessageBoxOk("Błąd: Brak zalogowanego użytkownika. Zaloguj się ponownie.", "Błąd autoryzacji");
+                return;
+            }
+
+
             try
             {
-                // Załaduj dane użytkownika z bazy danych
-                // Używamy SqliteDataAccess.LoadUserByIdAsync, którą za chwilę dodamy
-                _loggedInUser = await SqliteDataAccessModifyingQuery.LoadUserByIdAsync(userId);
+                _loggedInUser = await SqliteDataAccessModifyingQuery.LoadUserByIdAsync(_currentUserService.LoggedInUserId.Value);
                 if (_loggedInUser != null)
                 {
-                    EditedUser = _loggedInUser.Clone(); // Tworzymy kopię do edycji
-                    // Resetujemy pola hasła
+                    EditedUser = _loggedInUser.Clone();
                     OldPassword = string.Empty;
                     NewPassword = string.Empty;
                     ConfirmNewPassword = string.Empty;
                 }
                 else
                 {
-                    
-                    ShowMessageBoxOk("Nie znaleziono użytkownika o podanym ID.", "Błąd ładowania danych");
+                    ShowMessageBoxOk("Nie znaleziono użytkownika o podanym ID. Proszę skontaktować się z administratorem.", "Błąd ładowania danych");
+                    _currentUserService.ClearLoggedInUser();
                 }
             }
             catch (Exception ex)
@@ -202,11 +210,6 @@ namespace car_storage_odometer.ViewModels
 
             try
             {
-                // Sprawdź stare hasło (w prawdziwej aplikacji HASZUJ I PORÓWNUJ HASZE!)
-                // Użyj SqliteDataAccess.VerifyUserPasswordAsync, którą za chwilę dodamy
-                // W tej symulacji przyjmuję, że OldPassword to jawne hasło, które jest porównywane.
-                // W rzeczywistości powinieneś przekazać OldPassword do metody weryfikującej hasło,
-                // która następnie porówna zahaszowane wersje.
                 bool isPasswordCorrect = await SqliteDataAccessModifyingQuery.VerifyUserPasswordAsync(CurrentUserId, OldPassword);
 
                 if (!isPasswordCorrect)
@@ -215,8 +218,6 @@ namespace car_storage_odometer.ViewModels
                     return;
                 }
 
-                // Zmień hasło w bazie danych
-                // Użyj SqliteDataAccess.UpdateUserPasswordAsync, którą za chwilę dodamy
                 await SqliteDataAccessModifyingQuery.UpdateUserPasswordAsync(CurrentUserId, NewPassword); // Przekazuj jawne hasło, metoda powinna je haszować
                 ShowMessageBoxOk("Hasło zostało zmienione pomyślnie.", "Sukces");
 
@@ -257,7 +258,7 @@ namespace car_storage_odometer.ViewModels
         // Wywoływana, gdy widok jest aktywowany
         public void OnNavigatedTo(NavigationContext navigationContext)
         {
-            _ = LoadUserData(CurrentUserId);
+            _ = LoadUserData();
             IsEditing = false; // Resetuj tryb edycji po nawigacji
         }
 
