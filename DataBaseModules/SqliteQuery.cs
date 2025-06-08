@@ -136,10 +136,5 @@
         public static readonly string LoadWarehousesAsyncQuery = @"SELECT Name FROM warehouses ORDER BY Name";
         public static readonly string LoadStatusesAsyncQuery = @"SELECT Name FROM statuses ORDER BY Name";
 
-
-        // Kwerendy używane w AccountView
-
-
-
     }
 }

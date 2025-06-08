@@ -1,6 +1,7 @@
 ﻿using car_storage_odometer.DataBaseModules; // Zakładam, że tu masz dostęp do bazy
 using car_storage_odometer.Helpers;
 using Prism.Services.Dialogs;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace car_storage_odometer.Services
         private readonly ICurrentUserService _currentUserService;
         private readonly IDialogService _dialogService;
         public bool IsLoggedIn => _currentUserService.IsUserLoggedIn;
+        private Dictionary<string, string> _userHashesPassword = new Dictionary<string, string>();
 
         public AuthenticationService(ICurrentUserService currentUserService, IDialogService dialogService)
         {

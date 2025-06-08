@@ -72,8 +72,9 @@ namespace car_storage_odometer.ViewModels
 
                 return;
             }
+            string hashedPassword = PasswordBoxHelper.HashPassword(Password);
 
-            bool loginSuccessful = await _authenticationService.LoginAsync(Mail, Password);
+            bool loginSuccessful = await _authenticationService.LoginAsync(Mail, hashedPassword);
 
             if (loginSuccessful)
             {

@@ -210,7 +210,7 @@ namespace car_storage_odometer.ViewModels
 
             try
             {
-                bool isPasswordCorrect = await SqliteDataAccessModifyingQuery.VerifyUserPasswordAsync(CurrentUserId, OldPassword);
+                bool isPasswordCorrect = await SqliteDataAccessModifyingQuery.VerifyUserPasswordAsync(_currentUserService.LoggedInUserId.Value, OldPassword);
 
                 if (!isPasswordCorrect)
                 {
@@ -218,10 +218,9 @@ namespace car_storage_odometer.ViewModels
                     return;
                 }
 
-                await SqliteDataAccessModifyingQuery.UpdateUserPasswordAsync(CurrentUserId, NewPassword); // Przekazuj jawne hasło, metoda powinna je haszować
+                await SqliteDataAccessModifyingQuery.UpdateUserPasswordAsync(_currentUserService.LoggedInUserId.Value, NewPassword);
                 ShowMessageBoxOk("Hasło zostało zmienione pomyślnie.", "Sukces");
 
-                // Wyczyść pola hasła po zmianie
                 OldPassword = string.Empty;
                 NewPassword = string.Empty;
                 ConfirmNewPassword = string.Empty;
@@ -232,7 +231,7 @@ namespace car_storage_odometer.ViewModels
             }
             finally
             {
-                ChangePasswordCommand.RaiseCanExecuteChanged(); // Zaktualizuj stan przycisku
+                ChangePasswordCommand.RaiseCanExecuteChanged();
             }
         }
 
