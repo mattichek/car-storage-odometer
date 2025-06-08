@@ -20,12 +20,6 @@ namespace car_storage_odometer.ViewModels
 
         public DelegateCommand LoginCommand { get; private set; }
 
-        private string _title;
-        public string Title
-        {
-            get { return _title; }
-            set { SetProperty(ref _title, value); }
-        }
         private string _mail;
         public string Mail
         {
@@ -53,7 +47,6 @@ namespace car_storage_odometer.ViewModels
             _dialogService = dialogService;
 
             LoginCommand = new DelegateCommand(async () => await ExecuteLogin());
-            Title = "Logowanie do systemu";
         }
 
         private async Task ExecuteLogin()

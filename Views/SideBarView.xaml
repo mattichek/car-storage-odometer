@@ -46,36 +46,33 @@
 
     <Grid Background="#1E1E1E">
         <StackPanel VerticalAlignment="Top" Margin="10,15,10,0" >
-            <Button Content="Dashboard" Style="{StaticResource SideBarItemStyle}"
+            <Button Content="Menu główne" Style="{StaticResource SideBarItemStyle}"
                     Command="{Binding NavigateCommand}"
                     CommandParameter="DashboardView"/>
 
-            <Button Content="Logs Users" Style="{StaticResource SideBarItemStyle}"
+            <Button Content="Logi Użytkoników" Style="{StaticResource SideBarItemStyle}"
                     Command="{Binding NavigateCommand}"
                     CommandParameter="LogsUsersView"/>
 
-            <Button Content="Logs Device" Style="{StaticResource SideBarItemStyle}"
+            <Button Content="Logi Urządzeń" Style="{StaticResource SideBarItemStyle}"
                     Command="{Binding NavigateCommand}"
                     CommandParameter="LogsDeviceView"/>
 
-            <Button Content="History of Repair" Style="{StaticResource SideBarItemStyle}"
+            <Button Content="Histaria Napraw" Style="{StaticResource SideBarItemStyle}"
                     Command="{Binding NavigateCommand}"
                     CommandParameter="HistoryOfRepairView"/>
 
-            <!--<Button Content="Storage" Style="{StaticResource SideBarItemStyle}"
-                    Command="{Binding NavigateCommand}"
-                    CommandParameter="StorageView"/>-->
-
-            <Button Content="Devices" Style="{StaticResource SideBarItemStyle}"
+            <Button Content="Urządzenia" Style="{StaticResource SideBarItemStyle}"
                     Command="{Binding NavigateCommand}"
                     CommandParameter="DevicesView"/>
 
         </StackPanel>
         <StackPanel VerticalAlignment="Bottom" Margin="10,0,10,15">
-            <Button Content="Account" Style="{StaticResource SideBarItemStyle}"
+            <Button Content="Konto" Style="{StaticResource SideBarItemStyle}"
                 Command="{Binding NavigateCommand}"
                 CommandParameter="AccountView"/>
-            <Button Content="Logout" Style="{StaticResource SideBarItemStyle}"
+            
+            <Button Content="Wyloguj" Style="{StaticResource SideBarItemStyle}"
                 Command="{Binding LogoutCommand}"/>
         </StackPanel>
     </Grid>

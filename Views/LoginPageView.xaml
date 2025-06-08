@@ -16,8 +16,7 @@
                 <DropShadowEffect BlurRadius="50"/>
             </Border.Effect>
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" >
-                <TextBlock Text="{Binding Title}" FontSize="28" FontWeight="Bold" 
-                           Foreground="White" Margin="0,0,0,30" HorizontalAlignment="Center"/>
+                
                 <TextBlock Text="Zaloguj się" FontSize="28" FontWeight="Bold" 
                            Foreground="White" Margin="0,0,0,30" HorizontalAlignment="Center"/>
 

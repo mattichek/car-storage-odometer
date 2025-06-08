@@ -26,7 +26,7 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Background="{StaticResource SecondaryBackgroundBrush}" CornerRadius="5" Padding="16" Margin="0,0,0,20">
-            <TextBlock Text="Historia Zmian" Style="{StaticResource TitleTextBlockStyle}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <TextBlock Text="Historia Napraw Urządzeń" Style="{StaticResource TitleTextBlockStyle}" FontWeight="SemiBold" VerticalAlignment="Center"/>
         </Border>
 
         <Border Grid.Row="1"
@@ -143,7 +143,7 @@
                           CanUserSortColumns="True"
                           IsEnabled="{Binding IsLoading, Converter={StaticResource InvertBooleanConverter}}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID" Binding="{Binding RepairId}" Width="Auto" SortMemberPath="Id">
+                        <DataGridTextColumn Header="Id" Binding="{Binding RepairId}" Width="Auto" SortMemberPath="Id">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -151,7 +151,7 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Urządzenie" Binding="{Binding SerialNumber}" Width="*" SortMemberPath="DeviceTypeName">
+                        <DataGridTextColumn Header="Numer seryjny" Binding="{Binding SerialNumber}" Width="*" SortMemberPath="DeviceTypeName">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
