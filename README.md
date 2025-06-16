@@ -1,10 +1,10 @@
 ## 📖 Opis projektu
 
-Car Storage Odometer to profesjonalna aplikacja desktopowa stworzona w technologii WPF (.NET 6) do zarządzania magazynem pojazdów z zaawansowanym modułem śledzenia przebiegu (odometru). System umożliwia kompleksowe zarządzanie flotą pojazdów, śledzenie historii przebiegów oraz generowanie raportów.
+Car Storage Odometer to profesjonalna aplikacja desktopowa stworzona w technologii WPF do zarządzania magazynem liczników i modułów. System umożliwia kompleksowe zarządzanie flotą magazynową, śledzenie historii napraw.
 
 ## ✨ Kluczowe funkcje
 
-- 🚗 **Zarządzanie pojazdami** - dodawanie, edycja i usuwanie urządzeń z magazynu
+- 🚗 **Zarządzanie urządzeniami** - dodawanie, edycja i usuwanie urządzeń z magazynu
 - 📊 **Śledzenie poczynań użytkowników z urządzeniami** - rejestracja aktualnego stanu urządzeń 
 - 🔍 **Wyszukiwanie i filtrowanie** - szybki dostęp do urządzeń po parametrach
 - 🛠 **Historia napraw** - rejestracja napraw urządzeń
@@ -12,16 +12,15 @@ Car Storage Odometer to profesjonalna aplikacja desktopowa stworzona w technolog
 
 ## 🛠 Stos technologiczny
 
-- **Frontend**: WPF, XAML, Prism, Material Design
-- **Backend**: C#, .NET 6
+- **Frontend**: WPF, XAML, Prism
+- **Backend**: C#, .NET Framework 4.8
 - **Baza danych**: SQLite
 - **Wzorce projektowe**: MVVM, Repository, Dependency Injection
-- **Narzędzia**: Visual Studio 2022, Git, GitHub
+- **Narzędzia**: Visual Studio 2022, Git, GitHub, DB Browser (SQLite)
 
 ## 💻 Wymagania systemowe
 
 - System operacyjny: Windows 10/11
-- .NET Runtime 6.0 lub nowszy
 - Zalecane 4 GB RAM
 - 100 MB wolnego miejsca na dysku
 
