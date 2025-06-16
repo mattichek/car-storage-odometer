@@ -34,7 +34,7 @@ git clone https://github.com/mattichek/car-storage-odometer.git
 
 2. Otwórz rozwiązanie w Visual Studio 2022:
 ```bash
-CarStorageOdometer.sln
+car-storage-odometer.sln
 ```
 
 
